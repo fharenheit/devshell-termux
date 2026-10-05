@@ -139,6 +139,14 @@ jobs:
           set -euo pipefail
           ls -la artifacts
           (cd artifacts && sha256sum -c sha256sums)
+          # A tag left behind by a deleted release would be reused by `gh release create` for the
+          # old commit, so delete it first. Tags that still have a release are never touched.
+          if ! gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 && \
+              gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$TAG" >/dev/null 2>&1 && \
+              [ "$(gh api "repos/$GITHUB_REPOSITORY/commits/$TAG" --jq .sha)" != "$HEAD_SHA" ]; then
+            echo "Deleting '$TAG' tag that has no release and points to another commit"
+            gh api -X DELETE "repos/$GITHUB_REPOSITORY/git/refs/tags/$TAG"
+          fi
           args=(--repo "$GITHUB_REPOSITORY" --target "$HEAD_SHA" --title "$TAG" --notes "$NOTES")
           if [ "$PRERELEASE" = "true" ]; then args+=(--prerelease); fi
           gh release create "$TAG" "${args[@]}" artifacts/*.apk artifacts/sha256sums
