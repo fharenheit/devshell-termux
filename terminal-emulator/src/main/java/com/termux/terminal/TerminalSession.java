@@ -41,7 +41,7 @@ public final class TerminalSession extends TerminalOutput {
      * A queue written to from a separate thread when the process outputs, and read by main thread to process by
      * terminal emulator.
      */
-    final ByteQueue mProcessToTerminalIOQueue = new ByteQueue(64 * 1024);
+    final ByteQueue mProcessToTerminalIOQueue = new ByteQueue(4096);
     /**
      * A queue written to from the main thread due to user interaction, and read by another thread which forwards by
      * writing to the {@link #mTerminalFileDescriptor}.
@@ -126,7 +126,6 @@ public final class TerminalSession extends TerminalOutput {
         int[] processId = new int[1];
         mTerminalFileDescriptor = JNI.createSubprocess(mShellPath, mCwd, mArgs, mEnv, processId, rows, columns, cellWidthPixels, cellHeightPixels);
         mShellPid = processId[0];
-        mClient.setTerminalShellPid(this, mShellPid);
 
         final FileDescriptor terminalFileDescriptorWrapped = wrapFileDescriptor(mTerminalFileDescriptor, mClient);
 
@@ -336,7 +335,7 @@ public final class TerminalSession extends TerminalOutput {
     @SuppressLint("HandlerLeak")
     class MainThreadHandler extends Handler {
 
-        final byte[] mReceiveBuffer = new byte[64 * 1024];
+        final byte[] mReceiveBuffer = new byte[4 * 1024];
 
         @Override
         public void handleMessage(Message msg) {

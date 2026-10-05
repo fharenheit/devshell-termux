@@ -125,12 +125,6 @@ public final class TerminalView extends View {
 
     private final boolean mAccessibilityEnabled;
 
-    /** The {@link KeyEvent} is generated from a virtual keyboard, like manually with the {@link KeyEvent#KeyEvent(int, int)} constructor. */
-    public final static int KEY_EVENT_SOURCE_VIRTUAL_KEYBOARD = KeyCharacterMap.VIRTUAL_KEYBOARD; // -1
-
-    /** The {@link KeyEvent} is generated from a non-physical device, like if 0 value is returned by {@link KeyEvent#getDeviceId()}. */
-    public final static int KEY_EVENT_SOURCE_SOFT_KEYBOARD = 0;
-
     private static final String LOG_TAG = "TerminalView";
 
     public TerminalView(Context context, AttributeSet attributes) { // NO_UCD (unused code)
@@ -289,13 +283,11 @@ public final class TerminalView extends View {
      */
     public boolean attachSession(TerminalSession session) {
         if (session == mTermSession) return false;
+        mTopRow = 0;
 
         mTermSession = session;
         mEmulator = null;
         mCombiningAccent = 0;
-
-        // The emulator's cached value will be read in `updateSize()` when emulator is set.
-        setTopRow(0, false);
 
         updateSize();
 
@@ -430,7 +422,7 @@ public final class TerminalView extends View {
                         }
                     }
 
-                    inputCodePoint(KEY_EVENT_SOURCE_SOFT_KEYBOARD, codePoint, ctrlHeld, false);
+                    inputCodePoint(codePoint, ctrlHeld, false);
                 }
             }
 
@@ -453,31 +445,22 @@ public final class TerminalView extends View {
     }
 
     public void onScreenUpdated() {
-        onScreenUpdated(false);
-    }
-
-    public void onScreenUpdated(boolean skipScrolling) {
         if (mEmulator == null) return;
 
         int rowsInHistory = mEmulator.getScreen().getActiveTranscriptRows();
-        if (mTopRow < -rowsInHistory) setTopRow(-rowsInHistory);
+        if (mTopRow < -rowsInHistory) mTopRow = -rowsInHistory;
 
-        if (isSelectingText() || mEmulator.isAutoScrollDisabled()) {
+        boolean skipScrolling = false;
+        if (isSelectingText()) {
             // Do not scroll when selecting text.
             int rowShift = mEmulator.getScrollCounter();
             if (-mTopRow + rowShift > rowsInHistory) {
                 // .. unless we're hitting the end of history transcript, in which
                 // case we abort text selection and scroll to end.
-                if (isSelectingText())
-                    stopTextSelectionMode();
-
-                if (mEmulator.isAutoScrollDisabled()) {
-                    setTopRow(-rowsInHistory);
-                    skipScrolling = true;
-                }
+                stopTextSelectionMode();
             } else {
                 skipScrolling = true;
-                setTopRow(mTopRow - rowShift);
+                mTopRow -= rowShift;
                 decrementYTextSelectionCursors(rowShift);
             }
         }
@@ -490,7 +473,7 @@ public final class TerminalView extends View {
                 // of one row at a time.
                 awakenScrollBars();
             }
-            setTopRow(0);
+            mTopRow = 0;
         }
 
         mEmulator.clearScrollCounter();
@@ -583,7 +566,7 @@ public final class TerminalView extends View {
                 // e.g. less, which shifts to the alt screen without mouse handling.
                 handleKeyCode(up ? KeyEvent.KEYCODE_DPAD_UP : KeyEvent.KEYCODE_DPAD_DOWN, 0);
             } else {
-                setTopRow(Math.min(0, Math.max(-(mEmulator.getScreen().getActiveTranscriptRows()), mTopRow + (up ? -1 : 1))));
+                mTopRow = Math.min(0, Math.max(-(mEmulator.getScreen().getActiveTranscriptRows()), mTopRow + (up ? -1 : 1)));
                 if (!awakenScrollBars()) invalidate();
             }
         }
@@ -783,8 +766,6 @@ public final class TerminalView extends View {
         } else if (event.getAction() == KeyEvent.ACTION_MULTIPLE && keyCode == KeyEvent.KEYCODE_UNKNOWN) {
             mTermSession.write(event.getCharacters());
             return true;
-        } else if (keyCode == KeyEvent.KEYCODE_LANGUAGE_SWITCH) {
-            return super.onKeyDown(keyCode, event);
         }
 
         final int metaState = event.getMetaState();
@@ -828,7 +809,7 @@ public final class TerminalView extends View {
         if ((result & KeyCharacterMap.COMBINING_ACCENT) != 0) {
             // If entered combining accent previously, write it out:
             if (mCombiningAccent != 0)
-                inputCodePoint(event.getDeviceId(), mCombiningAccent, controlDown, leftAltDown);
+                inputCodePoint(mCombiningAccent, controlDown, leftAltDown);
             mCombiningAccent = result & KeyCharacterMap.COMBINING_ACCENT_MASK;
         } else {
             if (mCombiningAccent != 0) {
@@ -836,7 +817,7 @@ public final class TerminalView extends View {
                 if (combinedChar > 0) result = combinedChar;
                 mCombiningAccent = 0;
             }
-            inputCodePoint(event.getDeviceId(), result, controlDown, leftAltDown);
+            inputCodePoint(result, controlDown, leftAltDown);
         }
 
         if (mCombiningAccent != oldCombiningAccent) invalidate();
@@ -844,9 +825,9 @@ public final class TerminalView extends View {
         return true;
     }
 
-    public void inputCodePoint(int eventSource, int codePoint, boolean controlDownFromEvent, boolean leftAltDownFromEvent) {
+    public void inputCodePoint(int codePoint, boolean controlDownFromEvent, boolean leftAltDownFromEvent) {
         if (TERMINAL_VIEW_KEY_LOGGING_ENABLED) {
-            mClient.logInfo(LOG_TAG, "inputCodePoint(eventSource=" + eventSource + ", codePoint=" + codePoint + ", controlDownFromEvent=" + controlDownFromEvent + ", leftAltDownFromEvent="
+            mClient.logInfo(LOG_TAG, "inputCodePoint(codePoint=" + codePoint + ", controlDownFromEvent=" + controlDownFromEvent + ", leftAltDownFromEvent="
                 + leftAltDownFromEvent + ")");
         }
 
@@ -886,22 +867,19 @@ public final class TerminalView extends View {
         }
 
         if (codePoint > -1) {
-            // If not virtual or soft keyboard.
-            if (eventSource > KEY_EVENT_SOURCE_SOFT_KEYBOARD) {
-                // Work around bluetooth keyboards sending funny unicode characters instead
-                // of the more normal ones from ASCII that terminal programs expect - the
-                // desire to input the original characters should be low.
-                switch (codePoint) {
-                    case 0x02DC: // SMALL TILDE.
-                        codePoint = 0x007E; // TILDE (~).
-                        break;
-                    case 0x02CB: // MODIFIER LETTER GRAVE ACCENT.
-                        codePoint = 0x0060; // GRAVE ACCENT (`).
-                        break;
-                    case 0x02C6: // MODIFIER LETTER CIRCUMFLEX ACCENT.
-                        codePoint = 0x005E; // CIRCUMFLEX ACCENT (^).
-                        break;
-                }
+            // Work around bluetooth keyboards sending funny unicode characters instead
+            // of the more normal ones from ASCII that terminal programs expect - the
+            // desire to input the original characters should be low.
+            switch (codePoint) {
+                case 0x02DC: // SMALL TILDE.
+                    codePoint = 0x007E; // TILDE (~).
+                    break;
+                case 0x02CB: // MODIFIER LETTER GRAVE ACCENT.
+                    codePoint = 0x0060; // GRAVE ACCENT (`).
+                    break;
+                case 0x02C6: // MODIFIER LETTER CIRCUMFLEX ACCENT.
+                    codePoint = 0x005E; // CIRCUMFLEX ACCENT (^).
+                    break;
             }
 
             // If left alt, send escape before the code point to make e.g. Alt+B and Alt+F work in readline:
@@ -1000,19 +978,7 @@ public final class TerminalView extends View {
             if (mTerminalCursorBlinkerRunnable != null)
                 mTerminalCursorBlinkerRunnable.setEmulator(mEmulator);
 
-            // Restore cached top row value if session/emulator was switched back from a
-            // different session or after activity restart. The top row value also needs to be
-            // maintained after opening/closing soft keyboard.
-            int topRow = 0;
-            if (mEmulator != null) {
-                int rowsInHistory = mEmulator.getScreen().getActiveTranscriptRows();
-                int cachedTopRow = mEmulator.getTopRow();
-                if (cachedTopRow >= -rowsInHistory) {
-                    topRow = cachedTopRow;
-                }
-            }
-            setTopRow(topRow);
-
+            mTopRow = 0;
             scrollTo(0, 0);
             invalidate();
         }
@@ -1067,15 +1033,8 @@ public final class TerminalView extends View {
         return mTopRow;
     }
 
-    public void setTopRow(int topRow) {
-        setTopRow(topRow, true);
-    }
-
-    public void setTopRow(int topRow, boolean updateEmulator) {
-        mTopRow = topRow;
-        if (updateEmulator && mEmulator != null) {
-            mEmulator.setTopRow(mTopRow);
-        }
+    public void setTopRow(int mTopRow) {
+        this.mTopRow = mTopRow;
     }
 
 
@@ -1479,7 +1438,6 @@ public final class TerminalView extends View {
      * Define functions required for long hold toolbar.
      */
     private final Runnable mShowFloatingToolbar = new Runnable() {
-        @RequiresApi(api = Build.VERSION_CODES.M)
         @Override
         public void run() {
             if (getTextSelectionActionMode() != null) {
@@ -1488,7 +1446,6 @@ public final class TerminalView extends View {
         }
     };
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
     private void showFloatingToolbar() {
         if (getTextSelectionActionMode() != null) {
             int delay = ViewConfiguration.getDoubleTapTimeout();
@@ -1496,7 +1453,6 @@ public final class TerminalView extends View {
         }
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
     void hideFloatingToolbar() {
         if (getTextSelectionActionMode() != null) {
             removeCallbacks(mShowFloatingToolbar);
@@ -1505,7 +1461,7 @@ public final class TerminalView extends View {
     }
 
     public void updateFloatingToolbarVisibility(MotionEvent event) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && getTextSelectionActionMode() != null) {
+        if (getTextSelectionActionMode() != null) {
             switch (event.getActionMasked()) {
                 case MotionEvent.ACTION_MOVE:
                     hideFloatingToolbar();
