@@ -239,6 +239,47 @@ public final class TerminalRenderer {
         if (savedMatrix) canvas.restore();
     }
 
+    /** Render the text being composed by an IME, e.g. a Hangul syllable, over the cursor position. */
+    public final void renderComposingText(TerminalEmulator mEmulator, Canvas canvas, int topRow, CharSequence composingText) {
+        if (composingText == null || composingText.length() == 0) return;
+
+        final int cursorRow = mEmulator.getCursorRow();
+        if (cursorRow < topRow || cursorRow >= topRow + mEmulator.mRows) return;
+
+        final String text = composingText.toString();
+        int widthColumns = 0;
+        for (int i = 0; i < text.length(); ) {
+            int codePoint = text.codePointAt(i);
+            widthColumns += Math.max(0, WcWidth.width(codePoint));
+            i += Character.charCount(codePoint);
+        }
+        if (widthColumns == 0) return;
+
+        final int[] palette = mEmulator.mColors.mCurrentColors;
+        final float y = (cursorRow - topRow + 1) * mFontLineSpacing + mFontLineSpacingAndAscent;
+        final float left = Math.min(mEmulator.getCursorCol(), Math.max(0, mEmulator.mColumns - widthColumns)) * mFontWidth;
+        final float right = left + widthColumns * mFontWidth;
+
+        mTextPaint.setFakeBoldText(false);
+        mTextPaint.setTextSkewX(0.f);
+        mTextPaint.setStrikeThruText(false);
+
+        mTextPaint.setColor(palette[TextStyle.COLOR_INDEX_CURSOR]);
+        canvas.drawRect(left, y - mFontLineSpacingAndAscent + mFontAscent, right, y, mTextPaint);
+
+        final float measured = mTextPaint.measureText(text);
+        final boolean scale = measured > 0 && Math.abs(measured - (right - left)) > 0.01;
+        if (scale) {
+            canvas.save();
+            canvas.scale((right - left) / measured, 1.f, left, y);
+        }
+        mTextPaint.setUnderlineText(true);
+        mTextPaint.setColor(palette[TextStyle.COLOR_INDEX_BACKGROUND]);
+        canvas.drawText(text, left, y - mFontLineSpacingAndAscent, mTextPaint);
+        mTextPaint.setUnderlineText(false);
+        if (scale) canvas.restore();
+    }
+
     public float getFontWidth() {
         return mFontWidth;
     }

@@ -6,6 +6,7 @@ import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Typeface;
 import android.os.Build;
@@ -32,6 +33,7 @@ import android.view.autofill.AutofillValue;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Scroller;
 
 import androidx.annotation.Nullable;
@@ -85,6 +87,16 @@ public final class TerminalView extends View {
 
     /** If non-zero, this is the last unicode code point received if that was a combining character. */
     int mCombiningAccent;
+
+    /**
+     * The text the IME is currently composing (e.g. a Hangul syllable being assembled from jamo
+     * typed on a hardware keyboard). It is not sent to the terminal until the IME commits it, but
+     * is drawn over the cursor so the user can see what is being composed.
+     */
+    CharSequence mComposingText = "";
+
+    /** The {@link Configuration#hardKeyboardHidden} value the current input connection was created with. */
+    private int mHardKeyboardHidden = Configuration.HARDKEYBOARDHIDDEN_UNDEFINED;
 
     /**
      * The current AutoFill type returned for {@link View#getAutofillType()} by {@link #getAutofillType()}.
@@ -288,6 +300,7 @@ public final class TerminalView extends View {
         mTermSession = session;
         mEmulator = null;
         mCombiningAccent = 0;
+        mComposingText = "";
 
         updateSize();
 
@@ -303,8 +316,17 @@ public final class TerminalView extends View {
         // an alternate view is not selected, like an EditText. This is necessary if an activity is
         // initially started with the alternate view or if activity is returned to from another app
         // and the alternate view was the one selected the last time.
+        mHardKeyboardHidden = getResources().getConfiguration().hardKeyboardHidden;
         if (mClient.isTerminalViewSelected()) {
-            if (mClient.shouldEnforceCharBasedInput()) {
+            if (isHardwareKeyboardConnected()) {
+                // With a hardware keyboard, languages like Korean are composed by the IME from key
+                // presses (e.g. Samsung Keyboard or Gboard with a physical keyboard). IMEs disable
+                // that composition for TYPE_NULL and password input types and send raw latin key
+                // events instead, so a normal text input type is required for such input to work.
+                // Suggestions are disabled since text is sent to the terminal as soon as committed.
+                outAttrs.inputType = InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_NORMAL |
+                    InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS;
+            } else if (mClient.shouldEnforceCharBasedInput()) {
                 // Some keyboards seems do not reset the internal state on TYPE_NULL.
                 // Affects mostly Samsung stock keyboards.
                 // https://github.com/termux/termux-app/issues/686
@@ -338,6 +360,7 @@ public final class TerminalView extends View {
             public boolean finishComposingText() {
                 if (TERMINAL_VIEW_KEY_LOGGING_ENABLED) mClient.logInfo(LOG_TAG, "IME: finishComposingText()");
                 super.finishComposingText();
+                setComposingTextPreview("");
 
                 sendTextToTerminal(getEditable());
                 getEditable().clear();
@@ -350,12 +373,23 @@ public final class TerminalView extends View {
                     mClient.logInfo(LOG_TAG, "IME: commitText(\"" + text + "\", " + newCursorPosition + ")");
                 }
                 super.commitText(text, newCursorPosition);
+                setComposingTextPreview("");
 
                 if (mEmulator == null) return true;
 
                 Editable content = getEditable();
                 sendTextToTerminal(content);
                 content.clear();
+                return true;
+            }
+
+            @Override
+            public boolean setComposingText(CharSequence text, int newCursorPosition) {
+                if (TERMINAL_VIEW_KEY_LOGGING_ENABLED) {
+                    mClient.logInfo(LOG_TAG, "IME: setComposingText(\"" + text + "\", " + newCursorPosition + ")");
+                }
+                super.setComposingText(text, newCursorPosition);
+                setComposingTextPreview(text);
                 return true;
             }
 
@@ -504,6 +538,33 @@ public final class TerminalView extends View {
         mRenderer = new TerminalRenderer(mRenderer.mTextSize, newTypeface);
         updateSize();
         invalidate();
+    }
+
+    /** Whether a hardware keyboard is currently connected and usable. */
+    public boolean isHardwareKeyboardConnected() {
+        Configuration config = getResources().getConfiguration();
+        return config.keyboard != Configuration.KEYBOARD_NOKEYS &&
+            config.hardKeyboardHidden == Configuration.HARDKEYBOARDHIDDEN_NO;
+    }
+
+    void setComposingTextPreview(CharSequence text) {
+        CharSequence newText = text == null ? "" : text.toString();
+        if (TextUtils.equals(mComposingText, newText)) return;
+        mComposingText = newText;
+        invalidate();
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        // The input type depends on whether a hardware keyboard is connected, so restart input
+        // when it is connected or disconnected, since TermuxActivity handles keyboard config changes.
+        if (newConfig.hardKeyboardHidden != mHardKeyboardHidden) {
+            mHardKeyboardHidden = newConfig.hardKeyboardHidden;
+            setComposingTextPreview("");
+            InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (imm != null) imm.restartInput(this);
+        }
     }
 
     @Override
@@ -996,6 +1057,9 @@ public final class TerminalView extends View {
             }
 
             mRenderer.render(mEmulator, canvas, mTopRow, sel[0], sel[1], sel[2], sel[3]);
+
+            // render the text being composed by the IME at the cursor
+            mRenderer.renderComposingText(mEmulator, canvas, mTopRow, mComposingText);
 
             // render the text selection handles
             renderTextSelection();
