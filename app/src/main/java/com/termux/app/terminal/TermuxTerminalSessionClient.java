@@ -42,6 +42,11 @@ public class TermuxTerminalSessionClient extends TermuxTerminalSessionClientBase
 
     private int mBellSoundId;
 
+    private Typeface mDefaultTypeface;
+
+    /** The asset path of the default font used if {@link TermuxConstants#TERMUX_FONT_FILE} does not exist. */
+    private static final String DEFAULT_FONT_ASSET_PATH = "fonts/D2Codingligature-Regular.ttf";
+
     private static final String LOG_TAG = "TermuxTerminalSessionClient";
 
     public TermuxTerminalSessionClient(TermuxActivity activity) {
@@ -477,11 +482,28 @@ public class TermuxTerminalSessionClient extends TermuxTerminalSessionClientBase
             }
             updateBackgroundColor();
 
-            final Typeface newTypeface = (fontFile.exists() && fontFile.length() > 0) ? Typeface.createFromFile(fontFile) : Typeface.MONOSPACE;
+            final Typeface newTypeface = (fontFile.exists() && fontFile.length() > 0) ? Typeface.createFromFile(fontFile) : getDefaultTypeface();
             mActivity.getTerminalView().setTypeface(newTypeface);
         } catch (Exception e) {
             Logger.logStackTraceWithMessage(LOG_TAG, "Error in checkForFontAndColors()", e);
         }
+    }
+
+    /**
+     * Get the default typeface used when the user has not set a custom font, which is the bundled
+     * D2Coding ligature font that has proper widths for Hangul, or {@link Typeface#MONOSPACE} if it
+     * fails to load.
+     */
+    private Typeface getDefaultTypeface() {
+        if (mDefaultTypeface == null) {
+            try {
+                mDefaultTypeface = Typeface.createFromAsset(mActivity.getAssets(), DEFAULT_FONT_ASSET_PATH);
+            } catch (Exception e) {
+                Logger.logStackTraceWithMessage(LOG_TAG, "Failed to load default font from \"" + DEFAULT_FONT_ASSET_PATH + "\" asset", e);
+                mDefaultTypeface = Typeface.MONOSPACE;
+            }
+        }
+        return mDefaultTypeface;
     }
 
     public void updateBackgroundColor() {
