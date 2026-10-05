@@ -2,8 +2,14 @@ name: Publish Release From Build
 
 # Creates a GitHub release from the APKs already built by a successful `Build` workflow run,
 # without rebuilding them, so the released APKs are exactly the ones that were built and tested.
+#
+# Pushing a `v*` tag for a commit that has a successful `Build` run publishes a release for it,
+# with the annotated tag message as the release notes.
 
 on:
+  push:
+    tags:
+      - 'v*'
   workflow_dispatch:
     inputs:
       run_id:
@@ -32,10 +38,32 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
       RUN_ID: ${{ inputs.run_id }}
-      TAG: ${{ inputs.tag }}
+      TAG: ${{ inputs.tag || github.ref_name }}
       NOTES: ${{ inputs.notes }}
       PRERELEASE: ${{ inputs.prerelease }}
     steps:
+      - name: Find build run for tag
+        if: github.event_name == 'push'
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag_sha="$(gh api "repos/$GITHUB_REPOSITORY/commits/$TAG" --jq .sha)"
+          run_id="$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/debug_build.yml/runs?head_sha=$tag_sha&status=success" --jq '.workflow_runs[0].id // empty')"
+          if [ -z "$run_id" ]; then
+            echo "No successful 'Build' run found for '$TAG' commit $tag_sha."
+            exit 1
+          fi
+          echo "RUN_ID=$run_id" >> "$GITHUB_ENV"
+          tag_object="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$TAG" --jq '.object.type + " " + .object.sha')"
+          if [ "${tag_object%% *}" = "tag" ]; then
+            gh api "repos/$GITHUB_REPOSITORY/git/tags/${tag_object#* }" --jq .message > "$RUNNER_TEMP/notes.md"
+            {
+              echo "NOTES<<__NOTES_EOF__"
+              cat "$RUNNER_TEMP/notes.md"
+              echo "__NOTES_EOF__"
+            } >> "$GITHUB_ENV"
+          fi
+
       - name: Validate build run
         shell: bash
         run: |
@@ -53,7 +81,7 @@ jobs:
       - name: Download APKs from build run
         uses: actions/download-artifact@v4
         with:
-          run-id: ${{ inputs.run_id }}
+          run-id: ${{ env.RUN_ID }}
           github-token: ${{ github.token }}
           path: artifacts
           merge-multiple: true
