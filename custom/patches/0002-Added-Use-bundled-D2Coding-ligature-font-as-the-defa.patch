@@ -1,0 +1,66 @@
+From a23420d84cc2541a5eea467418d3239a1a872a3d Mon Sep 17 00:00:00 2001
+From: fharenheit <fharenheit@gmail.com>
+Date: Mon, 5 Oct 2026 10:31:02 +0000
+Subject: [PATCH] Added: Use bundled D2Coding ligature font as the default
+ terminal font
+
+Bundle D2Codingligature-Regular.ttf from naver/d2-coding-font (SIL Open
+Font License 1.1, license included as D2Coding-OFL.txt) in the app
+assets and use it as the terminal font when ~/.termux/font.ttf does not
+exist, instead of Typeface.MONOSPACE. A user provided font.ttf still
+takes precedence.
+---
+ .../terminal/TermuxTerminalSessionClient.java | 24 ++++++++++++++++++-
+ 1 file changed, 23 insertions(+), 1 deletion(-)
+
+diff --git a/app/src/main/java/com/termux/app/terminal/TermuxTerminalSessionClient.java b/app/src/main/java/com/termux/app/terminal/TermuxTerminalSessionClient.java
+index a9e60251..78a253a4 100644
+--- a/app/src/main/java/com/termux/app/terminal/TermuxTerminalSessionClient.java
++++ b/app/src/main/java/com/termux/app/terminal/TermuxTerminalSessionClient.java
+@@ -42,6 +42,11 @@ public class TermuxTerminalSessionClient extends TermuxTerminalSessionClientBase
+ 
+     private int mBellSoundId;
+ 
++    private Typeface mDefaultTypeface;
++
++    /** The asset path of the default font used if {@link TermuxConstants#TERMUX_FONT_FILE} does not exist. */
++    private static final String DEFAULT_FONT_ASSET_PATH = "fonts/D2Codingligature-Regular.ttf";
++
+     private static final String LOG_TAG = "TermuxTerminalSessionClient";
+ 
+     public TermuxTerminalSessionClient(TermuxActivity activity) {
+@@ -477,13 +482,30 @@ public class TermuxTerminalSessionClient extends TermuxTerminalSessionClientBase
+             }
+             updateBackgroundColor();
+ 
+-            final Typeface newTypeface = (fontFile.exists() && fontFile.length() > 0) ? Typeface.createFromFile(fontFile) : Typeface.MONOSPACE;
++            final Typeface newTypeface = (fontFile.exists() && fontFile.length() > 0) ? Typeface.createFromFile(fontFile) : getDefaultTypeface();
+             mActivity.getTerminalView().setTypeface(newTypeface);
+         } catch (Exception e) {
+             Logger.logStackTraceWithMessage(LOG_TAG, "Error in checkForFontAndColors()", e);
+         }
+     }
+ 
++    /**
++     * Get the default typeface used when the user has not set a custom font, which is the bundled
++     * D2Coding ligature font that has proper widths for Hangul, or {@link Typeface#MONOSPACE} if it
++     * fails to load.
++     */
++    private Typeface getDefaultTypeface() {
++        if (mDefaultTypeface == null) {
++            try {
++                mDefaultTypeface = Typeface.createFromAsset(mActivity.getAssets(), DEFAULT_FONT_ASSET_PATH);
++            } catch (Exception e) {
++                Logger.logStackTraceWithMessage(LOG_TAG, "Failed to load default font from \"" + DEFAULT_FONT_ASSET_PATH + "\" asset", e);
++                mDefaultTypeface = Typeface.MONOSPACE;
++            }
++        }
++        return mDefaultTypeface;
++    }
++
+     public void updateBackgroundColor() {
+         if (!mActivity.isVisible()) return;
+         TerminalSession session = mActivity.getCurrentSession();
+-- 
+2.43.0
+

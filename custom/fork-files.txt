@@ -1,0 +1,11 @@
+# Files and directories that only exist in this fork and are not in upstream termux/termux-app.
+# `upgrade-upstream.sh` copies these from the current commit on top of the new upstream source
+# as-is. Changes to files that also exist upstream go in `custom/patches/` instead.
+# One path per line, relative to the repository root. Lines starting with `#` are ignored.
+
+CLAUDE.md
+custom
+app/src/main/assets/fonts/D2Codingligature-Regular.ttf
+app/src/main/assets/fonts/D2Coding-OFL.txt
+.github/workflows/publish_release_from_build.yml
+.github/release-notes

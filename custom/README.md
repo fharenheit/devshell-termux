@@ -1,0 +1,54 @@
+# 이 포크의 수정 사항과 업스트림 업그레이드 방법
+
+이 저장소는 [termux/termux-app](https://github.com/termux/termux-app)의 포크입니다.
+업스트림 릴리즈 소스에 아래 수정 사항을 얹어서 사용합니다.
+
+## 수정 사항
+
+| 내용 | 위치 |
+|---|---|
+| 블루투스/하드웨어 키보드 한글(IME 조합) 입력, 조합 중인 글자 표시 | `custom/patches/0001-*.patch` (`TerminalView.java`, `TerminalRenderer.java`) |
+| D2Coding ligature 글꼴을 기본 터미널 글꼴로 사용 | `custom/patches/0002-*.patch` (`TermuxTerminalSessionClient.java`) + 글꼴 파일 |
+| 빌드 결과로 GitHub 릴리즈 게시 워크플로 | `.github/workflows/publish_release_from_build.yml`, `.github/release-notes/` |
+
+- **업스트림에도 있는 파일을 고친 것**은 `custom/patches/`에 패치로 보관합니다.
+- **포크에만 있는 파일**(글꼴, 릴리즈 워크플로, 이 디렉터리 등)은 `custom/fork-files.txt`에 목록으로 관리하고, 업그레이드할 때 그대로 복사됩니다.
+
+## 새 업스트림 릴리즈로 업그레이드하기
+
+```bash
+custom/upgrade-upstream.sh            # 최신 정식 릴리즈(베타 제외)로
+custom/upgrade-upstream.sh v0.119.0   # 특정 태그로
+```
+
+스크립트가 하는 일:
+
+1. 업스트림 태그를 받아서 소스 전체를 그 릴리즈로 바꾸고, `custom/fork-files.txt`의 파일은 유지한 채
+   `Sync source tree to upstream release <태그>` 커밋을 만듭니다. 히스토리는 그대로 두고 force-push도 필요 없습니다.
+2. `custom/patches/`의 패치를 순서대로 `git am -3`로 적용해서 패치마다 커밋을 하나씩 만듭니다.
+
+끝나면 `master`에 push하면 GitHub Actions의 `Build`가 APK를 만듭니다.
+
+### 패치가 충돌하면
+
+업스트림이 같은 부분을 고쳤으면 `git am`이 멈춥니다.
+
+1. 충돌한 파일을 고치고 `git add <파일>` 후 `git am --continue`
+2. 스크립트가 알려준 임시 폴더에서 남은 패치를 `git am -3 <패치>`로 적용
+3. `custom/update-patches.sh`를 실행해서 패치를 새 소스 기준으로 갱신하고 커밋
+
+포기하려면 `git am --abort && git reset --hard <업그레이드 전 커밋>`.
+
+## 수정 사항을 바꾸거나 추가할 때
+
+- 업스트림에도 있는 파일을 고쳤다면, 커밋한 다음 `custom/update-patches.sh`를 실행하고 그 결과도 커밋합니다.
+  마지막 `Sync source tree to upstream release` 커밋 이후의 커밋들에서 패치를 다시 만듭니다.
+- 포크에만 있는 새 파일을 추가했다면 `custom/fork-files.txt`에 경로를 추가합니다.
+
+## 릴리즈 게시
+
+1. `.github/release-notes/<태그>.md`에 릴리즈 노트 작성 후 `master`에 push
+2. 같은 커밋으로 `release/<태그>` 브랜치 push (예: `release/v0.119.0-ko.1`)
+
+워크플로가 그 커밋의 `Build` 결과 APK로 릴리즈와 태그를 만들고 브랜치를 지웁니다.
+태그를 직접 push할 수 있다면 `v*` 태그를 push해도 됩니다.
