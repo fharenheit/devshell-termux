@@ -1,15 +1,23 @@
 name: Publish Release From Build
 
 # Creates a GitHub release from the APKs already built by a successful `Build` workflow run,
-# without rebuilding them, so the released APKs are exactly the ones that were built and tested.
+# without rebuilding them, so the released APKs are exactly the ones that were built.
 #
-# Pushing a `v*` tag for a commit that has a successful `Build` run publishes a release for it,
-# with the annotated tag message as the release notes.
+# A release can be requested in one of these ways:
+# - Push a `v*` tag for a commit that has a `Build` run.
+# - Push a `release/<tag>` branch for a commit that has a `Build` run, e.g. `release/v0.118.3-ko.1`.
+#   The `<tag>` tag is created by the release and the branch is deleted afterwards.
+# - Run the workflow manually with the ID of a successful `Build` run.
+#
+# Release notes are read from the `notes` input, else the annotated tag message, else the
+# `.github/release-notes/<tag>.md` file of the released commit.
 
 on:
   push:
     tags:
       - 'v*'
+    branches:
+      - 'release/**'
   workflow_dispatch:
     inputs:
       run_id:
@@ -38,31 +46,50 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
       RUN_ID: ${{ inputs.run_id }}
-      TAG: ${{ inputs.tag || github.ref_name }}
       NOTES: ${{ inputs.notes }}
       PRERELEASE: ${{ inputs.prerelease }}
     steps:
-      - name: Find build run for tag
+      - name: Set tag
+        shell: bash
+        env:
+          INPUT_TAG: ${{ inputs.tag }}
+          REF_NAME: ${{ github.ref_name }}
+          REF_TYPE: ${{ github.ref_type }}
+        run: |
+          set -euo pipefail
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            tag="$INPUT_TAG"
+          elif [ "$REF_TYPE" = "tag" ]; then
+            tag="$REF_NAME"
+          else
+            tag="${REF_NAME#release/}"
+          fi
+          if ! printf "%s" "$tag" | grep -qE '^v[0-9A-Za-z.+-]+$'; then
+            echo "Invalid release tag '$tag'."
+            exit 1
+          fi
+          echo "TAG=$tag" >> "$GITHUB_ENV"
+
+      - name: Wait for build run of pushed commit
         if: github.event_name == 'push'
         shell: bash
         run: |
           set -euo pipefail
-          tag_sha="$(gh api "repos/$GITHUB_REPOSITORY/commits/$TAG" --jq .sha)"
-          run_id="$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/debug_build.yml/runs?head_sha=$tag_sha&status=success" --jq '.workflow_runs[0].id // empty')"
-          if [ -z "$run_id" ]; then
-            echo "No successful 'Build' run found for '$TAG' commit $tag_sha."
-            exit 1
-          fi
-          echo "RUN_ID=$run_id" >> "$GITHUB_ENV"
-          tag_object="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$TAG" --jq '.object.type + " " + .object.sha')"
-          if [ "${tag_object%% *}" = "tag" ]; then
-            gh api "repos/$GITHUB_REPOSITORY/git/tags/${tag_object#* }" --jq .message > "$RUNNER_TEMP/notes.md"
-            {
-              echo "NOTES<<__NOTES_EOF__"
-              cat "$RUNNER_TEMP/notes.md"
-              echo "__NOTES_EOF__"
-            } >> "$GITHUB_ENV"
-          fi
+          # The `Build` run of the same commit may still be running, so wait for up to 30 minutes.
+          for i in $(seq 1 60); do
+            run="$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/debug_build.yml/runs?head_sha=$GITHUB_SHA" \
+              --jq '[.workflow_runs[] | select(.conclusion == "success" or .status != "completed")][0] | "\(.id // "") \(.status // "")"')"
+            run_id="${run%% *}"
+            status="${run#* }"
+            if [ -n "$run_id" ] && [ "$status" = "completed" ]; then
+              echo "RUN_ID=$run_id" >> "$GITHUB_ENV"
+              exit 0
+            fi
+            echo "Waiting for 'Build' run of $GITHUB_SHA (run: '${run_id:-none}', status: '${status:-none}')"
+            sleep 30
+          done
+          echo "No successful 'Build' run found for $GITHUB_SHA."
+          exit 1
 
       - name: Validate build run
         shell: bash
@@ -77,6 +104,26 @@ jobs:
             exit 1
           fi
           echo "HEAD_SHA=$head_sha" >> "$GITHUB_ENV"
+
+      - name: Read release notes
+        if: env.NOTES == ''
+        shell: bash
+        run: |
+          set -euo pipefail
+          notes=""
+          tag_object="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$TAG" --jq '.object.type + " " + .object.sha' 2>/dev/null || true)"
+          if [ "${tag_object%% *}" = "tag" ]; then
+            notes="$(gh api "repos/$GITHUB_REPOSITORY/git/tags/${tag_object#* }" --jq .message)"
+          fi
+          if [ -z "$notes" ]; then
+            notes="$(gh api -H "Accept: application/vnd.github.raw" \
+              "repos/$GITHUB_REPOSITORY/contents/.github/release-notes/$TAG.md?ref=$HEAD_SHA" 2>/dev/null || true)"
+          fi
+          {
+            echo "NOTES<<__NOTES_EOF__"
+            printf "%s\n" "$notes"
+            echo "__NOTES_EOF__"
+          } >> "$GITHUB_ENV"
 
       - name: Download APKs from build run
         uses: actions/download-artifact@v4
@@ -95,3 +142,8 @@ jobs:
           args=(--repo "$GITHUB_REPOSITORY" --target "$HEAD_SHA" --title "$TAG" --notes "$NOTES")
           if [ "$PRERELEASE" = "true" ]; then args+=(--prerelease); fi
           gh release create "$TAG" "${args[@]}" artifacts/*.apk artifacts/sha256sums
+
+      - name: Delete release branch
+        if: github.event_name == 'push' && github.ref_type == 'branch'
+        shell: bash
+        run: gh api -X DELETE "repos/$GITHUB_REPOSITORY/git/refs/heads/$GITHUB_REF_NAME"
