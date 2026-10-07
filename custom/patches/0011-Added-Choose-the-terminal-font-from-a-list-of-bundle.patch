@@ -1,0 +1,88 @@
+From ccc2ddb668211ebae357061baec391687b3da5ad Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Wed, 7 Oct 2026 23:20:10 +0000
+Subject: [PATCH] Added: Choose the terminal font from a list of bundled fonts
+
+Bundle NanumGothicCoding, Sarasa Mono K, Noto Sans Mono CJK KR,
+JetBrains Mono, Fira Code, Hack and Source Code Pro with their licenses,
+in addition to the default D2Coding ligature font.
+
+A Font item in the terminal tab bar menu and in the Terminal View
+settings shows them with a preview in each font. Choosing one copies it
+to ~/.termux/font.ttf, like Termux:Styling does, and choosing the
+default font removes that file. A custom font.ttf that is not one of the
+bundled fonts is backed up to font.ttf.bak before it is replaced. The
+terminal loads the font right away, or when it is started again if it
+was chosen in the settings.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01GLNsTPnn2xKUQ4uFcevT6G
+---
+ .../settings/termux/TerminalViewPreferencesFragment.java     | 4 ++++
+ .../com/termux/app/terminal/TermuxTerminalSessionClient.java | 5 +++++
+ app/src/main/res/xml/termux_terminal_view_preferences.xml    | 4 ++++
+ 3 files changed, 13 insertions(+)
+
+diff --git a/app/src/main/java/com/termux/app/fragments/settings/termux/TerminalViewPreferencesFragment.java b/app/src/main/java/com/termux/app/fragments/settings/termux/TerminalViewPreferencesFragment.java
+index ed10d18..cb39fa1 100644
+--- a/app/src/main/java/com/termux/app/fragments/settings/termux/TerminalViewPreferencesFragment.java
++++ b/app/src/main/java/com/termux/app/fragments/settings/termux/TerminalViewPreferencesFragment.java
+@@ -9,6 +9,7 @@ import androidx.preference.PreferenceFragmentCompat;
+ import androidx.preference.PreferenceManager;
+ 
+ import com.termux.R;
++import com.termux.app.terminal.fonts.TerminalFontDialog;
+ import com.termux.shared.settings.preferences.TermuxAppSharedPreferences;
+ 
+ @Keep
+@@ -23,6 +24,9 @@ public class TerminalViewPreferencesFragment extends PreferenceFragmentCompat {
+         preferenceManager.setPreferenceDataStore(TerminalViewPreferencesDataStore.getInstance(context));
+ 
+         setPreferencesFromResource(R.xml.termux_terminal_view_preferences, rootKey);
++
++        if (getActivity() != null)
++            TerminalFontDialog.setupPreference(findPreference("terminal_font"), getActivity());
+     }
+ 
+ }
+diff --git a/app/src/main/java/com/termux/app/terminal/TermuxTerminalSessionClient.java b/app/src/main/java/com/termux/app/terminal/TermuxTerminalSessionClient.java
+index f56de6a..48bd9b5 100644
+--- a/app/src/main/java/com/termux/app/terminal/TermuxTerminalSessionClient.java
++++ b/app/src/main/java/com/termux/app/terminal/TermuxTerminalSessionClient.java
+@@ -17,6 +17,7 @@ import com.termux.shared.shell.TermuxSession;
+ import com.termux.shared.interact.TextInputDialogUtils;
+ import com.termux.shared.interact.ShareUtils;
+ import com.termux.app.TermuxActivity;
++import com.termux.app.terminal.fonts.TerminalFonts;
+ import com.termux.app.terminal.tabs.TerminalSessionNotifications;
+ import com.termux.app.terminal.tabs.TerminalTabStates;
+ import com.termux.app.terminal.tabs.TerminalTabTitles;
+@@ -68,6 +69,10 @@ public class TermuxTerminalSessionClient extends TermuxTerminalSessionClientBase
+      * Should be called when mActivity.onStart() is called
+      */
+     public void onStart() {
++        // Load the font if it was chosen in the settings while the activity was stopped.
++        if (TerminalFonts.consumeFontChanged())
++            checkForFontAndColors();
++
+         // The service has connected, but data may have changed since we were last in the foreground.
+         // Get the session stored in shared preferences stored by {@link #onStop} if its valid,
+         // otherwise get the last session currently running.
+diff --git a/app/src/main/res/xml/termux_terminal_view_preferences.xml b/app/src/main/res/xml/termux_terminal_view_preferences.xml
+index 3f66863..cf56f81 100644
+--- a/app/src/main/res/xml/termux_terminal_view_preferences.xml
++++ b/app/src/main/res/xml/termux_terminal_view_preferences.xml
+@@ -10,6 +10,10 @@
+             app:summaryOn="@string/termux_terminal_view_terminal_margin_adjustment_on"
+             app:title="@string/termux_terminal_view_terminal_margin_adjustment_title" />
+ 
++        <Preference
++            app:key="terminal_font"
++            app:title="@string/terminal_font_title" />
++
+     </PreferenceCategory>
+ 
+ </PreferenceScreen>
+-- 
+2.43.0
+

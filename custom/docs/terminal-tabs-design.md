@@ -139,7 +139,7 @@ TerminalTabStates 상태 변화 → TerminalTabsController.refresh()  (탭 수�
 | 탭 길게 누르기 | 메뉴: 이름 바꾸기 / 왼쪽·오른쪽으로 이동 / 닫기 |
 | × | 실행 중이면 확인 대화상자 후 `finishIfRunning()`, 프로세스가 끝나면 종료 코드와 상관없이 탭을 제거. 이미 종료된 세션은 바로 `removeFinishedSession` |
 | `+` | `addNewSession(false, null)`. 길게 누르면 기존 드로어 버튼처럼 이름 있는 세션/failsafe 대화상자 |
-| ⚙ (`+` 오른쪽) | 팝업 메뉴: Settings(설정 화면) / Sessions list(드로어 열기) / Show/hide keyboard / Edit termux.properties / Reload settings |
+| ⚙ (`+` 오른쪽) | 팝업 메뉴: Settings(설정 화면) / Sessions list(드로어 열기) / Show/hide keyboard / Font(글꼴 선택, `TerminalFontDialog`) / Edit termux.properties / Reload settings |
 | 탭 제목 | `[번호] 라벨`(5.1). 최대 너비 160dp, 넘치면 말줄임 |
 | 상태 표시 | 새 출력 ●(회색), 벨 🔔(강조색), 종료 코드 0이면 취소선, 0이 아니면 빨간 취소선(드로어와 같은 규칙) |
 
