@@ -101,7 +101,7 @@ public final class TerminalTabStates {
 | `TermuxActivity.java` | `onServiceConnected`에서 `TerminalTabsController` 생성. `termuxSessionListNotifyUpdated()`에서 탭 바도 갱신. `onReload()`에서 설정 다시 적용 |
 | `TermuxTerminalSessionClient.java` | 아래 4.3 이벤트 hook |
 | `TermuxService.java` | `mTermuxTerminalSessionClientBase`를 `new TrackingTerminalSessionClient()`로 교체(한 줄) |
-| (2단계) `TermuxPropertyConstants.java`, `TermuxSharedProperties.java` | `terminal-tabs`, `max-sessions` 속성 |
+| (3단계) properties 클래스는 고치지 않음 | 탭 설정은 포크 전용 `TerminalTabsSettings`가 읽음(6장) |
 
 ### 4.3 이벤트 흐름
 
