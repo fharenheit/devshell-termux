@@ -122,7 +122,7 @@ public final class TerminalSessionNotifications {
     @NonNull
     private static String getTitle(@Nullable TermuxService service, @NonNull TerminalSession session) {
         int index = service == null ? -1 : service.getIndexOfSession(session);
-        String label = !TextUtils.isEmpty(session.mSessionName) ? session.mSessionName : session.getTitle();
+        String label = TerminalTabTitles.getLabel(session);
         String number = index < 0 ? "" : "[" + (index + 1) + "]";
         if (TextUtils.isEmpty(label)) return number.isEmpty() ? TermuxConstants.TERMUX_APP_NAME : number;
         return number.isEmpty() ? label : number + " " + label;

@@ -20,6 +20,7 @@ import java.util.Properties;
  * terminal-tabs-show-close = true    # true | false
  * max-sessions = 8                   # 1..32
  * terminal-session-notifications = all  # all | exit | bell | off
+ * terminal-tab-auto-title = process  # process | cwd | off
  * </pre>
  */
 public final class TerminalTabsSettings {
@@ -44,12 +45,19 @@ public final class TerminalTabsSettings {
     public static final String VALUE_NOTIFICATIONS_BELL = "bell";
     public static final String VALUE_NOTIFICATIONS_OFF = "off";
 
+    /** The title of tabs without a name or a title set by the program, see {@link TerminalTabTitles}. */
+    public static final String KEY_TERMINAL_TAB_AUTO_TITLE = "terminal-tab-auto-title";
+    public static final String VALUE_AUTO_TITLE_PROCESS = "process";
+    public static final String VALUE_AUTO_TITLE_CWD = "cwd";
+    public static final String VALUE_AUTO_TITLE_OFF = "off";
+
     private static final String LOG_TAG = "TerminalTabsSettings";
 
     private static volatile String sTerminalTabs = VALUE_TERMINAL_TABS_TOP;
     private static volatile boolean sShowCloseButton = true;
     private static volatile int sMaxSessions = DEFAULT_MAX_SESSIONS;
     private static volatile String sSessionNotifications = VALUE_NOTIFICATIONS_ALL;
+    private static volatile String sAutoTitle = VALUE_AUTO_TITLE_PROCESS;
 
     private TerminalTabsSettings() {}
 
@@ -65,6 +73,8 @@ public final class TerminalTabsSettings {
             getValue(properties, KEY_TERMINAL_TABS_SHOW_CLOSE), true, true, LOG_TAG);
         sMaxSessions = getMaxSessions(getValue(properties, KEY_MAX_SESSIONS));
         sSessionNotifications = getSessionNotifications(getValue(properties, KEY_TERMINAL_SESSION_NOTIFICATIONS));
+        sAutoTitle = getOneOf(KEY_TERMINAL_TAB_AUTO_TITLE, getValue(properties, KEY_TERMINAL_TAB_AUTO_TITLE),
+            VALUE_AUTO_TITLE_PROCESS, VALUE_AUTO_TITLE_CWD, VALUE_AUTO_TITLE_OFF);
     }
 
     /** Get the value of a key with trailing whitespace removed, which {@link Properties#load} keeps. */
@@ -86,6 +96,17 @@ public final class TerminalTabsSettings {
                 Logger.logError(LOG_TAG, "Invalid value \"" + value + "\" for the \"" + KEY_TERMINAL_TABS + "\" property, using \"" + VALUE_TERMINAL_TABS_TOP + "\"");
                 return VALUE_TERMINAL_TABS_TOP;
         }
+    }
+
+    /** Get the value if it is one of the values, ignoring case, otherwise the first one, which is the default. */
+    @NonNull
+    private static String getOneOf(String key, String value, String... values) {
+        if (value == null) return values[0];
+        value = value.toLowerCase();
+        for (String validValue : values)
+            if (validValue.equals(value)) return value;
+        Logger.logError(LOG_TAG, "Invalid value \"" + value + "\" for the \"" + key + "\" property, using \"" + values[0] + "\"");
+        return values[0];
     }
 
     @NonNull
@@ -140,6 +161,16 @@ public final class TerminalTabsSettings {
     /** Whether to notify when a session rings the bell while the activity is not visible. */
     public static boolean areBellNotificationsEnabled() {
         return VALUE_NOTIFICATIONS_ALL.equals(sSessionNotifications) || VALUE_NOTIFICATIONS_BELL.equals(sSessionNotifications);
+    }
+
+    /** Whether tabs without a name or title show nothing more than their number. */
+    public static boolean isAutoTitleOff() {
+        return VALUE_AUTO_TITLE_OFF.equals(sAutoTitle);
+    }
+
+    /** Whether tabs without a name or title show the foreground process, otherwise the working directory. */
+    public static boolean isAutoTitleProcess() {
+        return VALUE_AUTO_TITLE_PROCESS.equals(sAutoTitle);
     }
 
     /** The maximum number of sessions that can be created from the app. */

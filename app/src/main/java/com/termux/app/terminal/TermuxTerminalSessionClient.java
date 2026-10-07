@@ -19,6 +19,7 @@ import com.termux.shared.interact.ShareUtils;
 import com.termux.app.TermuxActivity;
 import com.termux.app.terminal.tabs.TerminalSessionNotifications;
 import com.termux.app.terminal.tabs.TerminalTabStates;
+import com.termux.app.terminal.tabs.TerminalTabTitles;
 import com.termux.app.terminal.tabs.TerminalTabsController;
 import com.termux.app.terminal.tabs.TerminalTabsSettings;
 import com.termux.shared.terminal.TermuxTerminalSessionClientBase;
@@ -119,6 +120,7 @@ public class TermuxTerminalSessionClient extends TermuxTerminalSessionClientBase
     public void onTextChanged(TerminalSession changedSession) {
         // Also record output of other sessions while the activity is not visible, to show on their tabs.
         if (changedSession != mActivity.getCurrentSession()) TerminalTabStates.markOutput(changedSession);
+        TerminalTabTitles.onTextChanged(changedSession);
 
         if (!mActivity.isVisible()) return;
 
@@ -351,6 +353,13 @@ public class TermuxTerminalSessionClient extends TermuxTerminalSessionClientBase
     @SuppressLint("InflateParams")
     public void renameSession(final TerminalSession sessionToRename) {
         if (sessionToRename == null) return;
+
+        // Rename with the terminal tabs dialog, which can also reset the name.
+        TerminalTabsController terminalTabsController = mActivity.getTerminalTabsController();
+        if (terminalTabsController != null) {
+            terminalTabsController.showRenameDialog(sessionToRename);
+            return;
+        }
 
         TextInputDialogUtils.textInput(mActivity, R.string.title_rename_session, sessionToRename.mSessionName, R.string.action_rename_session_confirm, text -> {
             sessionToRename.mSessionName = text;

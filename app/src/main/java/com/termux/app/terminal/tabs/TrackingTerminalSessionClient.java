@@ -25,6 +25,7 @@ public class TrackingTerminalSessionClient extends TermuxTerminalSessionClientBa
     @Override
     public void onTextChanged(TerminalSession changedSession) {
         TerminalTabStates.markOutput(changedSession);
+        TerminalTabTitles.onTextChanged(changedSession);
     }
 
     @Override

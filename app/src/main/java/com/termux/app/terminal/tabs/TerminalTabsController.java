@@ -5,7 +5,11 @@ import android.graphics.Paint;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.util.TypedValue;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.EditText;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -65,6 +69,7 @@ public class TerminalTabsController {
     /** Reload the settings from the `termux.properties` file, like after `termux-reload-settings`. */
     public void reloadSettings() {
         TerminalTabsSettings.load();
+        TerminalTabTitles.clearAutoTitles();
         applySettings();
         refresh();
     }
@@ -128,7 +133,7 @@ public class TerminalTabsController {
 
     private void bindTab(View tabView, int index, TerminalSession session, boolean selected) {
         TextView titleView = tabView.findViewById(R.id.terminal_tab_title);
-        titleView.setText(getTabTitle(index, session));
+        titleView.setText(TerminalTabTitles.getNumberedLabel(index, session));
 
         // The current session is being displayed, so it has nothing unread.
         TerminalTabStates.State state = selected ? null : TerminalTabStates.get(session);
@@ -160,7 +165,11 @@ public class TerminalTabsController {
         titleView.setTextColor(ContextCompat.getColor(mActivity, colorId));
 
         tabView.setContentDescription(stateDescription == null ? titleView.getText() : titleView.getText() + ", " + stateDescription);
-        tabView.setOnClickListener(v -> getSessionClient().setCurrentSession(session));
+        // Tapping the tab of the current session renames it, since it is already displayed.
+        tabView.setOnClickListener(v -> {
+            if (session == mActivity.getCurrentSession()) showRenameDialog(session);
+            else getSessionClient().setCurrentSession(session);
+        });
         tabView.setOnLongClickListener(v -> {
             showTabMenu(index, session);
             return true;
@@ -170,12 +179,52 @@ public class TerminalTabsController {
         closeButton.setOnClickListener(v -> closeSession(session));
     }
 
-    @NonNull
-    private static String getTabTitle(int index, TerminalSession session) {
-        // Like the drawer sessions list: the session name if set, otherwise the title set by the program.
-        String label = !TextUtils.isEmpty(session.mSessionName) ? session.mSessionName : session.getTitle();
-        String number = "[" + (index + 1) + "]";
-        return TextUtils.isEmpty(label) ? number : number + " " + label;
+    /**
+     * Show a dialog to set the name of a session, which is shown on its tab and in the drawer
+     * instead of the title set by the program or the automatic title. The current name is selected
+     * so that it can be replaced by typing, the hint shows the title shown without a name, and
+     * the name can be reset to show that title again.
+     */
+    public void showRenameDialog(@Nullable TerminalSession session) {
+        if (session == null) return;
+
+        final EditText input = new EditText(mActivity);
+        input.setSingleLine();
+        if (!TextUtils.isEmpty(session.mSessionName)) {
+            input.setText(session.mSessionName);
+            input.selectAll();
+        }
+        String unnamedLabel = TerminalTabTitles.getUnnamedLabel(session);
+        if (!TextUtils.isEmpty(unnamedLabel)) input.setHint(unnamedLabel);
+
+        int padding = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16, mActivity.getResources().getDisplayMetrics()));
+        LinearLayout layout = new LinearLayout(mActivity);
+        layout.setPadding(padding, padding, padding, padding);
+        layout.addView(input, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+
+        final AlertDialog dialog = new AlertDialog.Builder(mActivity)
+            .setTitle(R.string.title_rename_session)
+            .setView(layout)
+            .setPositiveButton(R.string.action_rename_session_confirm, (d, which) -> setSessionName(session, input.getText().toString()))
+            .setNeutralButton(R.string.action_reset_terminal_tab_name, (d, which) -> setSessionName(session, null))
+            .setNegativeButton(android.R.string.cancel, null)
+            .create();
+        input.setOnEditorActionListener((v, actionId, event) -> {
+            setSessionName(session, input.getText().toString());
+            dialog.dismiss();
+            return true;
+        });
+        dialog.setCanceledOnTouchOutside(false);
+        Window window = dialog.getWindow();
+        if (window != null) window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+        dialog.show();
+        input.requestFocus();
+    }
+
+    private void setSessionName(@NonNull TerminalSession session, @Nullable String name) {
+        if (name != null) name = name.trim();
+        session.mSessionName = TextUtils.isEmpty(name) ? null : name;
+        mActivity.termuxSessionListNotifyUpdated();
     }
 
     private void scrollToTab(int index) {
@@ -201,7 +250,7 @@ public class TerminalTabsController {
         List<CharSequence> items = new ArrayList<>();
         List<Runnable> actions = new ArrayList<>();
         items.add(mActivity.getString(R.string.action_rename_terminal_tab));
-        actions.add(() -> getSessionClient().renameSession(session));
+        actions.add(() -> showRenameDialog(session));
         if (index > 0) {
             items.add(mActivity.getString(R.string.action_move_terminal_tab_left));
             actions.add(() -> moveSession(session, -1));

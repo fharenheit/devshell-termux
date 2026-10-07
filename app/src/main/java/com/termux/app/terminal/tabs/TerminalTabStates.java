@@ -88,7 +88,7 @@ public final class TerminalTabStates {
         return state;
     }
 
-    private static void notifyChanged() {
+    static void notifyChanged() {
         TerminalTabsController tabsController;
         synchronized (TerminalTabStates.class) {
             tabsController = sTabsController.get();
