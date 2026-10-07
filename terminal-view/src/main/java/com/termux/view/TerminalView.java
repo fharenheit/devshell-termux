@@ -95,6 +95,12 @@ public final class TerminalView extends View {
      */
     CharSequence mComposingText = "";
 
+    /**
+     * Incremented to make the input connections created before it was incremented ignore text the
+     * IME still sends them, see {@link #discardComposingText()}.
+     */
+    private int mInputConnectionGeneration = 0;
+
     /** The {@link Configuration#hardKeyboardHidden} value the current input connection was created with. */
     private int mHardKeyboardHidden = Configuration.HARDKEYBOARDHIDDEN_UNDEFINED;
 
@@ -297,6 +303,9 @@ public final class TerminalView extends View {
         if (session == mTermSession) return false;
         mTopRow = 0;
 
+        // Text being composed for the previous session is discarded and not sent to the new one.
+        if (mComposingText.length() > 0) discardComposingText();
+
         mTermSession = session;
         mEmulator = null;
         mCombiningAccent = 0;
@@ -354,11 +363,21 @@ public final class TerminalView extends View {
         // keyboard on Android TV (see https://github.com/termux/termux-app/issues/221).
         outAttrs.imeOptions = EditorInfo.IME_FLAG_NO_FULLSCREEN;
 
+        final int inputConnectionGeneration = mInputConnectionGeneration;
+
         return new BaseInputConnection(this, true) {
+
+            /** Whether text the IME sends should be dropped, since it was discarded by {@link #discardComposingText()}. */
+            boolean isDiscarded() {
+                if (inputConnectionGeneration == mInputConnectionGeneration) return false;
+                getEditable().clear();
+                return true;
+            }
 
             @Override
             public boolean finishComposingText() {
                 if (TERMINAL_VIEW_KEY_LOGGING_ENABLED) mClient.logInfo(LOG_TAG, "IME: finishComposingText()");
+                if (isDiscarded()) return true;
                 super.finishComposingText();
                 setComposingTextPreview("");
 
@@ -372,6 +391,7 @@ public final class TerminalView extends View {
                 if (TERMINAL_VIEW_KEY_LOGGING_ENABLED) {
                     mClient.logInfo(LOG_TAG, "IME: commitText(\"" + text + "\", " + newCursorPosition + ")");
                 }
+                if (isDiscarded()) return true;
                 super.commitText(text, newCursorPosition);
                 setComposingTextPreview("");
 
@@ -388,6 +408,7 @@ public final class TerminalView extends View {
                 if (TERMINAL_VIEW_KEY_LOGGING_ENABLED) {
                     mClient.logInfo(LOG_TAG, "IME: setComposingText(\"" + text + "\", " + newCursorPosition + ")");
                 }
+                if (isDiscarded()) return true;
                 super.setComposingText(text, newCursorPosition);
                 setComposingTextPreview(text);
                 return true;
@@ -552,6 +573,18 @@ public final class TerminalView extends View {
         if (TextUtils.equals(mComposingText, newText)) return;
         mComposingText = newText;
         invalidate();
+    }
+
+    /**
+     * Discard the text the IME is composing without sending it to the terminal, e.g. when switching
+     * sessions, by restarting input. The current input connection ignores the text the IME may still
+     * commit to it while finishing the old input.
+     */
+    void discardComposingText() {
+        setComposingTextPreview("");
+        mInputConnectionGeneration++;
+        InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm != null) imm.restartInput(this);
     }
 
     @Override
