@@ -1,0 +1,61 @@
+From 4a43f8cb379bbc2acee60d415dab26e20de4c69f Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Wed, 7 Oct 2026 15:30:58 +0000
+Subject: [PATCH] Added: Rename tabs by tapping the current tab and show
+ automatic tab titles
+
+Tapping the tab of the current session opens a rename dialog, which is
+also used from the tab menu, the drawer and Ctrl+Alt+R. It selects the
+current name, shows the title shown without a name as a hint and has a
+Reset button to remove the name.
+
+Tabs without a name or a title set by the program show an automatic
+title: the foreground process of the shell, like vim, read from the
+tpgid of /proc/<pid>/stat, or the shell working directory when the
+shell is in the foreground. It is checked when the session has output,
+at most once a second. The terminal-tab-auto-title = process | cwd | off
+property selects it, process by default.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01GLNsTPnn2xKUQ4uFcevT6G
+---
+ .../termux/app/terminal/TermuxTerminalSessionClient.java | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/app/src/main/java/com/termux/app/terminal/TermuxTerminalSessionClient.java b/app/src/main/java/com/termux/app/terminal/TermuxTerminalSessionClient.java
+index 0eb73f7..f56de6a 100644
+--- a/app/src/main/java/com/termux/app/terminal/TermuxTerminalSessionClient.java
++++ b/app/src/main/java/com/termux/app/terminal/TermuxTerminalSessionClient.java
+@@ -19,6 +19,7 @@ import com.termux.shared.interact.ShareUtils;
+ import com.termux.app.TermuxActivity;
+ import com.termux.app.terminal.tabs.TerminalSessionNotifications;
+ import com.termux.app.terminal.tabs.TerminalTabStates;
++import com.termux.app.terminal.tabs.TerminalTabTitles;
+ import com.termux.app.terminal.tabs.TerminalTabsController;
+ import com.termux.app.terminal.tabs.TerminalTabsSettings;
+ import com.termux.shared.terminal.TermuxTerminalSessionClientBase;
+@@ -119,6 +120,7 @@ public class TermuxTerminalSessionClient extends TermuxTerminalSessionClientBase
+     public void onTextChanged(TerminalSession changedSession) {
+         // Also record output of other sessions while the activity is not visible, to show on their tabs.
+         if (changedSession != mActivity.getCurrentSession()) TerminalTabStates.markOutput(changedSession);
++        TerminalTabTitles.onTextChanged(changedSession);
+ 
+         if (!mActivity.isVisible()) return;
+ 
+@@ -352,6 +354,13 @@ public class TermuxTerminalSessionClient extends TermuxTerminalSessionClientBase
+     public void renameSession(final TerminalSession sessionToRename) {
+         if (sessionToRename == null) return;
+ 
++        // Rename with the terminal tabs dialog, which can also reset the name.
++        TerminalTabsController terminalTabsController = mActivity.getTerminalTabsController();
++        if (terminalTabsController != null) {
++            terminalTabsController.showRenameDialog(sessionToRename);
++            return;
++        }
++
+         TextInputDialogUtils.textInput(mActivity, R.string.title_rename_session, sessionToRename.mSessionName, R.string.action_rename_session_confirm, text -> {
+             sessionToRename.mSessionName = text;
+             termuxSessionListNotifyUpdated();
+-- 
+2.43.0
+

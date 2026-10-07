@@ -1,6 +1,6 @@
 # 터미널 탭 설계 (여러 세션을 백그라운드로 유지하는 탭 UI)
 
-상태: 1단계(`custom/patches/0004-*`, `0005-*`), 2단계(`0007-*`), 3단계(`0008-*`), 4단계(`0009-*`, 종료/벨 알림만) 구현됨.
+상태: 1단계(`custom/patches/0004-*`, `0005-*`), 2단계(`0007-*`), 3단계(`0008-*`), 4단계(`0009-*`, 종료/벨 알림만), 탭 이름(`0010-*`) 구현됨.
 
 ## 1. 현재 구조
 
@@ -135,15 +135,38 @@ TerminalTabStates 상태 변화 → TerminalTabsController.refresh()  (탭 수�
 
 | 동작 | 결과 |
 |---|---|
-| 탭 터치 | `setCurrentSession` |
-| 탭 길게 누르기 | 메뉴: 이름 바꾸기 / 닫기 / 프로세스 강제 종료 / 왼쪽·오른쪽으로 이동 |
+| 탭 터치 | `setCurrentSession`. 이미 선택된 탭을 누르면 이름 바꾸기 대화상자 |
+| 탭 길게 누르기 | 메뉴: 이름 바꾸기 / 왼쪽·오른쪽으로 이동 / 닫기 |
 | × | 실행 중이면 확인 대화상자 후 `finishIfRunning()`, 프로세스가 끝나면 종료 코드와 상관없이 탭을 제거. 이미 종료된 세션은 바로 `removeFinishedSession` |
 | `+` | `addNewSession(false, null)`. 길게 누르면 기존 드로어 버튼처럼 이름 있는 세션/failsafe 대화상자 |
-| 탭 바에서 위로 스와이프 | (선택) 탭 바 숨기기 |
-| 탭 제목 | `[번호] 이름` 또는 `getTitle()`. 최대 너비를 정하고 넘치면 말줄임 |
+| 탭 제목 | `[번호] 라벨`(5.1). 최대 너비 160dp, 넘치면 말줄임 |
 | 상태 표시 | 새 출력 ●(회색), 벨 🔔(강조색), 종료 코드 0이면 취소선, 0이 아니면 빨간 취소선(드로어와 같은 규칙) |
 
 탭 순서 바꾸기는 탭을 길게 눌렀을 때 나오는 메뉴의 "Move left"/"Move right"로 합니다(3단계). `getTermuxSessions()`가 돌려주는 리스트를 `synchronized (service)` 안에서 `Collections.swap`하면 됩니다. 이 리스트는 드로어 어댑터가 쓰는 리스트와 같은 객체라서 드로어 순서도 같이 바뀝니다. 업스트림 코드는 바꿀 필요가 없습니다.
+
+### 5.1 탭 이름
+
+탭 라벨은 다음 순서로 정합니다(`TerminalTabTitles.getLabel`). 알림 제목도 같은 라벨을 씁니다.
+
+1. 사용자가 붙인 이름(`TerminalSession.mSessionName`)
+2. 프로그램이 OSC 0/2(`printf '\e]0;제목\a'`)로 정한 제목(`TerminalSession.getTitle()`)
+3. 자동 제목(`terminal-tab-auto-title`)
+   - `process`(기본): 셸의 foreground 프로세스 이름(`vim`, `ssh` 등). 셸 자신이 foreground이면 작업 폴더 이름(홈은 `~`)
+   - `cwd`: 항상 작업 폴더 이름
+   - `off`: 번호만
+
+**이름 바꾸기 대화상자**(`TerminalTabsController.showRenameDialog`)
+- 여는 방법: 선택된 탭 다시 누르기, 탭 길게 누르기 → Rename, 드로어 길게 누르기, `Ctrl+Alt+R`. 업스트림 `renameSession()`이 이 대화상자로 넘깁니다.
+- 현재 이름이 전체 선택된 채로 열리고 키보드가 바로 뜹니다.
+- 입력칸 힌트에는 이름이 없을 때 보일 라벨(2나 3)을 보여 줍니다.
+- `Reset` 버튼이나 빈 이름으로 저장하면 이름을 지우고 2나 3으로 돌아갑니다.
+
+**자동 제목 구현**(`TerminalTabTitles`)
+- `/proc/<셸 pid>/stat`의 `tpgid`(터미널의 foreground 프로세스 그룹)를 읽고, 그 값이 셸 pid가 아니면 `/proc/<tpgid>/comm`을 읽습니다.
+- `comm`에 공백이나 괄호가 들어갈 수 있으므로 필드는 마지막 `)` 뒤에서 셉니다.
+- 세션에 출력이 있을 때 세션마다 최대 1초에 한 번 확인합니다. 마지막 출력이 직전 확인 바로 뒤에 오면 1초 뒤에 한 번 더 확인해서, 프로그램이 끝나고 프롬프트가 나온 뒤 제목이 남아 있지 않게 합니다.
+- 바뀌었을 때만 탭을 다시 그립니다. 종료된 세션은 마지막 제목을 유지합니다.
+- 드로어 목록은 업스트림 코드 그대로라 자동 제목을 보여 주지 않습니다.
 
 ## 6. 설정 (`~/.termux/termux.properties`, 3단계)
 
@@ -151,6 +174,8 @@ TerminalTabStates 상태 변화 → TerminalTabsController.refresh()  (탭 수�
 terminal-tabs = top              # top | bottom | off   (기본 top)
 terminal-tabs-show-close = true  # 탭의 × 버튼 표시 (기본 true)
 max-sessions = 8                 # 1..32 (기본 8, 업스트림의 MAX_SESSIONS와 같음)
+terminal-session-notifications = all  # all | exit | bell | off (4단계)
+terminal-tab-auto-title = process     # process | cwd | off (5.1)
 ```
 
 - `termux-reload-settings`로 바로 반영됩니다(`TermuxActivity.reloadActivityStyling` → `TerminalTabsController.reloadSettings`).
@@ -192,6 +217,7 @@ max-sessions = 8                 # 1..32 (기본 8, 업스트림의 MAX_SESSIONS
 | 2 ✅ | 새 출력/벨 표시 + 액티비티 없을 때 추적, 토스트 정리 | SessionClient, Service(한 줄), Activity |
 | 3 ✅ | `termux.properties` 설정(`terminal-tabs`, `terminal-tabs-show-close`, `max-sessions`), 순서 바꾸기 | Activity, SessionClient (properties 클래스는 고치지 않음) |
 | 4 ✅ | 백그라운드 종료/벨 알림 (서비스 알림 요약은 하지 않음) | Activity, SessionClient, Service(생성자 인자) |
+| 탭 이름 ✅ | 선택된 탭 다시 눌러 이름 바꾸기, 이름 대화상자 개선, 자동 제목(5.1) | SessionClient(`renameSession`, `onTextChanged`) |
 
 각 단계는 커밋한 뒤 `custom/update-patches.sh`로 패치를 다시 만들고, `custom/README.md` 수정 사항 표에 항목을 추가합니다.
 
