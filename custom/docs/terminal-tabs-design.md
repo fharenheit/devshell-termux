@@ -1,6 +1,6 @@
 # 터미널 탭 설계 (여러 세션을 백그라운드로 유지하는 탭 UI)
 
-상태: 1단계(`custom/patches/0004-*`, `0005-*`)와 2단계(`0007-*`) 구현됨. 3단계부터는 설계 단계입니다.
+상태: 1단계(`custom/patches/0004-*`, `0005-*`), 2단계(`0007-*`), 3단계(`0008-*`) 구현됨. 4단계(선택)는 설계 단계입니다.
 
 ## 1. 현재 구조
 
@@ -143,18 +143,21 @@ TerminalTabStates 상태 변화 → TerminalTabsController.refresh()  (탭 수�
 | 탭 제목 | `[번호] 이름` 또는 `getTitle()`. 최대 너비를 정하고 넘치면 말줄임 |
 | 상태 표시 | 새 출력 ●(회색), 벨 🔔(강조색), 종료 코드 0이면 취소선, 0이 아니면 빨간 취소선(드로어와 같은 규칙) |
 
-탭 순서 바꾸기는 `getTermuxSessions()`가 돌려주는 리스트를 `synchronized (service)` 안에서 `Collections.swap`하면 됩니다. 이 리스트는 드로어 어댑터가 쓰는 리스트와 같은 객체라서 드로어 순서도 같이 바뀝니다. 업스트림 코드는 바꿀 필요가 없습니다.
+탭 순서 바꾸기는 탭을 길게 눌렀을 때 나오는 메뉴의 "Move left"/"Move right"로 합니다(3단계). `getTermuxSessions()`가 돌려주는 리스트를 `synchronized (service)` 안에서 `Collections.swap`하면 됩니다. 이 리스트는 드로어 어댑터가 쓰는 리스트와 같은 객체라서 드로어 순서도 같이 바뀝니다. 업스트림 코드는 바꿀 필요가 없습니다.
 
-## 6. 설정 (`~/.termux/termux.properties`, 2단계)
+## 6. 설정 (`~/.termux/termux.properties`, 3단계)
 
 ```properties
-terminal-tabs = top          # top | bottom | off   (기본 top)
-max-sessions = 16            # 기본 8, 범위 1..32 → MAX_SESSIONS 대체
-terminal-tabs-show-close = true
+terminal-tabs = top              # top | bottom | off   (기본 top)
+terminal-tabs-show-close = true  # 탭의 × 버튼 표시 (기본 true)
+max-sessions = 8                 # 1..32 (기본 8, 업스트림의 MAX_SESSIONS와 같음)
 ```
 
-`termux-reload-settings`로 바뀐 값이 반영되어야 합니다(`TermuxActivity.onReload`).
-1단계에서는 상수로 시작해서 업스트림 properties 클래스 패치를 2단계로 미룰 수 있습니다.
+- `termux-reload-settings`로 바로 반영됩니다(`TermuxActivity.reloadActivityStyling` → `TerminalTabsController.reloadSettings`).
+- 업스트림 properties 클래스(`TermuxPropertyConstants`, `TermuxSharedProperties`)는 고치지 않았습니다. 그 클래스의 메모리 캐시에는 업스트림이 정의한 키만 들어가므로, 포크 전용 `TerminalTabsSettings`가 `SharedProperties.getPropertiesFromFile()`로 파일을 직접 읽습니다.
+- 잘못된 값은 로그를 남기고 기본값을 씁니다.
+- `terminal-tabs = off`이면 탭 바를 숨기고, 세션 전환/제목 변경 토스트를 다시 보여 줍니다.
+- `max-sessions`는 앱에서 새 세션을 만들 때(`addNewSession`)만 제한합니다. 플러그인이 만드는 세션은 업스트림처럼 제한하지 않습니다.
 
 ## 7. 백그라운드 동작
 
@@ -179,7 +182,7 @@ terminal-tabs-show-close = true
 |---|---|---|
 | 1 ✅ | 탭 바(전환, 새로 만들기, 닫기, 이름 바꾸기), 드로어와 동기화, 세션 전환 시 조합 중인 글자 버리기 | layout, Activity, SessionClient, TerminalView |
 | 2 ✅ | 새 출력/벨 표시 + 액티비티 없을 때 추적, 토스트 정리 | SessionClient, Service(한 줄), Activity |
-| 3 | `termux.properties` 설정(`terminal-tabs`, `max-sessions`), 순서 바꾸기 | properties 클래스 |
+| 3 ✅ | `termux.properties` 설정(`terminal-tabs`, `terminal-tabs-show-close`, `max-sessions`), 순서 바꾸기 | Activity, SessionClient (properties 클래스는 고치지 않음) |
 | 4 (선택) | 알림 요약, 백그라운드 종료/벨 알림 | Service |
 
 각 단계는 커밋한 뒤 `custom/update-patches.sh`로 패치를 다시 만들고, `custom/README.md` 수정 사항 표에 항목을 추가합니다.

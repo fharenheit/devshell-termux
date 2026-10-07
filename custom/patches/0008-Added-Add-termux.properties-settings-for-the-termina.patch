@@ -1,0 +1,79 @@
+From bb778942690e0c6a6f17c03c21212378073e5d59 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Wed, 7 Oct 2026 15:02:32 +0000
+Subject: [PATCH] Added: Add termux.properties settings for the terminal tabs
+ and moving tabs
+
+- terminal-tabs = top | bottom | off: where to show the tab bar, or hide it
+- terminal-tabs-show-close = true | false: whether tabs have a close button
+- max-sessions = 1..32: the maximum number of sessions, 8 by default like before
+
+The settings are read from the properties file by the fork-only
+TerminalTabsSettings and reloaded by termux-reload-settings. Toasts for
+switching sessions and title changes are shown again when the tab bar is
+off. A tab's long press menu can also move it left or right, which
+changes the order of the sessions in the drawer too.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01GLNsTPnn2xKUQ4uFcevT6G
+---
+ app/src/main/java/com/termux/app/TermuxActivity.java         | 5 ++++-
+ .../com/termux/app/terminal/TermuxTerminalSessionClient.java | 5 ++---
+ 2 files changed, 6 insertions(+), 4 deletions(-)
+
+diff --git a/app/src/main/java/com/termux/app/TermuxActivity.java b/app/src/main/java/com/termux/app/TermuxActivity.java
+index 9f1d444..43b0e33 100644
+--- a/app/src/main/java/com/termux/app/TermuxActivity.java
++++ b/app/src/main/java/com/termux/app/TermuxActivity.java
+@@ -807,7 +807,7 @@ public final class TermuxActivity extends Activity implements ServiceConnection
+ 
+     /** Whether the terminal tabs show the sessions, their titles and states, so toasts for them are not needed. */
+     public boolean areTerminalTabsShown() {
+-        return mTerminalTabsController != null;
++        return mTerminalTabsController != null && mTerminalTabsController.isShown();
+     }
+ 
+     public boolean isVisible() {
+@@ -920,6 +920,9 @@ public final class TermuxActivity extends Activity implements ServiceConnection
+         setMargins();
+         setTerminalToolbarHeight();
+ 
++        if (mTerminalTabsController != null)
++            mTerminalTabsController.reloadSettings();
++
+         if (mTermuxTerminalSessionClient != null)
+             mTermuxTerminalSessionClient.onReload();
+ 
+diff --git a/app/src/main/java/com/termux/app/terminal/TermuxTerminalSessionClient.java b/app/src/main/java/com/termux/app/terminal/TermuxTerminalSessionClient.java
+index b92cd19..18cfc6a 100644
+--- a/app/src/main/java/com/termux/app/terminal/TermuxTerminalSessionClient.java
++++ b/app/src/main/java/com/termux/app/terminal/TermuxTerminalSessionClient.java
+@@ -19,6 +19,7 @@ import com.termux.shared.interact.ShareUtils;
+ import com.termux.app.TermuxActivity;
+ import com.termux.app.terminal.tabs.TerminalTabStates;
+ import com.termux.app.terminal.tabs.TerminalTabsController;
++import com.termux.app.terminal.tabs.TerminalTabsSettings;
+ import com.termux.shared.terminal.TermuxTerminalSessionClientBase;
+ import com.termux.shared.termux.TermuxConstants;
+ import com.termux.app.TermuxService;
+@@ -38,8 +39,6 @@ public class TermuxTerminalSessionClient extends TermuxTerminalSessionClientBase
+ 
+     private final TermuxActivity mActivity;
+ 
+-    private static final int MAX_SESSIONS = 8;
+-
+     private SoundPool mBellSoundPool;
+ 
+     private int mBellSoundId;
+@@ -356,7 +355,7 @@ public class TermuxTerminalSessionClient extends TermuxTerminalSessionClientBase
+         TermuxService service = mActivity.getTermuxService();
+         if (service == null) return;
+ 
+-        if (service.getTermuxSessionsSize() >= MAX_SESSIONS) {
++        if (service.getTermuxSessionsSize() >= TerminalTabsSettings.getMaxSessions()) {
+             new AlertDialog.Builder(mActivity).setTitle(R.string.title_max_terminals_reached).setMessage(R.string.msg_max_terminals_reached)
+                 .setPositiveButton(android.R.string.ok, null).show();
+         } else {
+-- 
+2.43.0
+
