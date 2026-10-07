@@ -17,6 +17,7 @@ import com.termux.shared.shell.TermuxSession;
 import com.termux.shared.interact.TextInputDialogUtils;
 import com.termux.shared.interact.ShareUtils;
 import com.termux.app.TermuxActivity;
+import com.termux.app.terminal.tabs.TerminalSessionNotifications;
 import com.termux.app.terminal.tabs.TerminalTabStates;
 import com.termux.app.terminal.tabs.TerminalTabsController;
 import com.termux.app.terminal.tabs.TerminalTabsSettings;
@@ -167,6 +168,9 @@ public class TermuxTerminalSessionClient extends TermuxTerminalSessionClientBase
                 Logger.logVerbose(LOG_TAG, "The \"" + finishedSession.mSessionName + "\" session will be force finished automatically since result in pending.");
         }
 
+        if (!mActivity.isVisible() && !isPluginExecutionCommandWithPendingResult)
+            TerminalSessionNotifications.onSessionFinished(mActivity.getApplicationContext(), service, finishedSession);
+
         if (mActivity.isVisible() && finishedSession != mActivity.getCurrentSession()) {
             // Show toast for non-current sessions that exit.
             // Verify that session was not removed before we got told about it finishing:
@@ -212,7 +216,10 @@ public class TermuxTerminalSessionClient extends TermuxTerminalSessionClientBase
     public void onBell(TerminalSession session) {
         if (session != mActivity.getCurrentSession()) TerminalTabStates.markBell(session);
 
-        if (!mActivity.isVisible()) return;
+        if (!mActivity.isVisible()) {
+            TerminalSessionNotifications.onBell(mActivity.getApplicationContext(), mActivity.getTermuxService(), session);
+            return;
+        }
 
         switch (mActivity.getProperties().getBellBehaviour()) {
             case TermuxPropertyConstants.IVALUE_BELL_BEHAVIOUR_VIBRATE:

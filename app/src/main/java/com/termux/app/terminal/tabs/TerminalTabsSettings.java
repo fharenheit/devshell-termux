@@ -19,6 +19,7 @@ import java.util.Properties;
  * terminal-tabs = top                # top | bottom | off
  * terminal-tabs-show-close = true    # true | false
  * max-sessions = 8                   # 1..32
+ * terminal-session-notifications = all  # all | exit | bell | off
  * </pre>
  */
 public final class TerminalTabsSettings {
@@ -36,11 +37,19 @@ public final class TerminalTabsSettings {
     public static final int MIN_MAX_SESSIONS = 1;
     public static final int MAX_MAX_SESSIONS = 32;
 
+    /** Notify when sessions exit or ring the bell while the activity is not visible, see {@link TerminalSessionNotifications}. */
+    public static final String KEY_TERMINAL_SESSION_NOTIFICATIONS = "terminal-session-notifications";
+    public static final String VALUE_NOTIFICATIONS_ALL = "all";
+    public static final String VALUE_NOTIFICATIONS_EXIT = "exit";
+    public static final String VALUE_NOTIFICATIONS_BELL = "bell";
+    public static final String VALUE_NOTIFICATIONS_OFF = "off";
+
     private static final String LOG_TAG = "TerminalTabsSettings";
 
     private static volatile String sTerminalTabs = VALUE_TERMINAL_TABS_TOP;
     private static volatile boolean sShowCloseButton = true;
     private static volatile int sMaxSessions = DEFAULT_MAX_SESSIONS;
+    private static volatile String sSessionNotifications = VALUE_NOTIFICATIONS_ALL;
 
     private TerminalTabsSettings() {}
 
@@ -55,6 +64,7 @@ public final class TerminalTabsSettings {
         sShowCloseButton = SharedProperties.getBooleanValueForStringValue(KEY_TERMINAL_TABS_SHOW_CLOSE,
             getValue(properties, KEY_TERMINAL_TABS_SHOW_CLOSE), true, true, LOG_TAG);
         sMaxSessions = getMaxSessions(getValue(properties, KEY_MAX_SESSIONS));
+        sSessionNotifications = getSessionNotifications(getValue(properties, KEY_TERMINAL_SESSION_NOTIFICATIONS));
     }
 
     /** Get the value of a key with trailing whitespace removed, which {@link Properties#load} keeps. */
@@ -75,6 +85,22 @@ public final class TerminalTabsSettings {
             default:
                 Logger.logError(LOG_TAG, "Invalid value \"" + value + "\" for the \"" + KEY_TERMINAL_TABS + "\" property, using \"" + VALUE_TERMINAL_TABS_TOP + "\"");
                 return VALUE_TERMINAL_TABS_TOP;
+        }
+    }
+
+    @NonNull
+    private static String getSessionNotifications(String value) {
+        if (value == null) return VALUE_NOTIFICATIONS_ALL;
+        value = value.toLowerCase();
+        switch (value) {
+            case VALUE_NOTIFICATIONS_ALL:
+            case VALUE_NOTIFICATIONS_EXIT:
+            case VALUE_NOTIFICATIONS_BELL:
+            case VALUE_NOTIFICATIONS_OFF:
+                return value;
+            default:
+                Logger.logError(LOG_TAG, "Invalid value \"" + value + "\" for the \"" + KEY_TERMINAL_SESSION_NOTIFICATIONS + "\" property, using \"" + VALUE_NOTIFICATIONS_ALL + "\"");
+                return VALUE_NOTIFICATIONS_ALL;
         }
     }
 
@@ -104,6 +130,16 @@ public final class TerminalTabsSettings {
     /** Whether tabs have a close button. */
     public static boolean shouldShowCloseButton() {
         return sShowCloseButton;
+    }
+
+    /** Whether to notify when a session exits while the activity is not visible. */
+    public static boolean areExitNotificationsEnabled() {
+        return VALUE_NOTIFICATIONS_ALL.equals(sSessionNotifications) || VALUE_NOTIFICATIONS_EXIT.equals(sSessionNotifications);
+    }
+
+    /** Whether to notify when a session rings the bell while the activity is not visible. */
+    public static boolean areBellNotificationsEnabled() {
+        return VALUE_NOTIFICATIONS_ALL.equals(sSessionNotifications) || VALUE_NOTIFICATIONS_BELL.equals(sSessionNotifications);
     }
 
     /** The maximum number of sessions that can be created from the app. */

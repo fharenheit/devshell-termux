@@ -103,7 +103,7 @@ public final class TermuxService extends Service implements TermuxTask.TermuxTas
     /** The basic implementation of the {@link TerminalSessionClient} interface to be used by {@link TerminalSession}
      * that does not hold activity references.
      */
-    final TermuxTerminalSessionClientBase mTermuxTerminalSessionClientBase = new TrackingTerminalSessionClient();
+    final TermuxTerminalSessionClientBase mTermuxTerminalSessionClientBase = new TrackingTerminalSessionClient(this);
 
     /** The wake lock and wifi lock are always acquired and released together. */
     private PowerManager.WakeLock mWakeLock;

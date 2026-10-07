@@ -23,4 +23,9 @@
     <string name="terminal_tab_indicator_bell" translatable="false">🔔</string>
     <string name="terminal_tab_state_output">new output</string>
     <string name="terminal_tab_state_bell">bell</string>
+
+    <string name="notification_terminal_session_bell">Bell</string>
+    <string name="notification_terminal_session_exited">Exited</string>
+    <string name="notification_terminal_session_exited_code">Exited (code %1$d)</string>
+    <string name="notification_terminal_session_exited_signal">Exited (signal %1$d)</string>
 </resources>

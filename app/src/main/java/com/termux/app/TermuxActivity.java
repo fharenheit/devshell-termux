@@ -41,6 +41,7 @@ import com.termux.app.activities.HelpActivity;
 import com.termux.app.activities.SettingsActivity;
 import com.termux.shared.settings.preferences.TermuxAppSharedPreferences;
 import com.termux.app.terminal.TermuxSessionsListViewController;
+import com.termux.app.terminal.tabs.TerminalSessionNotifications;
 import com.termux.app.terminal.tabs.TerminalTabsController;
 import com.termux.app.terminal.io.TerminalToolbarViewPager;
 import com.termux.app.terminal.TermuxTerminalSessionClient;
@@ -246,6 +247,9 @@ public final class TermuxActivity extends Activity implements ServiceConnection 
 
         registerForContextMenu(mTerminalView);
 
+        // Show the session of the notification the activity was opened from.
+        TerminalSessionNotifications.handleIntent(this, getIntent());
+
         // Start the {@link TermuxService} and make it run regardless of who is bound to it
         Intent serviceIntent = new Intent(this, TermuxService.class);
         startService(serviceIntent);
@@ -258,6 +262,15 @@ public final class TermuxActivity extends Activity implements ServiceConnection 
         // Send the {@link TermuxConstants#BROADCAST_TERMUX_OPENED} broadcast to notify apps that Termux
         // app has been opened.
         TermuxUtils.sendTermuxOpenedBroadcast(this);
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+
+        // Show the session of the notification the activity was brought to front from.
+        if (!mIsInvalidState)
+            TerminalSessionNotifications.handleIntent(this, intent);
     }
 
     @Override
