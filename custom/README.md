@@ -16,6 +16,7 @@
 | 선택된 탭을 다시 눌러 이름 바꾸기(Reset으로 이름 지우기), 이름 없는 탭에 실행 중인 프로그램/작업 폴더 표시(`terminal-tab-auto-title = process/cwd/off`) | `custom/patches/0010-*.patch` (`TermuxTerminalSessionClient.java`) + `app/.../terminal/tabs/TerminalTabTitles.java` |
 | 탭 바의 ⚙ 메뉴(설정, 세션 목록, 키보드, `termux.properties` 편집, 설정 다시 읽기) | 포크 전용 파일만 (`app/.../terminal/tabs/TerminalTabsController.java`, `view_terminal_tabs.xml`, `ic_terminal_tab_settings.xml`) |
 | 내장 글꼴 목록에서 터미널 글꼴 선택(⚙ 메뉴 → Font, 설정 → Terminal View → Font). 고른 글꼴을 `~/.termux/font.ttf`로 복사, 기본(D2Coding)은 `font.ttf` 삭제, 직접 넣은 `font.ttf`는 `font.ttf.bak`으로 백업. 내장: D2Coding ligature, NanumGothicCoding, Sarasa Mono K, Noto Sans Mono CJK KR, JetBrains Mono, Fira Code, Hack, Source Code Pro | `custom/patches/0011-*.patch` (`TerminalViewPreferencesFragment.java`, `termux_terminal_view_preferences.xml`, `TermuxTerminalSessionClient.java`) + `app/.../terminal/fonts/`, `app/src/main/assets/fonts/` |
+| SSH 접속 관리(⚙ 메뉴 → SSH): 호스트 등록/수정/삭제, 탭으로 접속, Disconnect/Reconnect, 비밀번호 암호화 저장, 키 생성/복사, `ssh-copy-id`. 자세한 내용은 `custom/docs/ssh.md` | 포크 전용 파일만 (`app/.../terminal/ssh/`, `fork_ssh.xml`, `TerminalTabsController.java`) |
 | 세션을 바꿀 때 IME가 조합 중인 글자(한글)를 버림 | `custom/patches/0005-*.patch` (`TerminalView.java`) |
 | 기본 extra keys에 ENTER(PGUP 오른쪽), KEYBOARD(PGDN 오른쪽, 키보드 표시/숨기기) 버튼 추가 | `custom/patches/0006-*.patch` (`TermuxPropertyConstants.java`) |
 | README 상단 안내 문구 | `custom/patches/0003-*.patch` (`README.md`) |

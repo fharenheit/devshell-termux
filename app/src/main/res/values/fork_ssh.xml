@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Strings of the SSH hosts dialogs. Kept out of upstream files to keep patches small. -->
+<resources>
+    <string name="action_terminal_tabs_menu_ssh">SSH</string>
+
+    <string name="title_ssh_hosts">SSH hosts</string>
+    <string name="title_ssh_add_host">Add SSH host</string>
+    <string name="title_ssh_edit_host">Edit SSH host</string>
+    <string name="title_ssh_keys">SSH keys</string>
+    <string name="title_ssh_choose_key">Choose the public key</string>
+    <string name="title_ssh_generate_key">Generate SSH key</string>
+
+    <string name="action_ssh_add_host">Add host</string>
+    <string name="action_ssh_keys">Keys</string>
+    <string name="action_ssh_close">Close</string>
+    <string name="action_ssh_connect">Connect</string>
+    <string name="action_ssh_edit_host">Edit</string>
+    <string name="action_ssh_delete_host">Delete</string>
+    <string name="action_ssh_copy_id">Install public key (ssh-copy-id)</string>
+    <string name="action_ssh_generate_key">Generate key</string>
+    <string name="action_ssh_save">Save</string>
+    <string name="action_ssh_disconnect">Disconnect</string>
+    <string name="action_ssh_reconnect">Reconnect</string>
+
+    <string name="ssh_field_name">Name (used as `ssh name`)</string>
+    <string name="ssh_field_host">Host</string>
+    <string name="ssh_field_port">Port</string>
+    <string name="ssh_field_user">User</string>
+    <string name="ssh_field_password">Password</string>
+    <string name="ssh_field_identity_file">Private key file (optional)</string>
+    <string name="ssh_field_startup_command">Command to run after connecting (optional)</string>
+    <string name="ssh_field_extra_options">More ssh_config options (optional, one per line)</string>
+    <string name="ssh_password_hint">Optional. Saved encrypted in the app.</string>
+    <string name="ssh_password_keep_hint">Saved. Leave empty to keep it.</string>
+    <string name="ssh_remove_saved_password">Remove the saved password</string>
+    <string name="ssh_password_saved">password saved</string>
+    <string name="ssh_host_from_config">from ~/.ssh/config</string>
+
+    <string name="ssh_error_name">Use only letters, digits, and . _ - @</string>
+    <string name="ssh_error_name_exists">A host with this name already exists</string>
+    <string name="ssh_error_host">Enter the host name or address</string>
+    <string name="ssh_error_port">Enter a port from 1 to 65535</string>
+
+    <string name="msg_ssh_no_hosts">No SSH hosts yet. Add one with Add host.\n\nConnecting needs the openssh package: pkg install openssh</string>
+    <string name="msg_ssh_confirm_delete_host">Delete the %1$s host and its saved password?</string>
+    <string name="msg_ssh_save_failed">Failed to save the SSH hosts: %1$s</string>
+    <string name="msg_ssh_password_not_saved">Failed to save the password</string>
+    <string name="msg_ssh_no_keys">No SSH keys in ~/.ssh yet.</string>
+    <string name="msg_ssh_key_copied">Copied %1$s to the clipboard</string>
+    <string name="msg_ssh_generate_key">An ed25519 key is generated in ~/.ssh with this file name. ssh-keygen asks for an optional passphrase in a new tab.</string>
+</resources>

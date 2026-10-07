@@ -29,6 +29,8 @@ import com.termux.app.activities.SettingsActivity;
 import com.termux.app.terminal.TermuxTerminalSessionClient;
 import com.termux.app.terminal.fonts.TerminalFontDialog;
 import com.termux.app.terminal.fonts.TerminalFonts;
+import com.termux.app.terminal.ssh.SshConnector;
+import com.termux.app.terminal.ssh.SshHostsDialog;
 import com.termux.shared.settings.properties.TermuxPropertyConstants;
 import com.termux.shared.shell.TermuxSession;
 import com.termux.shared.termux.TermuxConstants;
@@ -114,11 +116,13 @@ public class TerminalTabsController {
     private static final int MENU_EDIT_PROPERTIES = 4;
     private static final int MENU_RELOAD_SETTINGS = 5;
     private static final int MENU_FONT = 6;
+    private static final int MENU_SSH = 7;
 
     /** Show the menu of the settings button of the tab bar. */
     private void showMenu(View anchor) {
         PopupMenu popupMenu = new PopupMenu(mActivity, anchor);
         Menu menu = popupMenu.getMenu();
+        menu.add(Menu.NONE, MENU_SSH, Menu.NONE, R.string.action_terminal_tabs_menu_ssh);
         menu.add(Menu.NONE, MENU_SETTINGS, Menu.NONE, R.string.action_terminal_tabs_menu_settings);
         menu.add(Menu.NONE, MENU_SESSIONS, Menu.NONE, R.string.action_terminal_tabs_menu_sessions);
         menu.add(Menu.NONE, MENU_KEYBOARD, Menu.NONE, R.string.action_terminal_tabs_menu_keyboard);
@@ -135,6 +139,9 @@ public class TerminalTabsController {
                     return true;
                 case MENU_KEYBOARD:
                     mActivity.getTermuxTerminalViewClient().onToggleSoftKeyboardRequest();
+                    return true;
+                case MENU_SSH:
+                    SshHostsDialog.show(mActivity);
                     return true;
                 case MENU_FONT:
                     TerminalFontDialog.show(mActivity, () -> {
@@ -164,15 +171,6 @@ public class TerminalTabsController {
      * editor exits, and the session is then removed since it exits normally.
      */
     private void editPropertiesFile() {
-        TermuxService service = mActivity.getTermuxService();
-        if (service == null) return;
-
-        if (service.getTermuxSessionsSize() >= TerminalTabsSettings.getMaxSessions()) {
-            new AlertDialog.Builder(mActivity).setTitle(R.string.title_max_terminals_reached).setMessage(R.string.msg_max_terminals_reached)
-                .setPositiveButton(android.R.string.ok, null).show();
-            return;
-        }
-
         File propertiesFile = TermuxPropertyConstants.getTermuxPropertiesFile();
         String path = propertiesFile != null ? propertiesFile.getAbsolutePath() : TermuxConstants.TERMUX_PROPERTIES_PRIMARY_FILE_PATH;
 
@@ -188,13 +186,41 @@ public class TerminalTabsController {
             "echo \"No editor found. Install one with: pkg install nano\"\n" +
             "exit 1\n";
 
+        startScriptSession(propertiesFile != null ? propertiesFile.getName() : "termux.properties", script, path);
+    }
+
+    /**
+     * Start a new session that runs a shell script, in the home directory, and switch to it.
+     * The script gets the arguments as `$1`, `$2`, ... Shows the max sessions dialog instead if
+     * there are too many sessions.
+     *
+     * @return The new session, or {@code null} if it was not started.
+     */
+    @Nullable
+    public TerminalSession startScriptSession(@NonNull String sessionName, @NonNull String script, @NonNull String... arguments) {
+        TermuxService service = mActivity.getTermuxService();
+        if (service == null) return null;
+
+        if (service.getTermuxSessionsSize() >= TerminalTabsSettings.getMaxSessions()) {
+            new AlertDialog.Builder(mActivity).setTitle(R.string.title_max_terminals_reached).setMessage(R.string.msg_max_terminals_reached)
+                .setPositiveButton(android.R.string.ok, null).show();
+            return null;
+        }
+
         File termuxShell = new File(TermuxConstants.TERMUX_BIN_PREFIX_DIR_PATH, "sh");
         String shell = termuxShell.canExecute() ? termuxShell.getAbsolutePath() : "/system/bin/sh";
 
-        TermuxSession termuxSession = service.createTermuxSession(shell, new String[]{"-c", script, "sh", path},
-            null, TermuxConstants.TERMUX_HOME_DIR_PATH, false, propertiesFile != null ? propertiesFile.getName() : "termux.properties");
-        if (termuxSession == null) return;
+        String[] shellArguments = new String[arguments.length + 3];
+        shellArguments[0] = "-c";
+        shellArguments[1] = script;
+        shellArguments[2] = "sh";
+        System.arraycopy(arguments, 0, shellArguments, 3, arguments.length);
+
+        TermuxSession termuxSession = service.createTermuxSession(shell, shellArguments,
+            null, TermuxConstants.TERMUX_HOME_DIR_PATH, false, sessionName);
+        if (termuxSession == null) return null;
         getSessionClient().setCurrentSession(termuxSession.getTerminalSession());
+        return termuxSession.getTerminalSession();
     }
 
     /** Called when the session displayed in the terminal has changed or may have changed. */
@@ -351,6 +377,15 @@ public class TerminalTabsController {
 
         List<CharSequence> items = new ArrayList<>();
         List<Runnable> actions = new ArrayList<>();
+        if (SshConnector.isSshSession(session)) {
+            if (session.isRunning()) {
+                items.add(mActivity.getString(R.string.action_ssh_disconnect));
+                actions.add(() -> SshConnector.disconnect(session));
+            } else {
+                items.add(mActivity.getString(R.string.action_ssh_reconnect));
+                actions.add(() -> SshConnector.reconnect(mActivity, session));
+            }
+        }
         items.add(mActivity.getString(R.string.action_rename_terminal_tab));
         actions.add(() -> showRenameDialog(session));
         if (index > 0) {

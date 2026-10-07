@@ -1,0 +1,72 @@
+package com.termux.app.terminal.ssh;
+
+import org.json.JSONException;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
+
+@RunWith(RobolectricTestRunner.class)
+@Config(sdk = {28})
+public class SshHostTest {
+
+    private static SshHost newHost() {
+        SshHost host = new SshHost();
+        host.name = "my-server";
+        host.hostName = "example.com";
+        host.port = 2222;
+        host.user = "me";
+        host.identityFile = "~/.ssh/id_ed25519";
+        host.extraOptions = "ProxyJump bastion\n# a comment\n\n  LocalForward 8080 localhost:80  ";
+        host.startupCommand = "echo 100%";
+        return host;
+    }
+
+    @Test
+    public void testConfigBlock() {
+        Assert.assertEquals(
+            "Host my-server\n" +
+            "    HostName example.com\n" +
+            "    Port 2222\n" +
+            "    User me\n" +
+            "    IdentityFile \"~/.ssh/id_ed25519\"\n" +
+            "    ServerAliveInterval 30\n" +
+            "    RequestTTY yes\n" +
+            "    RemoteCommand echo 100%%; exec \"$SHELL\" -l\n" +
+            "    ProxyJump bastion\n" +
+            "    LocalForward 8080 localhost:80\n",
+            newHost().toConfigBlock());
+    }
+
+    @Test
+    public void testConfigBlockWithDefaults() {
+        SshHost host = new SshHost();
+        host.name = "plain";
+        host.hostName = "10.0.0.1";
+        Assert.assertEquals(
+            "Host plain\n" +
+            "    HostName 10.0.0.1\n" +
+            "    ServerAliveInterval 30\n",
+            host.toConfigBlock());
+        Assert.assertEquals("10.0.0.1", host.getAddress());
+    }
+
+    @Test
+    public void testJson() throws JSONException {
+        SshHost host = SshHost.fromJson(newHost().toJson());
+        Assert.assertEquals(newHost().toConfigBlock(), host.toConfigBlock());
+        Assert.assertEquals("me@example.com:2222", host.getAddress());
+    }
+
+    @Test
+    public void testIsValidName() {
+        Assert.assertTrue(SshHost.isValidName("my-server.lan_2"));
+        Assert.assertTrue(SshHost.isValidName("me@host"));
+        Assert.assertFalse(SshHost.isValidName(""));
+        Assert.assertFalse(SshHost.isValidName(null));
+        Assert.assertFalse(SshHost.isValidName("two words"));
+        Assert.assertFalse(SshHost.isValidName("web*"));
+    }
+
+}
