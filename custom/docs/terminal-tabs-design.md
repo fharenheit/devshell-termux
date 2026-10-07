@@ -1,6 +1,6 @@
 # 터미널 탭 설계 (여러 세션을 백그라운드로 유지하는 탭 UI)
 
-상태: 설계 초안. 아직 구현하지 않았습니다.
+상태: 1단계 구현됨(`custom/patches/0004-*`, `0005-*`). 2단계부터는 설계 단계입니다.
 
 ## 1. 현재 구조
 
@@ -28,7 +28,7 @@
 - 터미널 위(또는 아래)에 탭 바를 두고 탭으로 세션 생성, 전환, 닫기, 이름 변경
 - 백그라운드 탭에 상태 표시: 새 출력(●), 벨(🔔), 종료됨(취소선과 종료 코드 색상)
 - 액티비티가 멈춰 있거나 다시 생성된 동안 생긴 상태도 유지
-- 하드웨어 키보드 단축키로 탭 이동(`Ctrl+Alt+1..9` 추가)
+- 하드웨어 키보드 단축키로 탭 이동(`Ctrl+Alt+1..9`는 업스트림에 이미 있음)
 - 업스트림 업그레이드에 부담이 적도록 업스트림 파일 수정을 최소화
 
 **비목표**
@@ -89,8 +89,8 @@ public final class TerminalTabStates {
 | `app/.../terminal/tabs/TrackingTerminalSessionClient.java` | `TermuxTerminalSessionClientBase`를 상속. 액티비티가 없을 때도 `onTextChanged`/`onBell`을 `TerminalTabStates`에 기록 |
 | `app/src/main/res/layout/view_terminal_tabs.xml` | 탭 바(`HorizontalScrollView` + `LinearLayout` + `+` 버튼) |
 | `app/src/main/res/layout/item_terminal_tab.xml` | 탭 하나: 상태 점, 번호와 제목, 닫기(×) 버튼 |
-| `app/src/main/res/drawable/terminal_tab_*.xml` | 선택된 탭과 기본 탭 배경(일반/블랙 UI) |
-| `app/src/main/res/values/fork_strings.xml` | 탭 관련 문자열(업스트림 `strings.xml`을 건드리지 않기 위해) |
+| `app/src/main/res/drawable/terminal_tab_background.xml`, `ic_terminal_tab_*.xml` | 탭 배경(선택 시 아래 강조선), `+`/× 아이콘 |
+| `app/src/main/res/values/fork_terminal_tabs.xml` | 탭 관련 크기, 색, 문자열(업스트림 `values/*.xml`을 건드리지 않기 위해) |
 
 ### 4.2 업스트림 파일 수정 (새 패치 `0003-*.patch`, 모두 작은 hook)
 
@@ -100,7 +100,6 @@ public final class TerminalTabStates {
 | `TermuxActivity.java` | `onServiceConnected`에서 `TerminalTabsController` 생성. `termuxSessionListNotifyUpdated()`에서 탭 바도 갱신. `onReload()`에서 설정 다시 적용 |
 | `TermuxTerminalSessionClient.java` | 아래 4.3 이벤트 hook |
 | `TermuxService.java` | `mTermuxTerminalSessionClientBase`를 `new TrackingTerminalSessionClient()`로 교체(한 줄) |
-| `TermuxTerminalViewClient.java` | `Ctrl+Alt+1..9`를 `switchToSession(index)`에 연결 |
 | (2단계) `TermuxPropertyConstants.java`, `TermuxSharedProperties.java` | `terminal-tabs`, `max-sessions` 속성 |
 
 ### 4.3 이벤트 흐름
@@ -126,7 +125,7 @@ TerminalTabStates 상태 변화 → listener → TerminalTabsController.refresh(
 
 ```
 ┌──────────────────────────────────────────────┐
-│ [1 ~ ×] [2 vim ●] [3 build 🔔] [4 ssh̶ ×]  [+] │  ← 탭 바(높이는 툴바 높이 배율을 따름)
+│ [1 ~ ×] [2 vim ●] [3 build 🔔] [4 ssh̶ ×]  [+] │  ← 탭 바(높이 36dp)
 ├──────────────────────────────────────────────┤
 │ $ _                                          │
 │              TerminalView                    │
@@ -137,7 +136,7 @@ TerminalTabStates 상태 변화 → listener → TerminalTabsController.refresh(
 |---|---|
 | 탭 터치 | `setCurrentSession` |
 | 탭 길게 누르기 | 메뉴: 이름 바꾸기 / 닫기 / 프로세스 강제 종료 / 왼쪽·오른쪽으로 이동 |
-| × | 실행 중이면 확인 대화상자 후 `finishIfRunning()`. 종료된 세션은 바로 `removeFinishedSession` |
+| × | 실행 중이면 확인 대화상자 후 `finishIfRunning()`, 프로세스가 끝나면 종료 코드와 상관없이 탭을 제거. 이미 종료된 세션은 바로 `removeFinishedSession` |
 | `+` | `addNewSession(false, null)`. 길게 누르면 기존 드로어 버튼처럼 이름 있는 세션/failsafe 대화상자 |
 | 탭 바에서 위로 스와이프 | (선택) 탭 바 숨기기 |
 | 탭 제목 | `[번호] 이름` 또는 `getTitle()`. 최대 너비를 정하고 넘치면 말줄임 |
@@ -164,7 +163,7 @@ terminal-tabs-show-close = true
 
 ## 8. 주의할 점
 
-1. **한글 조합(패치 0001)**: `attachSession()`이 `mComposingText`를 비웁니다. 조합 중에 탭을 바꾸면 조합하던 글자를 앞 세션에 commit할지 버릴지 정해야 합니다. 제안은 commit입니다. IME에 `finishComposingText` 처리를 맞춰 `restartInput` 해야 합니다.
+1. **한글 조합(패치 0001)**: 조합 중에 세션을 바꾸면 조합하던 글자는 **버립니다**(패치 0005). `attachSession()`이 `restartInput`을 하고, 이전 입력 연결은 IME가 뒤늦게 보내는 `commitText`/`finishComposingText`를 무시합니다(`mInputConnectionGeneration`).
 2. **액티비티 재생성**(회전, 테마 변경): 탭 바는 상태를 갖지 않고 `TerminalTabStates`와 서비스 목록으로 다시 그리므로 상태가 사라지지 않습니다.
 3. **스레드**: `TerminalSession` 콜백은 메인 스레드 Handler에서 옵니다. 그래도 `TerminalTabStates` 리스너는 `post`로 감싸고 맵은 `ConcurrentHashMap`을 씁니다.
 4. **현재 세션이 제거될 때**: 기존 `removeFinishedSession`이 인접 세션을 고르므로 그대로 따르고, 탭 바는 notify만 받습니다.
@@ -177,7 +176,7 @@ terminal-tabs-show-close = true
 
 | 단계 | 내용 | 업스트림 패치 |
 |---|---|---|
-| 1 | 탭 바(전환, 새로 만들기, 닫기, 이름 바꾸기), 드로어와 동기화, `Ctrl+Alt+1..9` | layout, Activity, SessionClient, ViewClient |
+| 1 ✅ | 탭 바(전환, 새로 만들기, 닫기, 이름 바꾸기), 드로어와 동기화, 세션 전환 시 조합 중인 글자 버리기 | layout, Activity, SessionClient, TerminalView |
 | 2 | 새 출력/벨 표시 + 액티비티 없을 때 추적, 토스트 정리 | SessionClient, Service(한 줄) |
 | 3 | `termux.properties` 설정(`terminal-tabs`, `max-sessions`), 순서 바꾸기 | properties 클래스 |
 | 4 (선택) | 알림 요약, 백그라운드 종료/벨 알림 | Service |
@@ -186,7 +185,7 @@ terminal-tabs-show-close = true
 
 ## 10. 검증
 
-- 세션 8개를 만들어 탭 터치, `+`, ×, 드로어 선택, `Ctrl+Alt+←/→/1..9`로 전환할 때 탭 바와 드로어 선택 상태가 일치하는지
+- 세션 8개를 만들어 탭 터치, `+`, ×, 드로어 선택, `Ctrl+Alt+↑/↓/1..9`로 전환할 때 탭 바와 드로어 선택 상태가 일치하는지
 - 백그라운드 탭에서 `sleep 5; echo hi`, `sleep 5; printf '\a'` 실행 후 ● / 🔔이 표시되고, 전환하면 사라지는지
 - 홈으로 나간 상태(onStop)와 최근 앱에서 지운 상태(onDestroy, 서비스 유지)에서 위 출력을 만든 뒤 돌아왔을 때 상태가 남아 있는지
 - `exit` / `exit 1` 세션의 탭 표시와 자동 제거 규칙(종료 코드 0/130이면 제거)

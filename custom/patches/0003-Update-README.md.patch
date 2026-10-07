@@ -1,0 +1,24 @@
+From de2725c547546d637a5ee87f55607116a14da839 Mon Sep 17 00:00:00 2001
+From: Edward KIM <fharenheit@gmail.com>
+Date: Mon, 5 Oct 2026 21:08:19 +0900
+Subject: [PATCH] Update README.md
+
+---
+ README.md | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/README.md b/README.md
+index 3c6b2d1..ffff2c7 100644
+--- a/README.md
++++ b/README.md
+@@ -1,5 +1,7 @@
+ # Termux application
+ 
++*이 Termux는 Android에서 블루투스 키보드 등으로 한글입력이 안되는 문제를 수정한 Termux입니다. APK 파일을 수동 설치하시고 사용하세요.*
++
+ [![Build status](https://github.com/termux/termux-app/workflows/Build/badge.svg)](https://github.com/termux/termux-app/actions)
+ [![Testing status](https://github.com/termux/termux-app/workflows/Unit%20tests/badge.svg)](https://github.com/termux/termux-app/actions)
+ [![Join the chat at https://gitter.im/termux/termux](https://badges.gitter.im/termux/termux.svg)](https://gitter.im/termux/termux)
+-- 
+2.43.0
+

@@ -1,0 +1,171 @@
+From 9bcd2c416497113a78b51c2e2c188c913ae216b8 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Wed, 7 Oct 2026 12:00:24 +0000
+Subject: [PATCH] Added: Show terminal sessions as tabs above the terminal
+
+Add a tab bar above the terminal view that shows the sessions kept by
+TermuxService, in addition to the drawer sessions list. Tap a tab to
+switch to it, long press for rename and close, and use the close button
+or the + button to close or create sessions. Closing a running session
+asks first and removes it once its process has exited.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01GLNsTPnn2xKUQ4uFcevT6G
+---
+ .../java/com/termux/app/TermuxActivity.java   | 26 ++++++++++++++++---
+ .../terminal/TermuxTerminalSessionClient.java | 11 ++++++++
+ app/src/main/res/layout/activity_termux.xml   | 24 ++++++++++++-----
+ 3 files changed, 50 insertions(+), 11 deletions(-)
+
+diff --git a/app/src/main/java/com/termux/app/TermuxActivity.java b/app/src/main/java/com/termux/app/TermuxActivity.java
+index 243e170..414277d 100644
+--- a/app/src/main/java/com/termux/app/TermuxActivity.java
++++ b/app/src/main/java/com/termux/app/TermuxActivity.java
+@@ -41,6 +41,7 @@ import com.termux.app.activities.HelpActivity;
+ import com.termux.app.activities.SettingsActivity;
+ import com.termux.shared.settings.preferences.TermuxAppSharedPreferences;
+ import com.termux.app.terminal.TermuxSessionsListViewController;
++import com.termux.app.terminal.tabs.TerminalTabsController;
+ import com.termux.app.terminal.io.TerminalToolbarViewPager;
+ import com.termux.app.terminal.TermuxTerminalSessionClient;
+ import com.termux.app.terminal.TermuxTerminalViewClient;
+@@ -128,6 +129,11 @@ public final class TermuxActivity extends Activity implements ServiceConnection
+      */
+     TermuxSessionsListViewController mTermuxSessionListViewController;
+ 
++    /**
++     * The tabs above the terminal that show the terminal sessions.
++     */
++    TerminalTabsController mTerminalTabsController;
++
+     /**
+      * The {@link TermuxActivity} broadcast receiver for various things like terminal style configuration changes.
+      */
+@@ -234,6 +240,8 @@ public final class TermuxActivity extends Activity implements ServiceConnection
+ 
+         setNewSessionButtonView();
+ 
++        mTerminalTabsController = new TerminalTabsController(this);
++
+         setToggleKeyboardView();
+ 
+         registerForContextMenu(mTerminalView);
+@@ -531,14 +539,18 @@ public final class TermuxActivity extends Activity implements ServiceConnection
+         View newSessionButton = findViewById(R.id.new_session_button);
+         newSessionButton.setOnClickListener(v -> mTermuxTerminalSessionClient.addNewSession(false, null));
+         newSessionButton.setOnLongClickListener(v -> {
+-            TextInputDialogUtils.textInput(TermuxActivity.this, R.string.title_create_named_session, null,
+-                R.string.action_create_named_session_confirm, text -> mTermuxTerminalSessionClient.addNewSession(false, text),
+-                R.string.action_new_session_failsafe, text -> mTermuxTerminalSessionClient.addNewSession(true, text),
+-                -1, null, null);
++            showNewNamedSessionDialog();
+             return true;
+         });
+     }
+ 
++    public void showNewNamedSessionDialog() {
++        TextInputDialogUtils.textInput(TermuxActivity.this, R.string.title_create_named_session, null,
++            R.string.action_create_named_session_confirm, text -> mTermuxTerminalSessionClient.addNewSession(false, text),
++            R.string.action_new_session_failsafe, text -> mTermuxTerminalSessionClient.addNewSession(true, text),
++            -1, null, null);
++    }
++
+     private void setToggleKeyboardView() {
+         findViewById(R.id.toggle_keyboard_button).setOnClickListener(v -> {
+             mTermuxTerminalViewClient.onToggleSoftKeyboardRequest();
+@@ -780,6 +792,12 @@ public final class TermuxActivity extends Activity implements ServiceConnection
+ 
+     public void termuxSessionListNotifyUpdated() {
+         mTermuxSessionListViewController.notifyDataSetChanged();
++        terminalTabsNotifyUpdated();
++    }
++
++    public void terminalTabsNotifyUpdated() {
++        if (mTerminalTabsController != null)
++            mTerminalTabsController.refresh();
+     }
+ 
+     public boolean isVisible() {
+diff --git a/app/src/main/java/com/termux/app/terminal/TermuxTerminalSessionClient.java b/app/src/main/java/com/termux/app/terminal/TermuxTerminalSessionClient.java
+index 78a253a..96225ba 100644
+--- a/app/src/main/java/com/termux/app/terminal/TermuxTerminalSessionClient.java
++++ b/app/src/main/java/com/termux/app/terminal/TermuxTerminalSessionClient.java
+@@ -17,6 +17,7 @@ import com.termux.shared.shell.TermuxSession;
+ import com.termux.shared.interact.TextInputDialogUtils;
+ import com.termux.shared.interact.ShareUtils;
+ import com.termux.app.TermuxActivity;
++import com.termux.app.terminal.tabs.TerminalTabsController;
+ import com.termux.shared.terminal.TermuxTerminalSessionClientBase;
+ import com.termux.shared.termux.TermuxConstants;
+ import com.termux.app.TermuxService;
+@@ -144,6 +145,12 @@ public class TermuxTerminalSessionClient extends TermuxTerminalSessionClientBase
+             return;
+         }
+ 
++        // The session was closed from its tab while running.
++        if (TerminalTabsController.shouldRemoveOnExit(finishedSession)) {
++            removeFinishedSession(finishedSession);
++            return;
++        }
++
+         int index = service.getIndexOfSession(finishedSession);
+ 
+         // For plugin commands that expect the result back, we should immediately close the session
+@@ -177,6 +184,9 @@ public class TermuxTerminalSessionClient extends TermuxTerminalSessionClientBase
+                 removeFinishedSession(finishedSession);
+             }
+         }
++
++        // Show the exit status of sessions that were not removed.
++        termuxSessionListNotifyUpdated();
+     }
+ 
+     @Override
+@@ -284,6 +294,7 @@ public class TermuxTerminalSessionClient extends TermuxTerminalSessionClientBase
+         // We call the following even when the session is already being displayed since config may
+         // be stale, like current session not selected or scrolled to.
+         checkAndScrollToSession(session);
++        mActivity.terminalTabsNotifyUpdated();
+         updateBackgroundColor();
+     }
+ 
+diff --git a/app/src/main/res/layout/activity_termux.xml b/app/src/main/res/layout/activity_termux.xml
+index c30354e..bb738f2 100644
+--- a/app/src/main/res/layout/activity_termux.xml
++++ b/app/src/main/res/layout/activity_termux.xml
+@@ -23,15 +23,25 @@
+             android:layout_above="@+id/terminal_toolbar_view_pager"
+             android:layout_height="match_parent">
+ 
+-            <com.termux.view.TerminalView
+-                android:id="@+id/terminal_view"
++            <LinearLayout
++                android:id="@+id/terminal_content_layout"
+                 android:layout_width="match_parent"
+                 android:layout_height="match_parent"
+-                android:defaultFocusHighlightEnabled="false"
+-                android:focusableInTouchMode="true"
+-                android:scrollbarThumbVertical="@drawable/terminal_scroll_shape"
+-                android:scrollbars="vertical"
+-                tools:ignore="UnusedAttribute" />
++                android:orientation="vertical">
++
++                <include layout="@layout/view_terminal_tabs" />
++
++                <com.termux.view.TerminalView
++                    android:id="@+id/terminal_view"
++                    android:layout_width="match_parent"
++                    android:layout_height="0dp"
++                    android:layout_weight="1"
++                    android:defaultFocusHighlightEnabled="false"
++                    android:focusableInTouchMode="true"
++                    android:scrollbarThumbVertical="@drawable/terminal_scroll_shape"
++                    android:scrollbars="vertical"
++                    tools:ignore="UnusedAttribute" />
++            </LinearLayout>
+ 
+             <LinearLayout
+                 android:id="@+id/left_drawer"
+-- 
+2.43.0
+
