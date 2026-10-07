@@ -1,6 +1,6 @@
 # 터미널 탭 설계 (여러 세션을 백그라운드로 유지하는 탭 UI)
 
-상태: 1단계(`custom/patches/0004-*`, `0005-*`), 2단계(`0007-*`), 3단계(`0008-*`) 구현됨. 4단계(선택)는 설계 단계입니다.
+상태: 1단계(`custom/patches/0004-*`, `0005-*`), 2단계(`0007-*`), 3단계(`0008-*`), 4단계(`0009-*`, 종료/벨 알림만) 구현됨.
 
 ## 1. 현재 구조
 
@@ -162,8 +162,16 @@ max-sessions = 8                 # 1..32 (기본 8, 업스트림의 MAX_SESSIONS
 ## 7. 백그라운드 동작
 
 - 프로세스 유지: 기존 포그라운드 서비스와 wakelock을 그대로 씁니다. 별도 작업은 없습니다.
-- 서비스 알림 문구(`buildNotification`): "3 sessions" 대신 "3 sessions (1 unread, 1 bell)"처럼 보이게 하는 것은 3단계(선택)입니다. `TermuxService` 패치가 늘어나므로 꼭 필요할 때만 합니다.
-- 앱을 안 보고 있을 때 백그라운드 세션이 끝나거나 벨이 울리면 알림을 보내는 기능도 3단계(선택)입니다. 알림을 누르면 `VALUE_EXTRA_SESSION_ACTION_SWITCH_TO_NEW_SESSION_AND_OPEN_ACTIVITY`와 같은 방식으로 해당 세션으로 엽니다.
+- 서비스 알림 문구(`buildNotification`)를 "3 sessions (1 unread, 1 bell)"처럼 바꾸는 것은 **하지 않았습니다**. 쓸모에 비해 업스트림 `TermuxService`의 알림 코드를 더 고쳐야 하기 때문입니다.
+- **종료/벨 알림(4단계)**: 액티비티가 보이지 않을 때(`onStop` 이후, 또는 액티비티가 없을 때) 세션이 끝나거나 벨이 울리면 알림을 보냅니다. 포크 전용 `TerminalSessionNotifications`가 처리합니다.
+  - 알림 제목은 탭과 같은 `[번호] 이름`, 내용은 `Bell` / `Exited (code 1)` / `Exited (signal 9)`.
+  - 채널은 `Termux Sessions`(중요도 기본, 소리/진동). 안드로이드 설정에서 채널별로 끌 수 있습니다.
+  - 세션마다 알림은 하나만 쓰고 갱신합니다. 벨 알림은 그 세션을 다시 볼 때까지 한 번만 보냅니다.
+  - 알림을 누르면 세션 handle을 extra로 담은 인텐트로 액티비티를 엽니다. `TermuxActivity.onCreate`/`onNewIntent`에서 그 세션을 현재 세션으로 저장하거나 바로 전환합니다.
+  - 액티비티가 보이는 상태에서 그 세션이 표시되면(`TerminalTabsController.onCurrentSessionChanged`) 알림을 지웁니다.
+  - 알림을 보내지 않는 경우: 서비스 알림의 Exit로 모든 세션을 끝낼 때(`wantsToStop()`), 결과를 플러그인에 돌려주는 플러그인 명령 세션이 끝날 때.
+  - 설정: `terminal-session-notifications = all | exit | bell | off` (기본 `all`).
+  - 이벤트 경로: 액티비티가 살아 있으면 `TermuxTerminalSessionClient.onBell`/`onSessionFinished`, 없으면 `TrackingTerminalSessionClient`.
 
 ## 8. 주의할 점
 
@@ -183,7 +191,7 @@ max-sessions = 8                 # 1..32 (기본 8, 업스트림의 MAX_SESSIONS
 | 1 ✅ | 탭 바(전환, 새로 만들기, 닫기, 이름 바꾸기), 드로어와 동기화, 세션 전환 시 조합 중인 글자 버리기 | layout, Activity, SessionClient, TerminalView |
 | 2 ✅ | 새 출력/벨 표시 + 액티비티 없을 때 추적, 토스트 정리 | SessionClient, Service(한 줄), Activity |
 | 3 ✅ | `termux.properties` 설정(`terminal-tabs`, `terminal-tabs-show-close`, `max-sessions`), 순서 바꾸기 | Activity, SessionClient (properties 클래스는 고치지 않음) |
-| 4 (선택) | 알림 요약, 백그라운드 종료/벨 알림 | Service |
+| 4 ✅ | 백그라운드 종료/벨 알림 (서비스 알림 요약은 하지 않음) | Activity, SessionClient, Service(생성자 인자) |
 
 각 단계는 커밋한 뒤 `custom/update-patches.sh`로 패치를 다시 만들고, `custom/README.md` 수정 사항 표에 항목을 추가합니다.
 

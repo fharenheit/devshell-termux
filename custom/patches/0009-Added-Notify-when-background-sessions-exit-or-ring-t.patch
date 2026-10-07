@@ -1,0 +1,112 @@
+From 4dc0abeb093ef1449fd505f92875e5a7b90b557e Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Wed, 7 Oct 2026 15:18:15 +0000
+Subject: [PATCH] Added: Notify when background sessions exit or ring the bell
+
+While the activity is not visible, post a notification when a session
+exits or rings the bell, titled like its tab. Tapping it opens the
+activity on that session. A session has at most one notification, a bell
+is notified once until the session is displayed again, and the
+notification is removed when the session is displayed. Sessions killed
+by exiting from the service notification and plugin command sessions
+that return their result are not notified.
+
+The new terminal-session-notifications = all | exit | bell | off
+property selects what is notified, all by default.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01GLNsTPnn2xKUQ4uFcevT6G
+---
+ .../main/java/com/termux/app/TermuxActivity.java    | 13 +++++++++++++
+ app/src/main/java/com/termux/app/TermuxService.java |  2 +-
+ .../app/terminal/TermuxTerminalSessionClient.java   |  9 ++++++++-
+ 3 files changed, 22 insertions(+), 2 deletions(-)
+
+diff --git a/app/src/main/java/com/termux/app/TermuxActivity.java b/app/src/main/java/com/termux/app/TermuxActivity.java
+index 43b0e33..8d1adc4 100644
+--- a/app/src/main/java/com/termux/app/TermuxActivity.java
++++ b/app/src/main/java/com/termux/app/TermuxActivity.java
+@@ -41,6 +41,7 @@ import com.termux.app.activities.HelpActivity;
+ import com.termux.app.activities.SettingsActivity;
+ import com.termux.shared.settings.preferences.TermuxAppSharedPreferences;
+ import com.termux.app.terminal.TermuxSessionsListViewController;
++import com.termux.app.terminal.tabs.TerminalSessionNotifications;
+ import com.termux.app.terminal.tabs.TerminalTabsController;
+ import com.termux.app.terminal.io.TerminalToolbarViewPager;
+ import com.termux.app.terminal.TermuxTerminalSessionClient;
+@@ -246,6 +247,9 @@ public final class TermuxActivity extends Activity implements ServiceConnection
+ 
+         registerForContextMenu(mTerminalView);
+ 
++        // Show the session of the notification the activity was opened from.
++        TerminalSessionNotifications.handleIntent(this, getIntent());
++
+         // Start the {@link TermuxService} and make it run regardless of who is bound to it
+         Intent serviceIntent = new Intent(this, TermuxService.class);
+         startService(serviceIntent);
+@@ -260,6 +264,15 @@ public final class TermuxActivity extends Activity implements ServiceConnection
+         TermuxUtils.sendTermuxOpenedBroadcast(this);
+     }
+ 
++    @Override
++    protected void onNewIntent(Intent intent) {
++        super.onNewIntent(intent);
++
++        // Show the session of the notification the activity was brought to front from.
++        if (!mIsInvalidState)
++            TerminalSessionNotifications.handleIntent(this, intent);
++    }
++
+     @Override
+     public void onStart() {
+         super.onStart();
+diff --git a/app/src/main/java/com/termux/app/TermuxService.java b/app/src/main/java/com/termux/app/TermuxService.java
+index 3e87fc2..5031253 100644
+--- a/app/src/main/java/com/termux/app/TermuxService.java
++++ b/app/src/main/java/com/termux/app/TermuxService.java
+@@ -103,7 +103,7 @@ public final class TermuxService extends Service implements TermuxTask.TermuxTas
+     /** The basic implementation of the {@link TerminalSessionClient} interface to be used by {@link TerminalSession}
+      * that does not hold activity references.
+      */
+-    final TermuxTerminalSessionClientBase mTermuxTerminalSessionClientBase = new TrackingTerminalSessionClient();
++    final TermuxTerminalSessionClientBase mTermuxTerminalSessionClientBase = new TrackingTerminalSessionClient(this);
+ 
+     /** The wake lock and wifi lock are always acquired and released together. */
+     private PowerManager.WakeLock mWakeLock;
+diff --git a/app/src/main/java/com/termux/app/terminal/TermuxTerminalSessionClient.java b/app/src/main/java/com/termux/app/terminal/TermuxTerminalSessionClient.java
+index 18cfc6a..0eb73f7 100644
+--- a/app/src/main/java/com/termux/app/terminal/TermuxTerminalSessionClient.java
++++ b/app/src/main/java/com/termux/app/terminal/TermuxTerminalSessionClient.java
+@@ -17,6 +17,7 @@ import com.termux.shared.shell.TermuxSession;
+ import com.termux.shared.interact.TextInputDialogUtils;
+ import com.termux.shared.interact.ShareUtils;
+ import com.termux.app.TermuxActivity;
++import com.termux.app.terminal.tabs.TerminalSessionNotifications;
+ import com.termux.app.terminal.tabs.TerminalTabStates;
+ import com.termux.app.terminal.tabs.TerminalTabsController;
+ import com.termux.app.terminal.tabs.TerminalTabsSettings;
+@@ -167,6 +168,9 @@ public class TermuxTerminalSessionClient extends TermuxTerminalSessionClientBase
+                 Logger.logVerbose(LOG_TAG, "The \"" + finishedSession.mSessionName + "\" session will be force finished automatically since result in pending.");
+         }
+ 
++        if (!mActivity.isVisible() && !isPluginExecutionCommandWithPendingResult)
++            TerminalSessionNotifications.onSessionFinished(mActivity.getApplicationContext(), service, finishedSession);
++
+         if (mActivity.isVisible() && finishedSession != mActivity.getCurrentSession()) {
+             // Show toast for non-current sessions that exit.
+             // Verify that session was not removed before we got told about it finishing:
+@@ -212,7 +216,10 @@ public class TermuxTerminalSessionClient extends TermuxTerminalSessionClientBase
+     public void onBell(TerminalSession session) {
+         if (session != mActivity.getCurrentSession()) TerminalTabStates.markBell(session);
+ 
+-        if (!mActivity.isVisible()) return;
++        if (!mActivity.isVisible()) {
++            TerminalSessionNotifications.onBell(mActivity.getApplicationContext(), mActivity.getTermuxService(), session);
++            return;
++        }
+ 
+         switch (mActivity.getProperties().getBellBehaviour()) {
+             case TermuxPropertyConstants.IVALUE_BELL_BEHAVIOUR_VIBRATE:
+-- 
+2.43.0
+

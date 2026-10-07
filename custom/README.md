@@ -12,6 +12,7 @@
 | 터미널 위에 세션 탭 바(전환, 새로 만들기, 닫기, 이름 바꾸기). 설계는 `custom/docs/terminal-tabs-design.md` | `custom/patches/0004-*.patch` (`activity_termux.xml`, `TermuxActivity.java`, `TermuxTerminalSessionClient.java`) + `app/.../terminal/tabs/`, 탭 리소스 |
 | 백그라운드 세션의 새 출력(●)과 벨(🔔)을 탭에 표시(앱 화면이 닫혀 있는 동안 생긴 것 포함), 세션 전환/제목 변경 토스트 끔 | `custom/patches/0007-*.patch` (`TermuxService.java`, `TermuxActivity.java`, `TermuxTerminalSessionClient.java`) + `app/.../terminal/tabs/` |
 | `termux.properties`의 탭 설정(`terminal-tabs = top/bottom/off`, `terminal-tabs-show-close`, `max-sessions`), 탭 길게 누르기 메뉴로 순서 바꾸기 | `custom/patches/0008-*.patch` (`TermuxActivity.java`, `TermuxTerminalSessionClient.java`) + `app/.../terminal/tabs/TerminalTabsSettings.java` |
+| 앱을 보고 있지 않을 때 세션이 끝나거나 벨이 울리면 알림(누르면 그 세션으로 열림), `terminal-session-notifications = all/exit/bell/off` | `custom/patches/0009-*.patch` (`TermuxActivity.java`, `TermuxTerminalSessionClient.java`, `TermuxService.java`) + `app/.../terminal/tabs/TerminalSessionNotifications.java` |
 | 세션을 바꿀 때 IME가 조합 중인 글자(한글)를 버림 | `custom/patches/0005-*.patch` (`TerminalView.java`) |
 | 기본 extra keys에 ENTER(PGUP 오른쪽), KEYBOARD(PGDN 오른쪽, 키보드 표시/숨기기) 버튼 추가 | `custom/patches/0006-*.patch` (`TermuxPropertyConstants.java`) |
 | README 상단 안내 문구 | `custom/patches/0003-*.patch` (`README.md`) |
