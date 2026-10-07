@@ -19,6 +19,7 @@ import com.termux.shared.interact.ShareUtils;
 import com.termux.app.TermuxActivity;
 import com.termux.app.terminal.tabs.TerminalTabStates;
 import com.termux.app.terminal.tabs.TerminalTabsController;
+import com.termux.app.terminal.tabs.TerminalTabsSettings;
 import com.termux.shared.terminal.TermuxTerminalSessionClientBase;
 import com.termux.shared.termux.TermuxConstants;
 import com.termux.app.TermuxService;
@@ -37,8 +38,6 @@ import java.util.Properties;
 public class TermuxTerminalSessionClient extends TermuxTerminalSessionClientBase {
 
     private final TermuxActivity mActivity;
-
-    private static final int MAX_SESSIONS = 8;
 
     private SoundPool mBellSoundPool;
 
@@ -356,7 +355,7 @@ public class TermuxTerminalSessionClient extends TermuxTerminalSessionClientBase
         TermuxService service = mActivity.getTermuxService();
         if (service == null) return;
 
-        if (service.getTermuxSessionsSize() >= MAX_SESSIONS) {
+        if (service.getTermuxSessionsSize() >= TerminalTabsSettings.getMaxSessions()) {
             new AlertDialog.Builder(mActivity).setTitle(R.string.title_max_terminals_reached).setMessage(R.string.msg_max_terminals_reached)
                 .setPositiveButton(android.R.string.ok, null).show();
         } else {

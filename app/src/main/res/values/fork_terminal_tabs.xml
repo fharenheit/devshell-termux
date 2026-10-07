@@ -17,6 +17,8 @@
     <string name="title_terminal_tab_menu">Session %1$d</string>
     <string name="action_rename_terminal_tab">Rename</string>
     <string name="action_close_terminal_tab_menu">Close</string>
+    <string name="action_move_terminal_tab_left">Move left</string>
+    <string name="action_move_terminal_tab_right">Move right</string>
     <string name="terminal_tab_indicator_output" translatable="false">●</string>
     <string name="terminal_tab_indicator_bell" translatable="false">🔔</string>
     <string name="terminal_tab_state_output">new output</string>

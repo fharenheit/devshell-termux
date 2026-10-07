@@ -21,6 +21,7 @@ import com.termux.app.terminal.TermuxTerminalSessionClient;
 import com.termux.shared.shell.TermuxSession;
 import com.termux.terminal.TerminalSession;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -35,6 +36,7 @@ import java.util.WeakHashMap;
 public class TerminalTabsController {
 
     private final TermuxActivity mActivity;
+    private final View mTabsBar;
     private final HorizontalScrollView mScrollView;
     private final LinearLayout mTabsLayout;
 
@@ -43,6 +45,7 @@ public class TerminalTabsController {
 
     public TerminalTabsController(@NonNull TermuxActivity activity) {
         mActivity = activity;
+        mTabsBar = activity.findViewById(R.id.terminal_tabs_bar);
         mScrollView = activity.findViewById(R.id.terminal_tabs_scroll_view);
         mTabsLayout = activity.findViewById(R.id.terminal_tabs_layout);
 
@@ -54,6 +57,33 @@ public class TerminalTabsController {
         });
 
         TerminalTabStates.setTabsController(this);
+
+        TerminalTabsSettings.load();
+        applySettings();
+    }
+
+    /** Reload the settings from the `termux.properties` file, like after `termux-reload-settings`. */
+    public void reloadSettings() {
+        TerminalTabsSettings.load();
+        applySettings();
+        refresh();
+    }
+
+    /** Show or hide the tab bar, and put it above or below the terminal. */
+    private void applySettings() {
+        mTabsBar.setVisibility(TerminalTabsSettings.areTabsShown() ? View.VISIBLE : View.GONE);
+
+        ViewGroup parent = (ViewGroup) mTabsBar.getParent();
+        int index = TerminalTabsSettings.areTabsAtBottom() ? parent.getChildCount() - 1 : 0;
+        if (parent.indexOfChild(mTabsBar) != index) {
+            parent.removeView(mTabsBar);
+            parent.addView(mTabsBar, index);
+        }
+    }
+
+    /** Whether the tab bar is shown. */
+    public boolean isShown() {
+        return TerminalTabsSettings.areTabsShown();
     }
 
     private TermuxTerminalSessionClient getSessionClient() {
@@ -132,7 +162,9 @@ public class TerminalTabsController {
             showTabMenu(index, session);
             return true;
         });
-        tabView.findViewById(R.id.terminal_tab_close_button).setOnClickListener(v -> closeSession(session));
+        View closeButton = tabView.findViewById(R.id.terminal_tab_close_button);
+        closeButton.setVisibility(TerminalTabsSettings.shouldShowCloseButton() ? View.VISIBLE : View.GONE);
+        closeButton.setOnClickListener(v -> closeSession(session));
     }
 
     @NonNull
@@ -160,17 +192,48 @@ public class TerminalTabsController {
     }
 
     private void showTabMenu(int index, TerminalSession session) {
-        CharSequence[] items = {
-            mActivity.getString(R.string.action_rename_terminal_tab),
-            mActivity.getString(R.string.action_close_terminal_tab_menu)
-        };
+        TermuxService service = mActivity.getTermuxService();
+        int sessionsCount = service == null ? 0 : service.getTermuxSessionsSize();
+
+        List<CharSequence> items = new ArrayList<>();
+        List<Runnable> actions = new ArrayList<>();
+        items.add(mActivity.getString(R.string.action_rename_terminal_tab));
+        actions.add(() -> getSessionClient().renameSession(session));
+        if (index > 0) {
+            items.add(mActivity.getString(R.string.action_move_terminal_tab_left));
+            actions.add(() -> moveSession(session, -1));
+        }
+        if (index < sessionsCount - 1) {
+            items.add(mActivity.getString(R.string.action_move_terminal_tab_right));
+            actions.add(() -> moveSession(session, 1));
+        }
+        items.add(mActivity.getString(R.string.action_close_terminal_tab_menu));
+        actions.add(() -> closeSession(session));
+
         new AlertDialog.Builder(mActivity)
             .setTitle(mActivity.getString(R.string.title_terminal_tab_menu, index + 1))
-            .setItems(items, (dialog, which) -> {
-                if (which == 0) getSessionClient().renameSession(session);
-                else closeSession(session);
-            })
+            .setItems(items.toArray(new CharSequence[0]), (dialog, which) -> actions.get(which).run())
             .show();
+    }
+
+    /**
+     * Move a session by the offset in the {@link TermuxService} sessions list. The drawer shows the
+     * same list, so its order changes too.
+     */
+    private void moveSession(TerminalSession session, int offset) {
+        TermuxService service = mActivity.getTermuxService();
+        if (service == null) return;
+
+        synchronized (service) {
+            List<TermuxSession> sessions = service.getTermuxSessions();
+            int index = service.getIndexOfSession(session);
+            int newIndex = index + offset;
+            if (index < 0 || newIndex < 0 || newIndex >= sessions.size()) return;
+            Collections.swap(sessions, index, newIndex);
+        }
+
+        mActivity.termuxSessionListNotifyUpdated();
+        getSessionClient().checkAndScrollToSession(mActivity.getCurrentSession());
     }
 
     /** Close a session from its tab, asking first if its process is still running. */

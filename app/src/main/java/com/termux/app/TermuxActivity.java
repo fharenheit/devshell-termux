@@ -807,7 +807,7 @@ public final class TermuxActivity extends Activity implements ServiceConnection 
 
     /** Whether the terminal tabs show the sessions, their titles and states, so toasts for them are not needed. */
     public boolean areTerminalTabsShown() {
-        return mTerminalTabsController != null;
+        return mTerminalTabsController != null && mTerminalTabsController.isShown();
     }
 
     public boolean isVisible() {
@@ -919,6 +919,9 @@ public final class TermuxActivity extends Activity implements ServiceConnection 
 
         setMargins();
         setTerminalToolbarHeight();
+
+        if (mTerminalTabsController != null)
+            mTerminalTabsController.reloadSettings();
 
         if (mTermuxTerminalSessionClient != null)
             mTermuxTerminalSessionClient.onReload();
