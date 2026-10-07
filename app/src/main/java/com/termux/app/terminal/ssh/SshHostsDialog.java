@@ -88,6 +88,9 @@ public final class SshHostsDialog {
                 String summary;
                 if (item.host != null) {
                     summary = item.host.getAddress();
+                    if (item.host.useMosh) summary += " · mosh";
+                    if (item.host.autoReconnect && !item.host.useMosh) summary += " · " + activity.getString(R.string.ssh_auto_reconnect_short);
+                    if (!item.host.jumpHost.isEmpty()) summary += " · via " + item.host.jumpHost;
                     if (SshPasswords.has(activity, item.name))
                         summary += " · " + activity.getString(R.string.ssh_password_saved);
                 } else {
@@ -176,10 +179,13 @@ public final class SshHostsDialog {
         }
         final EditText identityInput = addField(form, R.string.ssh_field_identity_file, editedHost.identityFile, "~/.ssh/id_ed25519", InputType.TYPE_CLASS_TEXT);
         final EditText startupCommandInput = addField(form, R.string.ssh_field_startup_command, editedHost.startupCommand, "tmux attach || tmux", InputType.TYPE_CLASS_TEXT);
-        final EditText extraOptionsInput = addField(form, R.string.ssh_field_extra_options, editedHost.extraOptions,
-            "ProxyJump bastion\nLocalForward 8080 localhost:80", InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
-        extraOptionsInput.setSingleLine(false);
-        extraOptionsInput.setMinLines(2);
+        final CheckBox useMoshCheckBox = addCheckBox(form, R.string.ssh_use_mosh, editedHost.useMosh);
+        final CheckBox autoReconnectCheckBox = addCheckBox(form, R.string.ssh_auto_reconnect, editedHost.autoReconnect);
+        final EditText jumpHostInput = addField(form, R.string.ssh_field_jump_host, editedHost.jumpHost, "user@gateway:2222", InputType.TYPE_CLASS_TEXT);
+        final EditText localForwardsInput = addMultiLineField(form, R.string.ssh_field_local_forwards, editedHost.localForwards, "8080:localhost:80");
+        final EditText remoteForwardsInput = addMultiLineField(form, R.string.ssh_field_remote_forwards, editedHost.remoteForwards, "9000:localhost:3000");
+        final EditText socksPortInput = addField(form, R.string.ssh_field_socks_port, editedHost.socksPort, "1080", InputType.TYPE_CLASS_NUMBER);
+        final EditText extraOptionsInput = addMultiLineField(form, R.string.ssh_field_extra_options, editedHost.extraOptions, "Compression yes");
 
         ScrollView scrollView = new ScrollView(activity);
         scrollView.addView(form);
@@ -221,6 +227,28 @@ public final class SshHostsDialog {
                 portInput.setError(activity.getString(R.string.ssh_error_port));
                 return;
             }
+            String jumpHost = jumpHostInput.getText().toString().trim();
+            if (jumpHost.contains(" ")) {
+                jumpHostInput.setError(activity.getString(R.string.ssh_error_jump_host));
+                return;
+            }
+            String localForwards = localForwardsInput.getText().toString().trim();
+            String invalidForward = SshHost.getInvalidForward(localForwards);
+            if (invalidForward != null) {
+                localForwardsInput.setError(activity.getString(R.string.ssh_error_forward, invalidForward));
+                return;
+            }
+            String remoteForwards = remoteForwardsInput.getText().toString().trim();
+            invalidForward = SshHost.getInvalidForward(remoteForwards);
+            if (invalidForward != null) {
+                remoteForwardsInput.setError(activity.getString(R.string.ssh_error_forward, invalidForward));
+                return;
+            }
+            String socksPort = socksPortInput.getText().toString().trim();
+            if (!socksPort.isEmpty() && !SshHost.isPort(socksPort)) {
+                socksPortInput.setError(activity.getString(R.string.ssh_error_port));
+                return;
+            }
 
             SshHost stored = isNew ? null : SshHostStore.find(hosts, oldName);
             SshHost savedHost = stored != null ? stored : new SshHost();
@@ -231,6 +259,12 @@ public final class SshHostsDialog {
             savedHost.identityFile = identityInput.getText().toString().trim();
             savedHost.startupCommand = startupCommandInput.getText().toString().trim();
             savedHost.extraOptions = extraOptionsInput.getText().toString().trim();
+            savedHost.jumpHost = jumpHost;
+            savedHost.localForwards = localForwards;
+            savedHost.remoteForwards = remoteForwards;
+            savedHost.socksPort = socksPort;
+            savedHost.autoReconnect = autoReconnectCheckBox.isChecked();
+            savedHost.useMosh = useMoshCheckBox.isChecked();
             if (stored == null) hosts.add(savedHost);
             if (!save(activity, hosts)) return;
 
@@ -279,6 +313,23 @@ public final class SshHostsDialog {
         if (!TextUtils.isEmpty(hint)) input.setHint(hint);
         form.addView(input);
         return input;
+    }
+
+    @NonNull
+    private static EditText addMultiLineField(@NonNull LinearLayout form, int labelId, @Nullable String value, @Nullable String hint) {
+        EditText input = addField(form, labelId, value, hint, InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
+        input.setSingleLine(false);
+        input.setMinLines(2);
+        return input;
+    }
+
+    @NonNull
+    private static CheckBox addCheckBox(@NonNull LinearLayout form, int textId, boolean checked) {
+        CheckBox checkBox = new CheckBox(form.getContext());
+        checkBox.setText(textId);
+        checkBox.setChecked(checked);
+        form.addView(checkBox);
+        return checkBox;
     }
 
     /** The public keys in `~/.ssh`. */

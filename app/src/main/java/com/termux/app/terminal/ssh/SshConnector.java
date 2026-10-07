@@ -42,15 +42,49 @@ public final class SshConnector {
     /** How long to wait for ssh to ask for the password before removing the pipe. */
     private static final long PASSWORD_PIPE_TIMEOUT_MS = 120_000;
 
+    /**
+     * Connect to `$1` with ssh, or with mosh if `$4` is `mosh`. With `$5` set to `1`, reconnect
+     * when ssh fails with 255, which it does when the connection is lost or can't be made, after
+     * 5, 10, ... seconds, giving up after 5 failed attempts in a row. A connection that lasted a
+     * minute starts the count again. Each attempt gets a new `TERMUX_SSH_ATTEMPT` marker so that
+     * the askpass script gives the saved password once per attempt.
+     */
     private static final String CONNECT_SCRIPT =
+        "host=\"$1\"\n" +
+        "if [ -n \"$2\" ]; then\n" +
+        "  export SSH_ASKPASS=\"$3\" SSH_ASKPASS_REQUIRE=force TERMUX_SSH_PASSWORD_PIPE=\"$2\"\n" +
+        "fi\n" +
+        "if [ \"$4\" = mosh ]; then\n" +
+        "  if ! command -v mosh >/dev/null 2>&1; then\n" +
+        "    echo \"mosh is not installed. Install it with: pkg install mosh\"\n" +
+        "    exit 1\n" +
+        "  fi\n" +
+        "  exec mosh \"$host\"\n" +
+        "fi\n" +
         "if ! command -v ssh >/dev/null 2>&1; then\n" +
         "  echo \"ssh is not installed. Install it with: pkg install openssh\"\n" +
         "  exit 1\n" +
         "fi\n" +
-        "if [ -n \"$2\" ]; then\n" +
-        "  export SSH_ASKPASS=\"$3\" SSH_ASKPASS_REQUIRE=force TERMUX_SSH_PASSWORD_PIPE=\"$2\"\n" +
-        "fi\n" +
-        "exec ssh \"$1\"\n";
+        "[ \"$5\" = 1 ] || exec ssh \"$host\"\n" +
+        "failures=0\n" +
+        "while :; do\n" +
+        "  start=$(date +%s)\n" +
+        "  export TERMUX_SSH_ATTEMPT=\"${TMPDIR:-/tmp}/termux-ssh-attempt-$$-$start\"\n" +
+        "  ssh \"$host\"\n" +
+        "  status=$?\n" +
+        "  rm -f \"$TERMUX_SSH_ATTEMPT\"\n" +
+        "  [ $status -eq 255 ] || exit $status\n" +
+        "  [ $(($(date +%s) - start)) -ge 60 ] && failures=0\n" +
+        "  failures=$((failures + 1))\n" +
+        "  if [ $failures -gt 5 ]; then\n" +
+        "    echo \"[Failed to reconnect to $host 5 times in a row. Giving up.]\"\n" +
+        "    exit $status\n" +
+        "  fi\n" +
+        "  delay=$((failures * 5))\n" +
+        "  echo\n" +
+        "  echo \"[Not connected to $host. Reconnecting in ${delay}s. Press Ctrl+C to stop.]\"\n" +
+        "  sleep $delay\n" +
+        "done\n";
 
     /** Install a public key on a host, like `ssh-copy-id`, which is used if it is installed. */
     private static final String COPY_ID_SCRIPT =
@@ -75,14 +109,20 @@ public final class SshConnector {
 
     private static final String ASKPASS_SCRIPT =
         "#!" + TermuxConstants.TERMUX_BIN_PREFIX_DIR_PATH + "/sh\n" +
-        "# Answers ssh prompts for the Termux app: a password prompt once with the saved password\n" +
-        "# from the pipe the app writes it to, and other prompts on the terminal.\n" +
+        "# Answers ssh prompts for the Termux app: a password prompt with the saved password from the\n" +
+        "# pipe the app writes it to, once per connection attempt, and other prompts on the terminal.\n" +
         "case \"$1\" in\n" +
         "  *[Pp]assword*)\n" +
         "    if [ -n \"$TERMUX_SSH_PASSWORD_PIPE\" ] && [ -p \"$TERMUX_SSH_PASSWORD_PIPE\" ]; then\n" +
-        "      cat \"$TERMUX_SSH_PASSWORD_PIPE\"\n" +
-        "      rm -f \"$TERMUX_SSH_PASSWORD_PIPE\"\n" +
-        "      exit 0\n" +
+        "      if [ -z \"$TERMUX_SSH_ATTEMPT\" ]; then\n" +
+        "        cat \"$TERMUX_SSH_PASSWORD_PIPE\"\n" +
+        "        rm -f \"$TERMUX_SSH_PASSWORD_PIPE\"\n" +
+        "        exit 0\n" +
+        "      elif [ ! -e \"$TERMUX_SSH_ATTEMPT\" ]; then\n" +
+        "        : > \"$TERMUX_SSH_ATTEMPT\"\n" +
+        "        cat \"$TERMUX_SSH_PASSWORD_PIPE\"\n" +
+        "        exit 0\n" +
+        "      fi\n" +
         "    fi;;\n" +
         "esac\n" +
         "case \"$1\" in\n" +
@@ -119,7 +159,12 @@ public final class SshConnector {
     /** Connect to a host in a new tab, which is named after it. */
     @Nullable
     public static TerminalSession connect(@NonNull TermuxActivity activity, @NonNull String hostName) {
-        TerminalSession session = startSshScript(activity, hostName, hostName, CONNECT_SCRIPT);
+        // Hosts of ~/.ssh/config that are not registered in the app use ssh without reconnecting.
+        SshHost host = SshHostStore.find(SshHostStore.load(), hostName);
+        boolean useMosh = host != null && host.useMosh;
+        boolean autoReconnect = host != null && host.autoReconnect && !useMosh;
+        TerminalSession session = startSshScript(activity, hostName, hostName, CONNECT_SCRIPT, autoReconnect,
+            useMosh ? "mosh" : "ssh", autoReconnect ? "1" : "");
         if (session != null) {
             synchronized (sSshSessions) {
                 sSshSessions.put(session, hostName);
@@ -130,17 +175,21 @@ public final class SshConnector {
 
     /** Install a public key on a host in a new tab, so that the key is used to log in to it. */
     public static void copyId(@NonNull TermuxActivity activity, @NonNull String hostName, @NonNull File publicKeyFile) {
-        startSshScript(activity, "ssh-copy-id " + hostName, hostName, COPY_ID_SCRIPT, publicKeyFile.getAbsolutePath());
+        startSshScript(activity, "ssh-copy-id " + hostName, hostName, COPY_ID_SCRIPT, false, publicKeyFile.getAbsolutePath());
     }
 
     /**
      * Start a script that runs ssh for a host in a new tab, giving it the saved password of the
      * host if any. The script gets the host as `$1`, the password pipe as `$2`, the askpass
      * script as `$3`, both empty without a saved password, and the extra arguments after them.
+     *
+     * @param reusePassword Whether to give the password every time it is asked for while the
+     *                      session runs, like when reconnecting, instead of once.
      */
     @Nullable
     private static TerminalSession startSshScript(@NonNull TermuxActivity activity, @NonNull String sessionName,
-                                                  @NonNull String hostName, @NonNull String script, @NonNull String... extraArguments) {
+                                                  @NonNull String hostName, @NonNull String script, boolean reusePassword,
+                                                  @NonNull String... extraArguments) {
         TerminalTabsController tabsController = activity.getTerminalTabsController();
         if (tabsController == null) return null;
 
@@ -175,18 +224,26 @@ public final class SshConnector {
             return null;
         }
 
-        if (password != null) writePasswordToPipe(session, pipePath, password);
+        if (password != null) writePasswordToPipe(session, pipePath, password, reusePassword);
         return session;
     }
 
-    /** Disconnect an SSH session by asking ssh to exit, which leaves its tab to be reconnected or closed. */
+    /**
+     * Disconnect an SSH session by asking ssh to exit, which leaves its tab to be reconnected or
+     * closed. The signal is sent to the process group of the session, which the session process
+     * leads, so that it also stops the reconnect loop of the script that runs ssh.
+     */
     public static void disconnect(@NonNull TerminalSession session) {
         int pid = session.getPid();
         if (!session.isRunning() || pid < 1) return;
         try {
-            Os.kill(pid, OsConstants.SIGTERM);
+            Os.kill(-pid, OsConstants.SIGTERM);
         } catch (ErrnoException e) {
-            Logger.logStackTraceWithMessage(LOG_TAG, "Failed to disconnect the ssh process " + pid, e);
+            try {
+                Os.kill(pid, OsConstants.SIGTERM);
+            } catch (ErrnoException e2) {
+                Logger.logStackTraceWithMessage(LOG_TAG, "Failed to disconnect the ssh process " + pid, e2);
+            }
         }
     }
 
@@ -223,11 +280,13 @@ public final class SshConnector {
     }
 
     /**
-     * Write the password to the pipe once the askpass script opens it for reading, in the
+     * Write the password to the pipe when the askpass script opens it for reading, in the
      * background, and remove the pipe afterwards, or when ssh does not ask for the password in
-     * time or exits.
+     * time or the session ends. With {@code reuse}, the password is written each time the pipe is
+     * opened until the session ends, for reconnecting, and is kept in memory until then.
      */
-    private static void writePasswordToPipe(@NonNull TerminalSession session, @NonNull String pipePath, @NonNull byte[] password) {
+    private static void writePasswordToPipe(@NonNull TerminalSession session, @NonNull String pipePath,
+                                            @NonNull byte[] password, boolean reuse) {
         new Thread(() -> {
             long deadline = System.currentTimeMillis() + PASSWORD_PIPE_TIMEOUT_MS;
             byte[] line = Arrays.copyOf(password, password.length + 1);
@@ -236,7 +295,10 @@ public final class SshConnector {
             // The process is started when the session is first displayed.
             boolean started = false;
             try {
-                while (System.currentTimeMillis() < deadline && new File(pipePath).exists()) {
+                while (new File(pipePath).exists()) {
+                    // Wait for the password to be asked for until the timeout, except for a
+                    // running session that reuses it, which waits until the session ends.
+                    if ((!reuse || !started) && System.currentTimeMillis() > deadline) break;
                     FileDescriptor fd;
                     try {
                         // Fails with ENXIO until there is a reader, so it never blocks.
@@ -256,7 +318,9 @@ public final class SshConnector {
                     } finally {
                         Os.close(fd);
                     }
-                    break;
+                    if (!reuse) break;
+                    // Let the reader finish before waiting for the next one.
+                    Thread.sleep(1000);
                 }
             } catch (ErrnoException | java.io.InterruptedIOException | InterruptedException e) {
                 Logger.logStackTraceWithMessage(LOG_TAG, "Failed to give the saved password to ssh", e);

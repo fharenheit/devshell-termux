@@ -30,6 +30,13 @@
     <string name="ssh_field_identity_file">Private key file (optional)</string>
     <string name="ssh_field_startup_command">Command to run after connecting (optional)</string>
     <string name="ssh_field_extra_options">More ssh_config options (optional, one per line)</string>
+    <string name="ssh_field_jump_host">Jump host (ProxyJump, optional)</string>
+    <string name="ssh_field_local_forwards">Local port forwards (-L, one per line: port:host:hostport)</string>
+    <string name="ssh_field_remote_forwards">Remote port forwards (-R, one per line: port:host:hostport)</string>
+    <string name="ssh_field_socks_port">SOCKS proxy port (-D, optional)</string>
+    <string name="ssh_use_mosh">Connect with mosh (needs mosh on both sides, no port forwards)</string>
+    <string name="ssh_auto_reconnect">Reconnect automatically when the connection is lost (ssh only)</string>
+    <string name="ssh_auto_reconnect_short">auto reconnect</string>
     <string name="ssh_password_hint">Optional. Saved encrypted in the app.</string>
     <string name="ssh_password_keep_hint">Saved. Leave empty to keep it.</string>
     <string name="ssh_remove_saved_password">Remove the saved password</string>
@@ -40,6 +47,8 @@
     <string name="ssh_error_name_exists">A host with this name already exists</string>
     <string name="ssh_error_host">Enter the host name or address</string>
     <string name="ssh_error_port">Enter a port from 1 to 65535</string>
+    <string name="ssh_error_jump_host">Separate jump hosts with commas, without spaces</string>
+    <string name="ssh_error_forward">Invalid forward \"%1$s\". Use [bind:]port:host:hostport</string>
 
     <string name="msg_ssh_no_hosts">No SSH hosts yet. Add one with Add host.\n\nConnecting needs the openssh package: pkg install openssh</string>
     <string name="msg_ssh_confirm_delete_host">Delete the %1$s host and its saved password?</string>
