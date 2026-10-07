@@ -1,0 +1,31 @@
+From d8c73e88cb16d4bd07408765433d1f986d5d69a2 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Wed, 7 Oct 2026 12:06:01 +0000
+Subject: [PATCH] Added: Add ENTER and KEYBOARD buttons to the default extra
+ keys
+
+Add an ENTER key to the right of PGUP and a KEYBOARD key that toggles the
+soft keyboard to the right of PGDN in the default extra keys rows.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01GLNsTPnn2xKUQ4uFcevT6G
+---
+ .../shared/settings/properties/TermuxPropertyConstants.java     | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/termux-shared/src/main/java/com/termux/shared/settings/properties/TermuxPropertyConstants.java b/termux-shared/src/main/java/com/termux/shared/settings/properties/TermuxPropertyConstants.java
+index c868450..123aaa2 100644
+--- a/termux-shared/src/main/java/com/termux/shared/settings/properties/TermuxPropertyConstants.java
++++ b/termux-shared/src/main/java/com/termux/shared/settings/properties/TermuxPropertyConstants.java
+@@ -282,7 +282,7 @@ public final class TermuxPropertyConstants {
+     /** Defines the key for extra keys */
+     public static final String KEY_EXTRA_KEYS =  "extra-keys"; // Default: "extra-keys"
+     //public static final String DEFAULT_IVALUE_EXTRA_KEYS = "[[ESC, TAB, CTRL, ALT, {key: '-', popup: '|'}, DOWN, UP]]"; // Single row
+-    public static final String DEFAULT_IVALUE_EXTRA_KEYS = "[['ESC','/',{key: '-', popup: '|'},'HOME','UP','END','PGUP'], ['TAB','CTRL','ALT','LEFT','DOWN','RIGHT','PGDN']]"; // Double row
++    public static final String DEFAULT_IVALUE_EXTRA_KEYS = "[['ESC','/',{key: '-', popup: '|'},'HOME','UP','END','PGUP','ENTER'], ['TAB','CTRL','ALT','LEFT','DOWN','RIGHT','PGDN','KEYBOARD']]"; // Double row
+ 
+     /** Defines the key for extra keys style */
+     public static final String KEY_EXTRA_KEYS_STYLE =  "extra-keys-style"; // Default: "extra-keys-style"
+-- 
+2.43.0
+

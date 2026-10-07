@@ -11,6 +11,7 @@
 | D2Coding ligature 글꼴을 기본 터미널 글꼴로 사용 | `custom/patches/0002-*.patch` (`TermuxTerminalSessionClient.java`) + 글꼴 파일 |
 | 터미널 위에 세션 탭 바(전환, 새로 만들기, 닫기, 이름 바꾸기). 설계는 `custom/docs/terminal-tabs-design.md` | `custom/patches/0004-*.patch` (`activity_termux.xml`, `TermuxActivity.java`, `TermuxTerminalSessionClient.java`) + `app/.../terminal/tabs/`, 탭 리소스 |
 | 세션을 바꿀 때 IME가 조합 중인 글자(한글)를 버림 | `custom/patches/0005-*.patch` (`TerminalView.java`) |
+| 기본 extra keys에 ENTER(PGUP 오른쪽), KEYBOARD(PGDN 오른쪽, 키보드 표시/숨기기) 버튼 추가 | `custom/patches/0006-*.patch` (`TermuxPropertyConstants.java`) |
 | README 상단 안내 문구 | `custom/patches/0003-*.patch` (`README.md`) |
 | 빌드 결과로 GitHub 릴리즈 게시 워크플로 | `.github/workflows/publish_release_from_build.yml`, `.github/release-notes/` |
 
