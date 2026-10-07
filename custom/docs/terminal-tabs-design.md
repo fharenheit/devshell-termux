@@ -1,6 +1,6 @@
 # 터미널 탭 설계 (여러 세션을 백그라운드로 유지하는 탭 UI)
 
-상태: 1단계 구현됨(`custom/patches/0004-*`, `0005-*`). 2단계부터는 설계 단계입니다.
+상태: 1단계(`custom/patches/0004-*`, `0005-*`)와 2단계(`0007-*`) 구현됨. 3단계부터는 설계 단계입니다.
 
 ## 1. 현재 구조
 
@@ -53,7 +53,7 @@ ViewPager에 세션마다 `TerminalView`를 하나씩 두는 방식은 쓰지 �
 
 세션 수가 많지 않으므로(8개, 설정으로 늘려도 수십 개) RecyclerView나 Material `TabLayout` 의존성을 추가하지 않습니다. 목록이 바뀌면 탭 뷰를 다시 그립니다. 탭 뷰는 재사용하고, 개수가 달라질 때만 추가하거나 제거합니다.
 
-### 3.3 탭 상태는 포크 전용 싱글턴에 세션 handle을 키로 보관
+### 3.3 탭 상태는 포크 전용 싱글턴에 세션을 약한 참조 키로 보관
 
 탭 상태(새 출력 여부 등)는 액티비티보다 오래 살아 있어야 합니다(3번 한계). 그래서 액티비티에 두지 않고 프로세스 범위의 포크 전용 객체에 둡니다. 업스트림의 `TermuxSession`(`termux-shared`)에 필드를 추가하지 않으면 패치가 그만큼 줄어듭니다.
 
@@ -64,14 +64,15 @@ public final class TerminalTabStates {
         public boolean hasUnreadOutput;
         public boolean hasBell;
     }
-    private static final Map<String, State> sStates = new ConcurrentHashMap<>(); // key: TerminalSession.mHandle
-    private static volatile Runnable sListener; // 탭 바 갱신(메인 스레드로 post)
+    // 제거된 세션은 GC되면 저절로 빠지므로 따로 지울 필요가 없음
+    private static final Map<TerminalSession, State> sStates = new WeakHashMap<>();
+    // 탭 바 갱신 대상. 액티비티를 붙잡지 않도록 약한 참조
+    private static WeakReference<TerminalTabsController> sTabsController;
 
     /** 상태가 false에서 true로 바뀔 때만 리스너를 호출합니다(출력마다 다시 그리지 않음). */
     public static void markOutput(TerminalSession s) { ... }
     public static void markBell(TerminalSession s) { ... }
     public static void markSeen(TerminalSession s) { ... }   // 현재 탭이 되면 초기화
-    public static void remove(TerminalSession s) { ... }     // 세션 제거 시
     public static State get(TerminalSession s) { ... }
 }
 ```
@@ -92,7 +93,7 @@ public final class TerminalTabStates {
 | `app/src/main/res/drawable/terminal_tab_background.xml`, `ic_terminal_tab_*.xml` | 탭 배경(선택 시 아래 강조선), `+`/× 아이콘 |
 | `app/src/main/res/values/fork_terminal_tabs.xml` | 탭 관련 크기, 색, 문자열(업스트림 `values/*.xml`을 건드리지 않기 위해) |
 
-### 4.2 업스트림 파일 수정 (새 패치 `0003-*.patch`, 모두 작은 hook)
+### 4.2 업스트림 파일 수정 (패치 `0004-*`, `0007-*`, 모두 작은 hook)
 
 | 파일 | 변경 |
 |---|---|
@@ -110,16 +111,16 @@ PTY 출력 → TerminalSession(메인 스레드) → client.onTextChanged(s)
    │     s == 현재 세션 → TerminalView.onScreenUpdated()   (기존 동작)
    │     s != 현재 세션 → TerminalTabStates.markOutput(s)  ← isVisible() 검사보다 먼저
    └─ 액티비티 없음   : TrackingTerminalSessionClient → TerminalTabStates.markOutput(s)
-TerminalTabStates 상태 변화 → listener → TerminalTabsController.refresh(i)  (해당 탭만 다시 그림)
+TerminalTabStates 상태 변화 → TerminalTabsController.refresh()  (탭 수가 적어서 전체를 다시 바인딩, 스크롤은 하지 않음)
 ```
 
 `TermuxTerminalSessionClient`에서 바꿀 곳:
 
 - `onTextChanged`: 지금은 `if (!mActivity.isVisible()) return;`이 맨 앞에 있습니다. 현재 세션이 아니면 `markOutput`을 먼저 호출한 뒤 return하도록 바꿉니다. 액티비티가 `onStop`일 때도 기록해야 하기 때문입니다.
-- `onBell`: 백그라운드 세션이면 `markBell`. 지금처럼 진동/소리는 현재 세션에서만 냅니다(설정 가능하게).
+- `onBell`: 백그라운드 세션이면 `markBell`. 진동/소리는 업스트림처럼 어느 세션에서 울려도 냅니다(백그라운드 알림 역할).
 - `onTitleChanged`, `onSessionFinished`: `termuxSessionListNotifyUpdated()`가 이미 호출되므로 탭 바도 따라 갱신됩니다. 다른 세션 제목이 바뀔 때마다 뜨는 토스트는 탭 바가 켜져 있으면 끕니다(탭에 제목이 보이므로).
 - `setCurrentSession`: `markSeen(session)` 후 선택된 탭이 보이도록 스크롤(`checkAndScrollToSession` 옆에 추가). 탭 바로 바로 전환할 수 있으므로 전환 토스트(`notifyOfSessionChange`)도 탭 바가 켜져 있으면 생략합니다.
-- `removeFinishedSession`: `TerminalTabStates.remove(session)`.
+- `onSessionFinished`의 "- exited" 토스트는 그대로 둡니다.
 
 ## 5. UI와 동작
 
@@ -165,7 +166,7 @@ terminal-tabs-show-close = true
 
 1. **한글 조합(패치 0001)**: 조합 중에 세션을 바꾸면 조합하던 글자는 **버립니다**(패치 0005). `attachSession()`이 `restartInput`을 하고, 이전 입력 연결은 IME가 뒤늦게 보내는 `commitText`/`finishComposingText`를 무시합니다(`mInputConnectionGeneration`).
 2. **액티비티 재생성**(회전, 테마 변경): 탭 바는 상태를 갖지 않고 `TerminalTabStates`와 서비스 목록으로 다시 그리므로 상태가 사라지지 않습니다.
-3. **스레드**: `TerminalSession` 콜백은 메인 스레드 Handler에서 옵니다. 그래도 `TerminalTabStates` 리스너는 `post`로 감싸고 맵은 `ConcurrentHashMap`을 씁니다.
+3. **스레드**: `TerminalSession` 콜백은 메인 스레드 Handler에서 오므로 탭 갱신을 바로 호출합니다. 맵 접근은 `synchronized`로 감쌉니다.
 4. **현재 세션이 제거될 때**: 기존 `removeFinishedSession`이 인접 세션을 고르므로 그대로 따르고, 탭 바는 notify만 받습니다.
 5. **세로 공간**: 가로 모드나 키보드가 올라왔을 때 탭 바가 화면을 줄입니다. 높이는 `terminal-toolbar-height` 배율을 따르고, `off` 옵션을 둡니다. `TermuxActivityRootView`의 키보드 여백 계산은 레이아웃 높이 기준이라 영향이 없는지 확인해야 합니다.
 6. **블랙 UI, 다크 모드**: `isUsingBlackUI()`에 따라 배경과 글자 색을 바꿉니다(드로어와 같은 규칙).
@@ -177,7 +178,7 @@ terminal-tabs-show-close = true
 | 단계 | 내용 | 업스트림 패치 |
 |---|---|---|
 | 1 ✅ | 탭 바(전환, 새로 만들기, 닫기, 이름 바꾸기), 드로어와 동기화, 세션 전환 시 조합 중인 글자 버리기 | layout, Activity, SessionClient, TerminalView |
-| 2 | 새 출력/벨 표시 + 액티비티 없을 때 추적, 토스트 정리 | SessionClient, Service(한 줄) |
+| 2 ✅ | 새 출력/벨 표시 + 액티비티 없을 때 추적, 토스트 정리 | SessionClient, Service(한 줄), Activity |
 | 3 | `termux.properties` 설정(`terminal-tabs`, `max-sessions`), 순서 바꾸기 | properties 클래스 |
 | 4 (선택) | 알림 요약, 백그라운드 종료/벨 알림 | Service |
 
