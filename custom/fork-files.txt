@@ -5,8 +5,7 @@
 
 CLAUDE.md
 custom
-app/src/main/assets/fonts/D2Codingligature-Regular.ttf
-app/src/main/assets/fonts/D2Coding-OFL.txt
+app/src/main/assets/fonts
 .github/workflows/publish_release_from_build.yml
 .github/release-notes
 app/src/main/java/com/termux/app/terminal/tabs
@@ -17,3 +16,4 @@ app/src/main/res/drawable/ic_terminal_tab_add.xml
 app/src/main/res/drawable/ic_terminal_tab_close.xml
 app/src/main/res/values/fork_terminal_tabs.xml
 app/src/main/res/drawable/ic_terminal_tab_settings.xml
+app/src/main/java/com/termux/app/terminal/fonts

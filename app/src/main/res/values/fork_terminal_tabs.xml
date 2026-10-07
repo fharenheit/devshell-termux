@@ -26,6 +26,16 @@
     <string name="action_terminal_tabs_menu_edit_properties">Edit termux.properties</string>
     <string name="action_terminal_tabs_menu_reload_settings">Reload settings</string>
     <string name="msg_terminal_tabs_settings_reloaded">Settings reloaded</string>
+    <string name="action_terminal_tabs_menu_font">Font</string>
+
+    <string name="terminal_font_title">Font</string>
+    <string name="terminal_font_custom">Custom font (~/.termux/font.ttf)</string>
+    <string name="terminal_font_default_suffix">(default)</string>
+    <string name="terminal_font_no_hangul_suffix">(no Hangul)</string>
+    <string name="msg_terminal_font_applying">Setting the font to %1$s…</string>
+    <string name="msg_terminal_font_applied">Font set to %1$s</string>
+    <string name="msg_terminal_font_failed">Failed to set the font to %1$s: %2$s</string>
+    <string name="msg_terminal_font_backed_up">The previous font.ttf was moved to %1$s</string>
     <string name="action_move_terminal_tab_left">Move left</string>
     <string name="action_move_terminal_tab_right">Move right</string>
     <string name="terminal_tab_indicator_output" translatable="false">●</string>

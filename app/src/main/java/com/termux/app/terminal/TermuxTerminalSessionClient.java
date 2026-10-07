@@ -17,6 +17,7 @@ import com.termux.shared.shell.TermuxSession;
 import com.termux.shared.interact.TextInputDialogUtils;
 import com.termux.shared.interact.ShareUtils;
 import com.termux.app.TermuxActivity;
+import com.termux.app.terminal.fonts.TerminalFonts;
 import com.termux.app.terminal.tabs.TerminalSessionNotifications;
 import com.termux.app.terminal.tabs.TerminalTabStates;
 import com.termux.app.terminal.tabs.TerminalTabTitles;
@@ -68,6 +69,10 @@ public class TermuxTerminalSessionClient extends TermuxTerminalSessionClientBase
      * Should be called when mActivity.onStart() is called
      */
     public void onStart() {
+        // Load the font if it was chosen in the settings while the activity was stopped.
+        if (TerminalFonts.consumeFontChanged())
+            checkForFontAndColors();
+
         // The service has connected, but data may have changed since we were last in the foreground.
         // Get the session stored in shared preferences stored by {@link #onStop} if its valid,
         // otherwise get the last session currently running.

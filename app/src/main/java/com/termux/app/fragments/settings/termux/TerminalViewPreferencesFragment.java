@@ -9,6 +9,7 @@ import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 
 import com.termux.R;
+import com.termux.app.terminal.fonts.TerminalFontDialog;
 import com.termux.shared.settings.preferences.TermuxAppSharedPreferences;
 
 @Keep
@@ -23,6 +24,9 @@ public class TerminalViewPreferencesFragment extends PreferenceFragmentCompat {
         preferenceManager.setPreferenceDataStore(TerminalViewPreferencesDataStore.getInstance(context));
 
         setPreferencesFromResource(R.xml.termux_terminal_view_preferences, rootKey);
+
+        if (getActivity() != null)
+            TerminalFontDialog.setupPreference(findPreference("terminal_font"), getActivity());
     }
 
 }

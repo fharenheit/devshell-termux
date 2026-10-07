@@ -27,6 +27,8 @@ import com.termux.app.TermuxActivity;
 import com.termux.app.TermuxService;
 import com.termux.app.activities.SettingsActivity;
 import com.termux.app.terminal.TermuxTerminalSessionClient;
+import com.termux.app.terminal.fonts.TerminalFontDialog;
+import com.termux.app.terminal.fonts.TerminalFonts;
 import com.termux.shared.settings.properties.TermuxPropertyConstants;
 import com.termux.shared.shell.TermuxSession;
 import com.termux.shared.termux.TermuxConstants;
@@ -111,6 +113,7 @@ public class TerminalTabsController {
     private static final int MENU_KEYBOARD = 3;
     private static final int MENU_EDIT_PROPERTIES = 4;
     private static final int MENU_RELOAD_SETTINGS = 5;
+    private static final int MENU_FONT = 6;
 
     /** Show the menu of the settings button of the tab bar. */
     private void showMenu(View anchor) {
@@ -119,6 +122,7 @@ public class TerminalTabsController {
         menu.add(Menu.NONE, MENU_SETTINGS, Menu.NONE, R.string.action_terminal_tabs_menu_settings);
         menu.add(Menu.NONE, MENU_SESSIONS, Menu.NONE, R.string.action_terminal_tabs_menu_sessions);
         menu.add(Menu.NONE, MENU_KEYBOARD, Menu.NONE, R.string.action_terminal_tabs_menu_keyboard);
+        menu.add(Menu.NONE, MENU_FONT, Menu.NONE, R.string.action_terminal_tabs_menu_font);
         menu.add(Menu.NONE, MENU_EDIT_PROPERTIES, Menu.NONE, R.string.action_terminal_tabs_menu_edit_properties);
         menu.add(Menu.NONE, MENU_RELOAD_SETTINGS, Menu.NONE, R.string.action_terminal_tabs_menu_reload_settings);
         popupMenu.setOnMenuItemClickListener(item -> {
@@ -131,6 +135,13 @@ public class TerminalTabsController {
                     return true;
                 case MENU_KEYBOARD:
                     mActivity.getTermuxTerminalViewClient().onToggleSoftKeyboardRequest();
+                    return true;
+                case MENU_FONT:
+                    TerminalFontDialog.show(mActivity, () -> {
+                        // Load the font now instead of when the activity is started again.
+                        TerminalFonts.consumeFontChanged();
+                        getSessionClient().checkForFontAndColors();
+                    });
                     return true;
                 case MENU_EDIT_PROPERTIES:
                     editPropertiesFile();

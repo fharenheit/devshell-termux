@@ -10,6 +10,10 @@
             app:summaryOn="@string/termux_terminal_view_terminal_margin_adjustment_on"
             app:title="@string/termux_terminal_view_terminal_margin_adjustment_title" />
 
+        <Preference
+            app:key="terminal_font"
+            app:title="@string/terminal_font_title" />
+
     </PreferenceCategory>
 
 </PreferenceScreen>
