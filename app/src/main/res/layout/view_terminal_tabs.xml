@@ -31,4 +31,13 @@
         android:focusable="false"
         android:src="@drawable/ic_terminal_tab_add" />
 
+    <ImageButton
+        android:id="@+id/terminal_tabs_menu_button"
+        android:layout_width="@dimen/terminal_tabs_bar_height"
+        android:layout_height="match_parent"
+        android:background="?android:attr/selectableItemBackground"
+        android:contentDescription="@string/action_terminal_tabs_menu"
+        android:focusable="false"
+        android:src="@drawable/ic_terminal_tab_settings" />
+
 </LinearLayout>

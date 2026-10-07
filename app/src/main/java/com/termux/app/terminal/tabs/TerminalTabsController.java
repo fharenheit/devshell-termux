@@ -3,7 +3,10 @@ package com.termux.app.terminal.tabs;
 import android.app.AlertDialog;
 import android.graphics.Paint;
 import android.text.TextUtils;
+import android.content.Intent;
+import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.View;
 import android.util.TypedValue;
 import android.view.ViewGroup;
@@ -12,6 +15,7 @@ import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -21,10 +25,14 @@ import androidx.core.content.ContextCompat;
 import com.termux.R;
 import com.termux.app.TermuxActivity;
 import com.termux.app.TermuxService;
+import com.termux.app.activities.SettingsActivity;
 import com.termux.app.terminal.TermuxTerminalSessionClient;
+import com.termux.shared.settings.properties.TermuxPropertyConstants;
 import com.termux.shared.shell.TermuxSession;
+import com.termux.shared.termux.TermuxConstants;
 import com.termux.terminal.TerminalSession;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -60,6 +68,9 @@ public class TerminalTabsController {
             return true;
         });
 
+        View menuButton = activity.findViewById(R.id.terminal_tabs_menu_button);
+        menuButton.setOnClickListener(this::showMenu);
+
         TerminalTabStates.setTabsController(this);
 
         TerminalTabsSettings.load();
@@ -93,6 +104,86 @@ public class TerminalTabsController {
 
     private TermuxTerminalSessionClient getSessionClient() {
         return mActivity.getTermuxTerminalSessionClient();
+    }
+
+    private static final int MENU_SETTINGS = 1;
+    private static final int MENU_SESSIONS = 2;
+    private static final int MENU_KEYBOARD = 3;
+    private static final int MENU_EDIT_PROPERTIES = 4;
+    private static final int MENU_RELOAD_SETTINGS = 5;
+
+    /** Show the menu of the settings button of the tab bar. */
+    private void showMenu(View anchor) {
+        PopupMenu popupMenu = new PopupMenu(mActivity, anchor);
+        Menu menu = popupMenu.getMenu();
+        menu.add(Menu.NONE, MENU_SETTINGS, Menu.NONE, R.string.action_terminal_tabs_menu_settings);
+        menu.add(Menu.NONE, MENU_SESSIONS, Menu.NONE, R.string.action_terminal_tabs_menu_sessions);
+        menu.add(Menu.NONE, MENU_KEYBOARD, Menu.NONE, R.string.action_terminal_tabs_menu_keyboard);
+        menu.add(Menu.NONE, MENU_EDIT_PROPERTIES, Menu.NONE, R.string.action_terminal_tabs_menu_edit_properties);
+        menu.add(Menu.NONE, MENU_RELOAD_SETTINGS, Menu.NONE, R.string.action_terminal_tabs_menu_reload_settings);
+        popupMenu.setOnMenuItemClickListener(item -> {
+            switch (item.getItemId()) {
+                case MENU_SETTINGS:
+                    mActivity.startActivity(new Intent(mActivity, SettingsActivity.class));
+                    return true;
+                case MENU_SESSIONS:
+                    mActivity.getDrawer().openDrawer(Gravity.LEFT);
+                    return true;
+                case MENU_KEYBOARD:
+                    mActivity.getTermuxTerminalViewClient().onToggleSoftKeyboardRequest();
+                    return true;
+                case MENU_EDIT_PROPERTIES:
+                    editPropertiesFile();
+                    return true;
+                case MENU_RELOAD_SETTINGS:
+                    // Like `termux-reload-settings`.
+                    TermuxActivity.updateTermuxActivityStyling(mActivity);
+                    mActivity.showToast(mActivity.getString(R.string.msg_terminal_tabs_settings_reloaded), false);
+                    return true;
+                default:
+                    return false;
+            }
+        });
+        popupMenu.show();
+    }
+
+    /**
+     * Open the `termux.properties` file in an editor in a new session: `$EDITOR`, `nano` or `vi`,
+     * whichever is found first. The settings are reloaded with `termux-reload-settings` when the
+     * editor exits, and the session is then removed since it exits normally.
+     */
+    private void editPropertiesFile() {
+        TermuxService service = mActivity.getTermuxService();
+        if (service == null) return;
+
+        if (service.getTermuxSessionsSize() >= TerminalTabsSettings.getMaxSessions()) {
+            new AlertDialog.Builder(mActivity).setTitle(R.string.title_max_terminals_reached).setMessage(R.string.msg_max_terminals_reached)
+                .setPositiveButton(android.R.string.ok, null).show();
+            return;
+        }
+
+        File propertiesFile = TermuxPropertyConstants.getTermuxPropertiesFile();
+        String path = propertiesFile != null ? propertiesFile.getAbsolutePath() : TermuxConstants.TERMUX_PROPERTIES_PRIMARY_FILE_PATH;
+
+        String script =
+            "mkdir -p \"$(dirname \"$1\")\"\n" +
+            "for editor in \"$EDITOR\" nano vi; do\n" +
+            "  if [ -n \"$editor\" ] && command -v \"$editor\" >/dev/null 2>&1; then\n" +
+            "    \"$editor\" \"$1\" || exit\n" +
+            "    if command -v termux-reload-settings >/dev/null 2>&1; then termux-reload-settings; fi\n" +
+            "    exit 0\n" +
+            "  fi\n" +
+            "done\n" +
+            "echo \"No editor found. Install one with: pkg install nano\"\n" +
+            "exit 1\n";
+
+        File termuxShell = new File(TermuxConstants.TERMUX_BIN_PREFIX_DIR_PATH, "sh");
+        String shell = termuxShell.canExecute() ? termuxShell.getAbsolutePath() : "/system/bin/sh";
+
+        TermuxSession termuxSession = service.createTermuxSession(shell, new String[]{"-c", script, "sh", path},
+            null, TermuxConstants.TERMUX_HOME_DIR_PATH, false, propertiesFile != null ? propertiesFile.getName() : "termux.properties");
+        if (termuxSession == null) return;
+        getSessionClient().setCurrentSession(termuxSession.getTerminalSession());
     }
 
     /** Called when the session displayed in the terminal has changed or may have changed. */
