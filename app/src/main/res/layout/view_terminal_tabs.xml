@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Tab bar above the terminal that shows the terminal sessions, see TerminalTabsController. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/terminal_tabs_bar"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/terminal_tabs_bar_height"
+    android:background="@color/terminal_tabs_bar_background"
+    android:orientation="horizontal">
+
+    <HorizontalScrollView
+        android:id="@+id/terminal_tabs_scroll_view"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:fillViewport="true"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:id="@+id/terminal_tabs_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal" />
+    </HorizontalScrollView>
+
+    <ImageButton
+        android:id="@+id/terminal_tabs_new_session_button"
+        android:layout_width="@dimen/terminal_tabs_bar_height"
+        android:layout_height="match_parent"
+        android:background="?android:attr/selectableItemBackground"
+        android:contentDescription="@string/action_new_session"
+        android:focusable="false"
+        android:src="@drawable/ic_terminal_tab_add" />
+
+</LinearLayout>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_activated="true">
+        <layer-list>
+            <item>
+                <color android:color="@color/terminal_tab_selected_background" />
+            </item>
+            <item android:gravity="bottom" android:height="2dp">
+                <color android:color="@color/terminal_tab_selected_indicator" />
+            </item>
+        </layer-list>
+    </item>
+    <item>
+        <ripple android:color="@color/terminal_tab_selected_background">
+            <item android:id="@android:id/mask">
+                <color android:color="@android:color/white" />
+            </item>
+        </ripple>
+    </item>
+</selector>

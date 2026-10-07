@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:background="@drawable/terminal_tab_background"
+    android:focusable="false"
+    android:gravity="center_vertical"
+    android:minWidth="64dp"
+    android:orientation="horizontal"
+    android:paddingStart="10dp">
+
+    <TextView
+        android:id="@+id/terminal_tab_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:ellipsize="end"
+        android:maxWidth="@dimen/terminal_tab_title_max_width"
+        android:singleLine="true"
+        android:textColor="@color/terminal_tab_text"
+        android:textSize="13sp" />
+
+    <ImageButton
+        android:id="@+id/terminal_tab_close_button"
+        android:layout_width="28dp"
+        android:layout_height="match_parent"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/action_close_terminal_tab"
+        android:focusable="false"
+        android:src="@drawable/ic_terminal_tab_close" />
+
+</LinearLayout>

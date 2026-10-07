@@ -17,6 +17,7 @@ import com.termux.shared.shell.TermuxSession;
 import com.termux.shared.interact.TextInputDialogUtils;
 import com.termux.shared.interact.ShareUtils;
 import com.termux.app.TermuxActivity;
+import com.termux.app.terminal.tabs.TerminalTabsController;
 import com.termux.shared.terminal.TermuxTerminalSessionClientBase;
 import com.termux.shared.termux.TermuxConstants;
 import com.termux.app.TermuxService;
@@ -144,6 +145,12 @@ public class TermuxTerminalSessionClient extends TermuxTerminalSessionClientBase
             return;
         }
 
+        // The session was closed from its tab while running.
+        if (TerminalTabsController.shouldRemoveOnExit(finishedSession)) {
+            removeFinishedSession(finishedSession);
+            return;
+        }
+
         int index = service.getIndexOfSession(finishedSession);
 
         // For plugin commands that expect the result back, we should immediately close the session
@@ -177,6 +184,9 @@ public class TermuxTerminalSessionClient extends TermuxTerminalSessionClientBase
                 removeFinishedSession(finishedSession);
             }
         }
+
+        // Show the exit status of sessions that were not removed.
+        termuxSessionListNotifyUpdated();
     }
 
     @Override
@@ -284,6 +294,7 @@ public class TermuxTerminalSessionClient extends TermuxTerminalSessionClientBase
         // We call the following even when the session is already being displayed since config may
         // be stale, like current session not selected or scrolled to.
         checkAndScrollToSession(session);
+        mActivity.terminalTabsNotifyUpdated();
         updateBackgroundColor();
     }
 

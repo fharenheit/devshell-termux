@@ -41,6 +41,7 @@ import com.termux.app.activities.HelpActivity;
 import com.termux.app.activities.SettingsActivity;
 import com.termux.shared.settings.preferences.TermuxAppSharedPreferences;
 import com.termux.app.terminal.TermuxSessionsListViewController;
+import com.termux.app.terminal.tabs.TerminalTabsController;
 import com.termux.app.terminal.io.TerminalToolbarViewPager;
 import com.termux.app.terminal.TermuxTerminalSessionClient;
 import com.termux.app.terminal.TermuxTerminalViewClient;
@@ -127,6 +128,11 @@ public final class TermuxActivity extends Activity implements ServiceConnection 
      * The termux sessions list controller.
      */
     TermuxSessionsListViewController mTermuxSessionListViewController;
+
+    /**
+     * The tabs above the terminal that show the terminal sessions.
+     */
+    TerminalTabsController mTerminalTabsController;
 
     /**
      * The {@link TermuxActivity} broadcast receiver for various things like terminal style configuration changes.
@@ -233,6 +239,8 @@ public final class TermuxActivity extends Activity implements ServiceConnection 
         setSettingsButtonView();
 
         setNewSessionButtonView();
+
+        mTerminalTabsController = new TerminalTabsController(this);
 
         setToggleKeyboardView();
 
@@ -531,12 +539,16 @@ public final class TermuxActivity extends Activity implements ServiceConnection 
         View newSessionButton = findViewById(R.id.new_session_button);
         newSessionButton.setOnClickListener(v -> mTermuxTerminalSessionClient.addNewSession(false, null));
         newSessionButton.setOnLongClickListener(v -> {
-            TextInputDialogUtils.textInput(TermuxActivity.this, R.string.title_create_named_session, null,
-                R.string.action_create_named_session_confirm, text -> mTermuxTerminalSessionClient.addNewSession(false, text),
-                R.string.action_new_session_failsafe, text -> mTermuxTerminalSessionClient.addNewSession(true, text),
-                -1, null, null);
+            showNewNamedSessionDialog();
             return true;
         });
+    }
+
+    public void showNewNamedSessionDialog() {
+        TextInputDialogUtils.textInput(TermuxActivity.this, R.string.title_create_named_session, null,
+            R.string.action_create_named_session_confirm, text -> mTermuxTerminalSessionClient.addNewSession(false, text),
+            R.string.action_new_session_failsafe, text -> mTermuxTerminalSessionClient.addNewSession(true, text),
+            -1, null, null);
     }
 
     private void setToggleKeyboardView() {
@@ -780,6 +792,12 @@ public final class TermuxActivity extends Activity implements ServiceConnection 
 
     public void termuxSessionListNotifyUpdated() {
         mTermuxSessionListViewController.notifyDataSetChanged();
+        terminalTabsNotifyUpdated();
+    }
+
+    public void terminalTabsNotifyUpdated() {
+        if (mTerminalTabsController != null)
+            mTerminalTabsController.refresh();
     }
 
     public boolean isVisible() {

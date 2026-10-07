@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Resources for the terminal session tabs. Kept out of upstream files to keep patches small. -->
+<resources>
+    <dimen name="terminal_tabs_bar_height">36dp</dimen>
+    <dimen name="terminal_tab_title_max_width">160dp</dimen>
+
+    <color name="terminal_tabs_bar_background">#FF000000</color>
+    <color name="terminal_tab_selected_background">#FF2E2E2E</color>
+    <color name="terminal_tab_selected_indicator">#FFE0E0E0</color>
+    <color name="terminal_tab_text">#FFB0B0B0</color>
+    <color name="terminal_tab_text_selected">#FFFFFFFF</color>
+    <color name="terminal_tab_text_failed">#FFFF5555</color>
+
+    <string name="action_close_terminal_tab">Close session</string>
+    <string name="title_terminal_tab_menu">Session %1$d</string>
+    <string name="action_rename_terminal_tab">Rename</string>
+    <string name="action_close_terminal_tab_menu">Close</string>
+</resources>
