@@ -800,6 +800,16 @@ public final class TermuxActivity extends Activity implements ServiceConnection 
             mTerminalTabsController.refresh();
     }
 
+    @Nullable
+    public TerminalTabsController getTerminalTabsController() {
+        return mTerminalTabsController;
+    }
+
+    /** Whether the terminal tabs show the sessions, their titles and states, so toasts for them are not needed. */
+    public boolean areTerminalTabsShown() {
+        return mTerminalTabsController != null;
+    }
+
     public boolean isVisible() {
         return mIsVisible;
     }

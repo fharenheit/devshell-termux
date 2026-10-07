@@ -17,6 +17,7 @@ import com.termux.shared.shell.TermuxSession;
 import com.termux.shared.interact.TextInputDialogUtils;
 import com.termux.shared.interact.ShareUtils;
 import com.termux.app.TermuxActivity;
+import com.termux.app.terminal.tabs.TerminalTabStates;
 import com.termux.app.terminal.tabs.TerminalTabsController;
 import com.termux.shared.terminal.TermuxTerminalSessionClientBase;
 import com.termux.shared.termux.TermuxConstants;
@@ -116,6 +117,9 @@ public class TermuxTerminalSessionClient extends TermuxTerminalSessionClientBase
 
     @Override
     public void onTextChanged(TerminalSession changedSession) {
+        // Also record output of other sessions while the activity is not visible, to show on their tabs.
+        if (changedSession != mActivity.getCurrentSession()) TerminalTabStates.markOutput(changedSession);
+
         if (!mActivity.isVisible()) return;
 
         if (mActivity.getCurrentSession() == changedSession) mActivity.getTerminalView().onScreenUpdated();
@@ -125,7 +129,7 @@ public class TermuxTerminalSessionClient extends TermuxTerminalSessionClientBase
     public void onTitleChanged(TerminalSession updatedSession) {
         if (!mActivity.isVisible()) return;
 
-        if (updatedSession != mActivity.getCurrentSession()) {
+        if (updatedSession != mActivity.getCurrentSession() && !mActivity.areTerminalTabsShown()) {
             // Only show toast for other sessions than the current one, since the user
             // probably consciously caused the title change to change in the current session
             // and don't want an annoying toast for that.
@@ -207,6 +211,8 @@ public class TermuxTerminalSessionClient extends TermuxTerminalSessionClientBase
 
     @Override
     public void onBell(TerminalSession session) {
+        if (session != mActivity.getCurrentSession()) TerminalTabStates.markBell(session);
+
         if (!mActivity.isVisible()) return;
 
         switch (mActivity.getProperties().getBellBehaviour()) {
@@ -294,14 +300,16 @@ public class TermuxTerminalSessionClient extends TermuxTerminalSessionClientBase
         // We call the following even when the session is already being displayed since config may
         // be stale, like current session not selected or scrolled to.
         checkAndScrollToSession(session);
-        mActivity.terminalTabsNotifyUpdated();
+        TerminalTabsController terminalTabsController = mActivity.getTerminalTabsController();
+        if (terminalTabsController != null)
+            terminalTabsController.onCurrentSessionChanged(session);
         updateBackgroundColor();
     }
 
     void notifyOfSessionChange() {
         if (!mActivity.isVisible()) return;
 
-        if (!mActivity.getProperties().areTerminalSessionChangeToastsDisabled()) {
+        if (!mActivity.getProperties().areTerminalSessionChangeToastsDisabled() && !mActivity.areTerminalTabsShown()) {
             TerminalSession session = mActivity.getCurrentSession();
             mActivity.showToast(toToastTitle(session), false);
         }

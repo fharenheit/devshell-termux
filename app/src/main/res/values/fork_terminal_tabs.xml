@@ -10,9 +10,15 @@
     <color name="terminal_tab_text">#FFB0B0B0</color>
     <color name="terminal_tab_text_selected">#FFFFFFFF</color>
     <color name="terminal_tab_text_failed">#FFFF5555</color>
+    <color name="terminal_tab_indicator_output">#FF8AB4F8</color>
+    <color name="terminal_tab_indicator_bell">#FFFFC107</color>
 
     <string name="action_close_terminal_tab">Close session</string>
     <string name="title_terminal_tab_menu">Session %1$d</string>
     <string name="action_rename_terminal_tab">Rename</string>
     <string name="action_close_terminal_tab_menu">Close</string>
+    <string name="terminal_tab_indicator_output" translatable="false">●</string>
+    <string name="terminal_tab_indicator_bell" translatable="false">🔔</string>
+    <string name="terminal_tab_state_output">new output</string>
+    <string name="terminal_tab_state_bell">bell</string>
 </resources>

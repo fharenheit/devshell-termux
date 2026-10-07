@@ -52,14 +52,26 @@ public class TerminalTabsController {
             mActivity.showNewNamedSessionDialog();
             return true;
         });
+
+        TerminalTabStates.setTabsController(this);
     }
 
     private TermuxTerminalSessionClient getSessionClient() {
         return mActivity.getTermuxTerminalSessionClient();
     }
 
+    /** Called when the session displayed in the terminal has changed or may have changed. */
+    public void onCurrentSessionChanged(TerminalSession currentSession) {
+        TerminalTabStates.markSeen(currentSession);
+        refresh(true);
+    }
+
     /** Rebuild the tabs from the current {@link TermuxService} sessions. */
     public void refresh() {
+        refresh(false);
+    }
+
+    private void refresh(boolean scrollToSelectedTab) {
         TermuxService service = mActivity.getTermuxService();
         List<TermuxSession> sessions = service == null ? Collections.emptyList() : service.getTermuxSessions();
         TerminalSession currentSession = mActivity.getCurrentSession();
@@ -78,12 +90,27 @@ public class TerminalTabsController {
             if (session == currentSession) selectedIndex = i;
         }
 
-        if (selectedIndex >= 0) scrollToTab(selectedIndex);
+        if (scrollToSelectedTab && selectedIndex >= 0) scrollToTab(selectedIndex);
     }
 
     private void bindTab(View tabView, int index, TerminalSession session, boolean selected) {
         TextView titleView = tabView.findViewById(R.id.terminal_tab_title);
         titleView.setText(getTabTitle(index, session));
+
+        // The current session is being displayed, so it has nothing unread.
+        TerminalTabStates.State state = selected ? null : TerminalTabStates.get(session);
+        TextView indicatorView = tabView.findViewById(R.id.terminal_tab_indicator);
+        String stateDescription = null;
+        if (state != null && state.hasBell) {
+            indicatorView.setText(R.string.terminal_tab_indicator_bell);
+            indicatorView.setTextColor(ContextCompat.getColor(mActivity, R.color.terminal_tab_indicator_bell));
+            stateDescription = mActivity.getString(R.string.terminal_tab_state_bell);
+        } else if (state != null && state.hasUnreadOutput) {
+            indicatorView.setText(R.string.terminal_tab_indicator_output);
+            indicatorView.setTextColor(ContextCompat.getColor(mActivity, R.color.terminal_tab_indicator_output));
+            stateDescription = mActivity.getString(R.string.terminal_tab_state_output);
+        }
+        indicatorView.setVisibility(stateDescription != null ? View.VISIBLE : View.GONE);
 
         tabView.setActivated(selected);
 
@@ -99,7 +126,7 @@ public class TerminalTabsController {
         else colorId = R.color.terminal_tab_text;
         titleView.setTextColor(ContextCompat.getColor(mActivity, colorId));
 
-        tabView.setContentDescription(titleView.getText());
+        tabView.setContentDescription(stateDescription == null ? titleView.getText() : titleView.getText() + ", " + stateDescription);
         tabView.setOnClickListener(v -> getSessionClient().setCurrentSession(session));
         tabView.setOnLongClickListener(v -> {
             showTabMenu(index, session);

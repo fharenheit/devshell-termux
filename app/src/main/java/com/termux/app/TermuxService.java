@@ -24,6 +24,7 @@ import androidx.annotation.Nullable;
 import com.termux.R;
 import com.termux.app.settings.properties.TermuxAppSharedProperties;
 import com.termux.app.terminal.TermuxTerminalSessionClient;
+import com.termux.app.terminal.tabs.TrackingTerminalSessionClient;
 import com.termux.app.utils.PluginUtils;
 import com.termux.shared.data.IntentUtils;
 import com.termux.shared.models.errors.Errno;
@@ -102,7 +103,7 @@ public final class TermuxService extends Service implements TermuxTask.TermuxTas
     /** The basic implementation of the {@link TerminalSessionClient} interface to be used by {@link TerminalSession}
      * that does not hold activity references.
      */
-    final TermuxTerminalSessionClientBase mTermuxTerminalSessionClientBase = new TermuxTerminalSessionClientBase();
+    final TermuxTerminalSessionClientBase mTermuxTerminalSessionClientBase = new TrackingTerminalSessionClient();
 
     /** The wake lock and wifi lock are always acquired and released together. */
     private PowerManager.WakeLock mWakeLock;
