@@ -139,10 +139,13 @@ TerminalTabStates 상태 변화 → TerminalTabsController.refresh()  (탭 수�
 | 탭 길게 누르기 | 메뉴: 이름 바꾸기 / 왼쪽·오른쪽으로 이동 / 닫기 |
 | × | 실행 중이면 확인 대화상자 후 `finishIfRunning()`, 프로세스가 끝나면 종료 코드와 상관없이 탭을 제거. 이미 종료된 세션은 바로 `removeFinishedSession` |
 | `+` | `addNewSession(false, null)`. 길게 누르면 기존 드로어 버튼처럼 이름 있는 세션/failsafe 대화상자 |
+| ⚙ (`+` 오른쪽) | 팝업 메뉴: Settings(설정 화면) / Sessions list(드로어 열기) / Show/hide keyboard / Edit termux.properties / Reload settings |
 | 탭 제목 | `[번호] 라벨`(5.1). 최대 너비 160dp, 넘치면 말줄임 |
 | 상태 표시 | 새 출력 ●(회색), 벨 🔔(강조색), 종료 코드 0이면 취소선, 0이 아니면 빨간 취소선(드로어와 같은 규칙) |
 
 탭 순서 바꾸기는 탭을 길게 눌렀을 때 나오는 메뉴의 "Move left"/"Move right"로 합니다(3단계). `getTermuxSessions()`가 돌려주는 리스트를 `synchronized (service)` 안에서 `Collections.swap`하면 됩니다. 이 리스트는 드로어 어댑터가 쓰는 리스트와 같은 객체라서 드로어 순서도 같이 바뀝니다. 업스트림 코드는 바꿀 필요가 없습니다.
+
+**⚙ 메뉴의 Edit termux.properties**: 새 세션에서 `$PREFIX/bin/sh -c`로 `$EDITOR`, `nano`, `vi` 중 처음 찾은 편집기로 `termux.properties`(없으면 `~/.termux/termux.properties`를 만들 경로)를 엽니다. 편집기가 정상 종료하면 `termux-reload-settings`를 실행하고, 세션은 종료 코드 0이라 자동으로 닫힙니다. 편집기가 없으면 설치 방법을 출력하고 종료 코드 1로 남습니다. **Reload settings**는 `termux-reload-settings`와 같은 브로드캐스트(`TermuxActivity.updateTermuxActivityStyling`)를 보냅니다.
 
 ### 5.1 탭 이름
 

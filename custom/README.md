@@ -14,6 +14,7 @@
 | `termux.properties`의 탭 설정(`terminal-tabs = top/bottom/off`, `terminal-tabs-show-close`, `max-sessions`), 탭 길게 누르기 메뉴로 순서 바꾸기 | `custom/patches/0008-*.patch` (`TermuxActivity.java`, `TermuxTerminalSessionClient.java`) + `app/.../terminal/tabs/TerminalTabsSettings.java` |
 | 앱을 보고 있지 않을 때 세션이 끝나거나 벨이 울리면 알림(누르면 그 세션으로 열림), `terminal-session-notifications = all/exit/bell/off` | `custom/patches/0009-*.patch` (`TermuxActivity.java`, `TermuxTerminalSessionClient.java`, `TermuxService.java`) + `app/.../terminal/tabs/TerminalSessionNotifications.java` |
 | 선택된 탭을 다시 눌러 이름 바꾸기(Reset으로 이름 지우기), 이름 없는 탭에 실행 중인 프로그램/작업 폴더 표시(`terminal-tab-auto-title = process/cwd/off`) | `custom/patches/0010-*.patch` (`TermuxTerminalSessionClient.java`) + `app/.../terminal/tabs/TerminalTabTitles.java` |
+| 탭 바의 ⚙ 메뉴(설정, 세션 목록, 키보드, `termux.properties` 편집, 설정 다시 읽기) | 포크 전용 파일만 (`app/.../terminal/tabs/TerminalTabsController.java`, `view_terminal_tabs.xml`, `ic_terminal_tab_settings.xml`) |
 | 세션을 바꿀 때 IME가 조합 중인 글자(한글)를 버림 | `custom/patches/0005-*.patch` (`TerminalView.java`) |
 | 기본 extra keys에 ENTER(PGUP 오른쪽), KEYBOARD(PGDN 오른쪽, 키보드 표시/숨기기) 버튼 추가 | `custom/patches/0006-*.patch` (`TermuxPropertyConstants.java`) |
 | README 상단 안내 문구 | `custom/patches/0003-*.patch` (`README.md`) |
