@@ -34,6 +34,7 @@ import com.termux.shared.activities.ReportActivity;
 import com.termux.shared.models.ReportInfo;
 import com.termux.app.models.UserAction;
 import com.termux.app.terminal.io.KeyboardShortcut;
+import com.termux.shared.settings.preferences.TermuxAppSharedPreferences;
 import com.termux.shared.settings.properties.TermuxPropertyConstants;
 import com.termux.shared.data.DataUtils;
 import com.termux.shared.logger.Logger;
@@ -69,6 +70,10 @@ public class TermuxTerminalViewClient extends TermuxTerminalViewClientBase {
 
     private boolean mTerminalCursorBlinkerStateAlreadySet;
 
+    /** The font size on the screen, and the saved one it started from. */
+    private int mFontSize;
+    private int mSavedFontSize;
+
     private static final String LOG_TAG = "TermuxTerminalViewClient";
 
     public TermuxTerminalViewClient(TermuxActivity activity, TermuxTerminalSessionClient termuxTerminalSessionClient) {
@@ -84,7 +89,7 @@ public class TermuxTerminalViewClient extends TermuxTerminalViewClientBase {
      * Should be called when mActivity.onCreate() is called
      */
     public void onCreate() {
-        mActivity.getTerminalView().setTextSize(mActivity.getPreferences().getFontSize());
+        applySavedFontSize();
         mActivity.getTerminalView().setKeepScreenOn(mActivity.getPreferences().shouldKeepScreenOn());
     }
 
@@ -92,6 +97,9 @@ public class TermuxTerminalViewClient extends TermuxTerminalViewClientBase {
      * Should be called when mActivity.onStart() is called
      */
     public void onStart() {
+        // The font size may have been changed in the settings.
+        applySavedFontSizeIfChanged();
+
         // Set {@link TerminalView#TERMINAL_VIEW_KEY_LOGGING_ENABLED} value
         // Also required if user changed the preference from {@link TermuxSettings} activity and returns
         boolean isTerminalViewKeyLoggingEnabled = mActivity.getPreferences().isTerminalViewKeyLoggingEnabled();
@@ -484,9 +492,27 @@ public class TermuxTerminalViewClient extends TermuxTerminalViewClientBase {
 
 
 
+    /**
+     * Make the text larger or smaller on the screen, for the A+ and A− extra keys, pinch zoom and
+     * Ctrl+Alt+/-. The size is not saved, so the saved size of the Font size setting is used when
+     * the app is opened again.
+     */
     public void changeFontSize(boolean increase) {
-        mActivity.getPreferences().changeFontSize(increase);
-        mActivity.getTerminalView().setTextSize(mActivity.getPreferences().getFontSize());
+        int[] sizes = TermuxAppSharedPreferences.getDefaultFontSizes(mActivity);
+        mFontSize = Math.max(sizes[1], Math.min(sizes[2], mFontSize + (increase ? 2 : -2)));
+        mActivity.getTerminalView().setTextSize(mFontSize);
+    }
+
+    /** Show the text at the saved font size, like after it was changed in the settings. */
+    public void applySavedFontSize() {
+        mSavedFontSize = mActivity.getPreferences().getFontSize();
+        mFontSize = mSavedFontSize;
+        mActivity.getTerminalView().setTextSize(mFontSize);
+    }
+
+    /** Show the text at the saved font size if it was changed in the settings since it was shown. */
+    public void applySavedFontSizeIfChanged() {
+        if (mActivity.getPreferences().getFontSize() != mSavedFontSize) applySavedFontSize();
     }
 
 

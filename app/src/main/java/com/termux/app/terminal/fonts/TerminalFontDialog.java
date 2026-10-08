@@ -52,6 +52,16 @@ public final class TerminalFontDialog {
      * @param onApplied Called on the main thread after a font was applied successfully.
      */
     public static void show(@NonNull Activity activity, @Nullable Runnable onApplied) {
+        show(activity, onApplied, null);
+    }
+
+    /**
+     * Show the dialog.
+     *
+     * @param onApplied Called on the main thread after a font was applied successfully.
+     * @param onSizeSaved Called on the main thread after a font size was saved with the Size button.
+     */
+    public static void show(@NonNull Activity activity, @Nullable Runnable onApplied, @Nullable Runnable onSizeSaved) {
         final Font current = TerminalFonts.getCurrentFont(activity);
         final boolean hasCustomFont = current == null;
 
@@ -88,6 +98,7 @@ public final class TerminalFontDialog {
                 if (font == null || font == current) return;
                 applyFont(activity, font, onApplied);
             })
+            .setNeutralButton(R.string.action_terminal_font_size, (d, which) -> TerminalFontSizeDialog.show(activity, onSizeSaved))
             .setNegativeButton(android.R.string.cancel, null)
             .create();
         dialog.setOnDismissListener(d -> previewLoader.release());

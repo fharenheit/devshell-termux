@@ -38,6 +38,9 @@ public class TermuxTerminalExtraKeys extends TerminalExtraKeys {
                 drawerLayout.closeDrawer(Gravity.LEFT);
             else
                 drawerLayout.openDrawer(Gravity.LEFT);
+        } else if ("FONT_LARGER".equals(key) || "FONT_SMALLER".equals(key)) {
+            if (mTermuxTerminalViewClient != null)
+                mTermuxTerminalViewClient.changeFontSize("FONT_LARGER".equals(key));
         } else if ("PASTE".equals(key)) {
             if(mTermuxTerminalSessionClient != null)
                 mTermuxTerminalSessionClient.onPasteTextFromClipboard(null);

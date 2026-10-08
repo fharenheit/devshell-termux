@@ -160,7 +160,7 @@ public class TerminalTabsController {
                         // Load the font now instead of when the activity is started again.
                         TerminalFonts.consumeFontChanged();
                         getSessionClient().checkForFontAndColors();
-                    });
+                    }, () -> mActivity.getTermuxTerminalViewClient().applySavedFontSize());
                     return true;
                 case MENU_EDIT_PROPERTIES:
                     editPropertiesFile();

@@ -42,6 +42,11 @@
     <string name="msg_settings_imported">Settings imported. The previous ones were copied to %1$s</string>
 
     <string name="terminal_font_title">Font</string>
+    <string name="terminal_font_size_title">Font size</string>
+    <string name="terminal_font_size_value">%1$d px (%2$d dp)</string>
+    <string name="action_terminal_font_size_save">Save</string>
+    <string name="action_terminal_font_size_default">Default</string>
+    <string name="action_terminal_font_size">Size…</string>
     <string name="terminal_font_custom">Custom font (~/.termux/font.ttf)</string>
     <string name="terminal_font_default_suffix">(default)</string>
     <string name="msg_terminal_font_applying">Setting the font to %1$s…</string>

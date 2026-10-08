@@ -123,6 +123,9 @@ public class ExtraKeysConstants {
         public static final ExtraKeyDisplayMap NICER_LOOKING_DISPLAY = new ExtraKeyDisplayMap() {{
             // nicer looking for most cases
             put("-", "―"); // U+2015 ― HORIZONTAL BAR
+            // Make the terminal text larger or smaller until the app is opened again.
+            put("FONT_LARGER", "A+");
+            put("FONT_SMALLER", "A−"); // U+2212 − MINUS SIGN
         }};
 
         /**

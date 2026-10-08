@@ -9,6 +9,15 @@
 - **문자 표시**: 목록의 각 글꼴에 `EN 한 日 中 Кир ع ש ไทย Nerd` 중 가진 문자를 표시합니다. 글꼴을 추가할 때 fontTools로 확인한 값입니다(`TerminalFonts.FONTS`).
 - **내려받는 글꼴**: 큰 글꼴은 APK에 넣지 않고 처음 적용할 때 이 저장소의 `custom/fonts/`에서 `~/.termux/fonts/`로 받습니다(raw.githubusercontent.com, `master`). 크기와 SHA-256이 맞을 때만 쓰고, 진행률 대화상자에서 취소할 수 있습니다. `custom/fonts/`의 파일을 바꾸면 `TerminalFonts.FONTS`의 크기와 체크섬도 바꿔야 합니다(`TerminalFontsTest.testFontFilesMatch`가 확인).
 
+## 글자 크기
+
+- **화면에서만 바꾸기**: extra keys의 A+(PGUP 오른쪽), A−(PGDN 오른쪽), 두 손가락 확대/축소, 하드웨어 키보드 Ctrl+Alt+`+`/`-`.
+  2픽셀씩 바뀌고 저장하지 않습니다. 앱을 다시 열면(액티비티를 새로 만들면) 저장된 크기로 돌아갑니다.
+  `termux.properties`에 `extra-keys`를 직접 정한 경우에는 `'FONT_LARGER'`, `'FONT_SMALLER'` 키를 넣으면 같은 버튼이 됩니다
+- **저장되는 크기**: ⚙ 메뉴 → Font → **Size…**, 또는 설정 → Terminal View → **Font size**(`TerminalFontSizeDialog`). 샘플 글자를 보며
+  A−/A+나 슬라이더로 고르고 Save. Default는 기본 크기(12dp)로 되돌림. 저장하면 화면에서 바꾼 크기 대신 바로 적용되고, 설정 화면에서 바꾼 것은
+  터미널로 돌아올 때 적용됩니다. 값은 원래 Termux의 `fontsize` 설정(픽셀)이라 설정 내보내기에도 포함됩니다
+
 | 글꼴 | 위치 | 크기 | 문자 | 라이선스 |
 |---|---|---|---|---|
 | D2Coding ligature (기본) | APK | 4.1 MB | 한 日 Кир | OFL |
