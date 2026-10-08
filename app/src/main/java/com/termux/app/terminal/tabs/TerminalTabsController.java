@@ -34,6 +34,7 @@ import com.termux.app.terminal.sftp.SftpBrowserActivity;
 import com.termux.app.terminal.search.TerminalSearchBar;
 import com.termux.app.terminal.snippets.SnippetsDialog;
 import com.termux.app.terminal.ssh.SshConnector;
+import com.termux.app.terminal.ssh.SshForwardsDialog;
 import com.termux.app.terminal.ssh.SshHostsDialog;
 import com.termux.shared.settings.properties.TermuxPropertyConstants;
 import com.termux.shared.shell.TermuxSession;
@@ -423,6 +424,10 @@ public class TerminalTabsController {
             } else {
                 items.add(mActivity.getString(R.string.action_ssh_reconnect));
                 actions.add(() -> SshConnector.reconnect(mActivity, session));
+            }
+            if (SshForwardsDialog.isAvailable(session)) {
+                items.add(mActivity.getString(R.string.action_ssh_forwards));
+                actions.add(() -> SshForwardsDialog.show(mActivity, session));
             }
             String hostName = SshConnector.getHostName(session);
             items.add(mActivity.getString(R.string.action_sftp_browse_files));

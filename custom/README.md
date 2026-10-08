@@ -42,7 +42,7 @@
 
 | 내용 | 위치 |
 |---|---|
-| SSH 접속 관리(⚙ 메뉴 → SSH): 호스트 등록/수정/삭제, 탭으로 접속, Disconnect/Reconnect, 비밀번호 암호화 저장, 키 생성/복사, `ssh-copy-id`, 점프 호스트, 포트 포워딩, 자동 재접속, mosh. 자세한 내용은 `custom/docs/ssh.md` | 포크 전용 파일만 (`app/.../terminal/ssh/`, `fork_ssh.xml`, `TerminalTabsController.java`) |
+| SSH 접속 관리(⚙ 메뉴 → SSH): 호스트 등록/수정/삭제, 탭으로 접속, Disconnect/Reconnect, 비밀번호 암호화 저장, 키 생성/복사, `ssh-copy-id`, 점프 호스트, 포트 포워딩(SSH 탭 길게 누르기 → Port forwards: 포트가 열려 있는지 표시, 로컬 포트를 브라우저로 열기, 접속 중에 추가/중지), 자동 재접속, mosh. 자세한 내용은 `custom/docs/ssh.md` | 포크 전용 파일만 (`app/.../terminal/ssh/`, `fork_ssh.xml`, `TerminalTabsController.java`) |
 | SSH 파일 탐색(SSH 탭 또는 호스트 메뉴 → Browse files): SFTP로 파일 목록, 이미지 보기, 텍스트 보기/편집/저장(문법 강조, 툴바: Undo/Redo, 자동 줄 바꿈, 글꼴 크기, 인코딩, 줄 끝, 16진수 보기, 충돌 확인, 안전한 저장), 업로드/다운로드(여러 개 선택, 폴더 통째로), 이름 바꾸기, 삭제, 권한(chmod), 즐겨찾기, 새 폴더/파일, 속성. ssh 탭의 연결을 공유. 자세한 내용은 `custom/docs/sftp.md` | `custom/patches/0013-*.patch` (`AndroidManifest.xml`) + `app/.../terminal/sftp/`, `fork_sftp.xml` |
 
 ### 설정

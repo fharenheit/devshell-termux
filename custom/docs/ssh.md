@@ -11,7 +11,7 @@
 | SSH hosts | 등록한 호스트와 `~/.ssh/config`의 다른 호스트 목록. 누르면 접속, 길게 누르면 Connect / Browse files / Edit / Install public key / Delete. 아래 버튼: Add host, Keys, Close |
 | 호스트 편집 | 이름(= `ssh 이름`의 별칭), 호스트, 포트, 사용자, 비밀번호, 개인키 파일, 접속 후 실행할 명령, mosh로 접속, 자동 재접속, 점프 호스트, 로컬/원격 포트 포워딩, SOCKS 포트, 추가 `ssh_config` 옵션 |
 | Keys | `~/.ssh/*.pub` 목록. 누르면 공개키를 클립보드로 복사. Generate key로 새 탭에서 `ssh-keygen -t ed25519` |
-| 탭 메뉴 | SSH 탭을 길게 누르면 실행 중일 때 **Disconnect**(ssh에 SIGTERM), 끝났을 때 **Reconnect**(같은 위치에 새로 접속), **Browse files**(파일 탐색, `custom/docs/sftp.md`) |
+| 탭 메뉴 | SSH 탭을 길게 누르면 실행 중일 때 **Disconnect**(ssh에 SIGTERM), 끝났을 때 **Reconnect**(같은 위치에 새로 접속), **Browse files**(파일 탐색, `custom/docs/sftp.md`), **Port forwards**(아래) |
 
 ## 저장 위치
 
@@ -55,3 +55,12 @@
   - Disconnect(프로세스 그룹에 SIGTERM)로 셸과 ssh가 함께 끝나고 다시 접속하지 않음
   - 자동 재접속에서 저장한 비밀번호가 틀리면 한 번만 보내고 터미널 입력으로 넘어감
   - mosh: 저장한 비밀번호로 접속해 `mosh-server` 아래 셸이 열림
+
+## 포트 포워딩 상태 (SSH 탭 길게 누르기 → Port forwards)
+
+- 호스트에 설정한 로컬/원격/SOCKS 포워딩과 이 연결에 추가한 포워딩 목록. mosh 탭에는 없음(ssh 연결이 없음)
+- 로컬·SOCKS 포트는 기기에서 실제로 열려 있는지 확인해서 `● Listening` / `○ Not listening`으로 표시(127.0.0.1에 연결해 봄). 원격 포트는 `On <서버>`
+- 로컬 포워딩을 누르면 `http://localhost:<포트>`를 브라우저로 엶(서버 쪽 포트가 443/8443이면 https). 길게 누르면 열기, 주소 복사, 중지
+- 탭이 접속 중이면 **Add**로 포워딩을 추가하고, 항목 메뉴의 **Stop forwarding**으로 중지. 다시 접속하지 않고 탭의 연결 공유 소켓으로
+  `ssh -S <소켓> -O forward|cancel -L|-R|-D <spec> <호스트>`를 실행(`SshForwards`). 실패하면 ssh의 메시지(`Port forwarding failed` 등)를 보여 줌
+- 추가/중지는 그 연결에만 적용되고 호스트 설정은 바꾸지 않음. 다시 접속하면(소켓이 새로 만들어지면) 호스트 설정대로 돌아감
