@@ -1,0 +1,181 @@
+From 3be691b94e03b41da0faaf30c0917a09e78b0932 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Thu, 8 Oct 2026 02:56:20 +0000
+Subject: [PATCH] Added: Change the terminal font size with A+ and A- extra
+ keys
+
+The default extra keys have A+ right of PGUP and A- right of PGDN, which
+make the terminal text larger or smaller on the screen. Like pinch zoom
+and Ctrl+Alt+/-, which now do the same, the size is not saved, so the
+saved size is used when the app is opened again.
+
+The saved size is set in a new Font size dialog, from the Size button
+of the Font dialog or Settings > Terminal View > Font size, with a
+sample of the text at that size.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01GLNsTPnn2xKUQ4uFcevT6G
+---
+ .../TerminalViewPreferencesFragment.java      |  5 ++-
+ .../terminal/TermuxTerminalViewClient.java    | 32 +++++++++++++++++--
+ .../terminal/io/TermuxTerminalExtraKeys.java  |  3 ++
+ .../xml/termux_terminal_view_preferences.xml  |  4 +++
+ .../properties/TermuxPropertyConstants.java   |  2 +-
+ .../io/extrakeys/ExtraKeysConstants.java      |  3 ++
+ 6 files changed, 44 insertions(+), 5 deletions(-)
+
+diff --git a/app/src/main/java/com/termux/app/fragments/settings/termux/TerminalViewPreferencesFragment.java b/app/src/main/java/com/termux/app/fragments/settings/termux/TerminalViewPreferencesFragment.java
+index cb39fa1..20dea07 100644
+--- a/app/src/main/java/com/termux/app/fragments/settings/termux/TerminalViewPreferencesFragment.java
++++ b/app/src/main/java/com/termux/app/fragments/settings/termux/TerminalViewPreferencesFragment.java
+@@ -10,6 +10,7 @@ import androidx.preference.PreferenceManager;
+ 
+ import com.termux.R;
+ import com.termux.app.terminal.fonts.TerminalFontDialog;
++import com.termux.app.terminal.fonts.TerminalFontSizeDialog;
+ import com.termux.shared.settings.preferences.TermuxAppSharedPreferences;
+ 
+ @Keep
+@@ -25,8 +26,10 @@ public class TerminalViewPreferencesFragment extends PreferenceFragmentCompat {
+ 
+         setPreferencesFromResource(R.xml.termux_terminal_view_preferences, rootKey);
+ 
+-        if (getActivity() != null)
++        if (getActivity() != null) {
+             TerminalFontDialog.setupPreference(findPreference("terminal_font"), getActivity());
++            TerminalFontSizeDialog.setupPreference(findPreference("terminal_font_size"), getActivity());
++        }
+     }
+ 
+ }
+diff --git a/app/src/main/java/com/termux/app/terminal/TermuxTerminalViewClient.java b/app/src/main/java/com/termux/app/terminal/TermuxTerminalViewClient.java
+index 279e3b0..9a3f3ff 100644
+--- a/app/src/main/java/com/termux/app/terminal/TermuxTerminalViewClient.java
++++ b/app/src/main/java/com/termux/app/terminal/TermuxTerminalViewClient.java
+@@ -34,6 +34,7 @@ import com.termux.shared.activities.ReportActivity;
+ import com.termux.shared.models.ReportInfo;
+ import com.termux.app.models.UserAction;
+ import com.termux.app.terminal.io.KeyboardShortcut;
++import com.termux.shared.settings.preferences.TermuxAppSharedPreferences;
+ import com.termux.shared.settings.properties.TermuxPropertyConstants;
+ import com.termux.shared.data.DataUtils;
+ import com.termux.shared.logger.Logger;
+@@ -69,6 +70,10 @@ public class TermuxTerminalViewClient extends TermuxTerminalViewClientBase {
+ 
+     private boolean mTerminalCursorBlinkerStateAlreadySet;
+ 
++    /** The font size on the screen, and the saved one it started from. */
++    private int mFontSize;
++    private int mSavedFontSize;
++
+     private static final String LOG_TAG = "TermuxTerminalViewClient";
+ 
+     public TermuxTerminalViewClient(TermuxActivity activity, TermuxTerminalSessionClient termuxTerminalSessionClient) {
+@@ -84,7 +89,7 @@ public class TermuxTerminalViewClient extends TermuxTerminalViewClientBase {
+      * Should be called when mActivity.onCreate() is called
+      */
+     public void onCreate() {
+-        mActivity.getTerminalView().setTextSize(mActivity.getPreferences().getFontSize());
++        applySavedFontSize();
+         mActivity.getTerminalView().setKeepScreenOn(mActivity.getPreferences().shouldKeepScreenOn());
+     }
+ 
+@@ -92,6 +97,9 @@ public class TermuxTerminalViewClient extends TermuxTerminalViewClientBase {
+      * Should be called when mActivity.onStart() is called
+      */
+     public void onStart() {
++        // The font size may have been changed in the settings.
++        applySavedFontSizeIfChanged();
++
+         // Set {@link TerminalView#TERMINAL_VIEW_KEY_LOGGING_ENABLED} value
+         // Also required if user changed the preference from {@link TermuxSettings} activity and returns
+         boolean isTerminalViewKeyLoggingEnabled = mActivity.getPreferences().isTerminalViewKeyLoggingEnabled();
+@@ -484,9 +492,27 @@ public class TermuxTerminalViewClient extends TermuxTerminalViewClientBase {
+ 
+ 
+ 
++    /**
++     * Make the text larger or smaller on the screen, for the A+ and A− extra keys, pinch zoom and
++     * Ctrl+Alt+/-. The size is not saved, so the saved size of the Font size setting is used when
++     * the app is opened again.
++     */
+     public void changeFontSize(boolean increase) {
+-        mActivity.getPreferences().changeFontSize(increase);
+-        mActivity.getTerminalView().setTextSize(mActivity.getPreferences().getFontSize());
++        int[] sizes = TermuxAppSharedPreferences.getDefaultFontSizes(mActivity);
++        mFontSize = Math.max(sizes[1], Math.min(sizes[2], mFontSize + (increase ? 2 : -2)));
++        mActivity.getTerminalView().setTextSize(mFontSize);
++    }
++
++    /** Show the text at the saved font size, like after it was changed in the settings. */
++    public void applySavedFontSize() {
++        mSavedFontSize = mActivity.getPreferences().getFontSize();
++        mFontSize = mSavedFontSize;
++        mActivity.getTerminalView().setTextSize(mFontSize);
++    }
++
++    /** Show the text at the saved font size if it was changed in the settings since it was shown. */
++    public void applySavedFontSizeIfChanged() {
++        if (mActivity.getPreferences().getFontSize() != mSavedFontSize) applySavedFontSize();
+     }
+ 
+ 
+diff --git a/app/src/main/java/com/termux/app/terminal/io/TermuxTerminalExtraKeys.java b/app/src/main/java/com/termux/app/terminal/io/TermuxTerminalExtraKeys.java
+index 8eed517..cd042c4 100644
+--- a/app/src/main/java/com/termux/app/terminal/io/TermuxTerminalExtraKeys.java
++++ b/app/src/main/java/com/termux/app/terminal/io/TermuxTerminalExtraKeys.java
+@@ -38,6 +38,9 @@ public class TermuxTerminalExtraKeys extends TerminalExtraKeys {
+                 drawerLayout.closeDrawer(Gravity.LEFT);
+             else
+                 drawerLayout.openDrawer(Gravity.LEFT);
++        } else if ("FONT_LARGER".equals(key) || "FONT_SMALLER".equals(key)) {
++            if (mTermuxTerminalViewClient != null)
++                mTermuxTerminalViewClient.changeFontSize("FONT_LARGER".equals(key));
+         } else if ("PASTE".equals(key)) {
+             if(mTermuxTerminalSessionClient != null)
+                 mTermuxTerminalSessionClient.onPasteTextFromClipboard(null);
+diff --git a/app/src/main/res/xml/termux_terminal_view_preferences.xml b/app/src/main/res/xml/termux_terminal_view_preferences.xml
+index cf56f81..bb5bf14 100644
+--- a/app/src/main/res/xml/termux_terminal_view_preferences.xml
++++ b/app/src/main/res/xml/termux_terminal_view_preferences.xml
+@@ -14,6 +14,10 @@
+             app:key="terminal_font"
+             app:title="@string/terminal_font_title" />
+ 
++        <Preference
++            app:key="terminal_font_size"
++            app:title="@string/terminal_font_size_title" />
++
+     </PreferenceCategory>
+ 
+ </PreferenceScreen>
+diff --git a/termux-shared/src/main/java/com/termux/shared/settings/properties/TermuxPropertyConstants.java b/termux-shared/src/main/java/com/termux/shared/settings/properties/TermuxPropertyConstants.java
+index 123aaa2..56bb03c 100644
+--- a/termux-shared/src/main/java/com/termux/shared/settings/properties/TermuxPropertyConstants.java
++++ b/termux-shared/src/main/java/com/termux/shared/settings/properties/TermuxPropertyConstants.java
+@@ -282,7 +282,7 @@ public final class TermuxPropertyConstants {
+     /** Defines the key for extra keys */
+     public static final String KEY_EXTRA_KEYS =  "extra-keys"; // Default: "extra-keys"
+     //public static final String DEFAULT_IVALUE_EXTRA_KEYS = "[[ESC, TAB, CTRL, ALT, {key: '-', popup: '|'}, DOWN, UP]]"; // Single row
+-    public static final String DEFAULT_IVALUE_EXTRA_KEYS = "[['ESC','/',{key: '-', popup: '|'},'HOME','UP','END','PGUP','ENTER'], ['TAB','CTRL','ALT','LEFT','DOWN','RIGHT','PGDN','KEYBOARD']]"; // Double row
++    public static final String DEFAULT_IVALUE_EXTRA_KEYS = "[['ESC','/',{key: '-', popup: '|'},'HOME','UP','END','PGUP','FONT_LARGER','ENTER'], ['TAB','CTRL','ALT','LEFT','DOWN','RIGHT','PGDN','FONT_SMALLER','KEYBOARD']]"; // Double row
+ 
+     /** Defines the key for extra keys style */
+     public static final String KEY_EXTRA_KEYS_STYLE =  "extra-keys-style"; // Default: "extra-keys-style"
+diff --git a/termux-shared/src/main/java/com/termux/shared/terminal/io/extrakeys/ExtraKeysConstants.java b/termux-shared/src/main/java/com/termux/shared/terminal/io/extrakeys/ExtraKeysConstants.java
+index d5aced0..7eb3492 100644
+--- a/termux-shared/src/main/java/com/termux/shared/terminal/io/extrakeys/ExtraKeysConstants.java
++++ b/termux-shared/src/main/java/com/termux/shared/terminal/io/extrakeys/ExtraKeysConstants.java
+@@ -123,6 +123,9 @@ public class ExtraKeysConstants {
+         public static final ExtraKeyDisplayMap NICER_LOOKING_DISPLAY = new ExtraKeyDisplayMap() {{
+             // nicer looking for most cases
+             put("-", "―"); // U+2015 ― HORIZONTAL BAR
++            // Make the terminal text larger or smaller until the app is opened again.
++            put("FONT_LARGER", "A+");
++            put("FONT_SMALLER", "A−"); // U+2212 − MINUS SIGN
+         }};
+ 
+         /**
+-- 
+2.43.0
+
