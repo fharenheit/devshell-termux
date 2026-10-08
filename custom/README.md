@@ -22,6 +22,7 @@
 | 세션을 바꿀 때 IME가 조합 중인 글자(한글)를 버림 | `custom/patches/0005-*.patch` (`TerminalView.java`) |
 | 기본 extra keys에 ENTER(PGUP 오른쪽), KEYBOARD(PGDN 오른쪽, 키보드 표시/숨기기) 버튼 추가 | `custom/patches/0006-*.patch` (`TermuxPropertyConstants.java`) |
 | README 상단 안내 문구 | `custom/patches/0003-*.patch` (`README.md`) |
+| 단위 테스트 워크플로를 JDK 11로 실행(Robolectric 4.4가 새 JDK에서 실패) | `custom/patches/0014-*.patch` (`.github/workflows/run_tests.yml`) |
 | 빌드 결과로 GitHub 릴리즈 게시 워크플로 | `.github/workflows/publish_release_from_build.yml`, `.github/release-notes/` |
 
 - **업스트림에도 있는 파일을 고친 것**은 `custom/patches/`에 패치로 보관합니다.
