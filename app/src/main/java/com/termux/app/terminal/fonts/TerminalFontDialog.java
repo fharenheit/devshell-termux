@@ -181,7 +181,7 @@ public final class TerminalFontDialog {
                 Font font = (Font) item;
                 String name = font.name;
                 if (font == TerminalFonts.DEFAULT_FONT) name += " " + mActivity.getString(R.string.terminal_font_default_suffix);
-                if (!font.hasHangul) name += " " + mActivity.getString(R.string.terminal_font_no_hangul_suffix);
+                if (!font.hasHangul) name += " " + mActivity.getString(R.string.terminal_font_english_only_suffix);
                 nameView.setText(name);
                 Typeface typeface = mTypefaces.get(font);
                 previewView.setTypeface(typeface != null ? typeface : Typeface.MONOSPACE);

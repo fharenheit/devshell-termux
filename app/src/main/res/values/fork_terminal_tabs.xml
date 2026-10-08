@@ -31,7 +31,7 @@
     <string name="terminal_font_title">Font</string>
     <string name="terminal_font_custom">Custom font (~/.termux/font.ttf)</string>
     <string name="terminal_font_default_suffix">(default)</string>
-    <string name="terminal_font_no_hangul_suffix">(no Hangul)</string>
+    <string name="terminal_font_english_only_suffix">(English only)</string>
     <string name="msg_terminal_font_applying">Setting the font to %1$s…</string>
     <string name="msg_terminal_font_applied">Font set to %1$s</string>
     <string name="msg_terminal_font_failed">Failed to set the font to %1$s: %2$s</string>
