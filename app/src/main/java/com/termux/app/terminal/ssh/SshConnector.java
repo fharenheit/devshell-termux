@@ -124,9 +124,9 @@ public final class SshConnector {
         "fi\n" +
         "echo \"Installing $4 on $1\"\n" +
         "if command -v ssh-copy-id >/dev/null 2>&1; then\n" +
-        "  ssh-copy-id -i \"$4\" \"$1\"\n" +
+        "  ssh-copy-id -o RemoteCommand=none -o RequestTTY=no -i \"$4\" \"$1\"\n" +
         "else\n" +
-        "  ssh \"$1\" 'umask 077; mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys' < \"$4\"\n" +
+        "  ssh -o RemoteCommand=none -o RequestTTY=no \"$1\" 'umask 077; mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys' < \"$4\"\n" +
         "fi\n" +
         "status=$?\n" +
         "[ $status -eq 0 ] && echo \"Done. Key authentication will be used for $1 from now on.\"\n" +
