@@ -127,7 +127,7 @@ public final class SshHostStore {
     }
 
     @NonNull
-    static String readFile(@NonNull File file) throws IOException {
+    public static String readFile(@NonNull File file) throws IOException {
         try (InputStream in = new FileInputStream(file)) {
             byte[] buffer = new byte[(int) file.length()];
             int offset = 0;
@@ -139,7 +139,7 @@ public final class SshHostStore {
     }
 
     /** Write a file through a temporary file, so that it is never left partially written. */
-    static void writeFile(@NonNull File file, @NonNull String content, boolean ownerOnly) throws IOException {
+    public static void writeFile(@NonNull File file, @NonNull String content, boolean ownerOnly) throws IOException {
         File dir = file.getParentFile();
         if (dir != null && !dir.isDirectory() && !dir.mkdirs())
             throw new IOException("Failed to create \"" + dir.getAbsolutePath() + "\"");

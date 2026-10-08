@@ -26,12 +26,13 @@ final class SettingsBackupArchive {
     static final String ENTRY_PROPERTIES = "termux.properties";
     static final String ENTRY_COLORS = "colors.properties";
     static final String ENTRY_SSH_HOSTS = "ssh_hosts.json";
+    static final String ENTRY_SNIPPETS = "snippets.json";
     static final String ENTRY_PREFERENCES = "preferences.json";
     static final String ENTRY_FONT = "font.json";
     static final String ENTRY_FONT_FILE = "font.ttf";
 
     static final Set<String> ENTRIES = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
-        ENTRY_MANIFEST, ENTRY_PROPERTIES, ENTRY_COLORS, ENTRY_SSH_HOSTS, ENTRY_PREFERENCES, ENTRY_FONT, ENTRY_FONT_FILE)));
+        ENTRY_MANIFEST, ENTRY_PROPERTIES, ENTRY_COLORS, ENTRY_SSH_HOSTS, ENTRY_SNIPPETS, ENTRY_PREFERENCES, ENTRY_FONT, ENTRY_FONT_FILE)));
 
     /** The size limit of a text entry. */
     static final int MAX_TEXT_ENTRY_SIZE = 1024 * 1024;

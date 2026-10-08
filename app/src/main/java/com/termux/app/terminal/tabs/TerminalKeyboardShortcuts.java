@@ -9,6 +9,7 @@ import com.termux.R;
 import com.termux.app.TermuxActivity;
 import com.termux.app.terminal.TermuxTerminalSessionClient;
 import com.termux.app.terminal.TermuxTerminalViewClient;
+import com.termux.app.terminal.snippets.SnippetsDialog;
 import com.termux.terminal.TerminalSession;
 import com.termux.view.TerminalView;
 
@@ -36,16 +37,11 @@ public final class TerminalKeyboardShortcuts {
     }
 
     private static Action sFindAction;
-    private static Action sSnippetsAction;
 
     private TerminalKeyboardShortcuts() {}
 
     public static void setFindAction(Action action) {
         sFindAction = action;
-    }
-
-    public static void setSnippetsAction(Action action) {
-        sSnippetsAction = action;
     }
 
     /**
@@ -106,8 +102,8 @@ public final class TerminalKeyboardShortcuts {
                 if (!repeat && sFindAction != null) sFindAction.run(activity);
                 return sFindAction != null;
             case KeyEvent.KEYCODE_S:
-                if (!repeat && sSnippetsAction != null) sSnippetsAction.run(activity);
-                return sSnippetsAction != null;
+                if (!repeat) SnippetsDialog.show(activity);
+                return true;
             default:
                 return false;
         }

@@ -41,6 +41,27 @@
     <string name="msg_settings_import_failed">Failed to import the settings: %1$s</string>
     <string name="msg_settings_imported">Settings imported. The previous ones were copied to %1$s</string>
 
+    <string name="title_snippets">Snippets</string>
+    <string name="title_snippets_for_host">Snippets · %1$s</string>
+    <string name="msg_snippets_empty">No snippets yet. Add the commands you use often, then tap one to type it into the current tab.</string>
+    <string name="action_snippet_add">Add</string>
+    <string name="action_snippets_close">Close</string>
+    <string name="action_snippet_type">Type into the tab</string>
+    <string name="action_snippet_edit">Edit</string>
+    <string name="action_snippet_move_up">Move up</string>
+    <string name="action_snippet_move_down">Move down</string>
+    <string name="action_snippet_delete">Delete</string>
+    <string name="action_snippet_save">Save</string>
+    <string name="msg_snippet_delete">Delete the snippet %1$s?</string>
+    <string name="msg_snippet_no_session">The current tab has ended</string>
+    <string name="msg_snippet_command_empty">Enter the command</string>
+    <string name="msg_snippets_save_failed">Failed to save the snippets: %1$s</string>
+    <string name="snippet_name">Name</string>
+    <string name="snippet_name_hint">Optional, the command is shown if empty</string>
+    <string name="snippet_command">Command (can have several lines)</string>
+    <string name="snippet_run">Press Enter after the command</string>
+    <string name="snippet_host">Show on</string>
+    <string name="snippet_host_all">All tabs</string>
     <string name="title_terminal_keyboard_shortcuts">Keyboard shortcuts</string>
     <string name="msg_terminal_keyboard_shortcuts">Ctrl+Tab: next tab\nCtrl+Shift+Tab: previous tab\nCtrl+Shift+T: new tab\nCtrl+Shift+W: close tab\nCtrl+Shift+C: copy the selection\nCtrl+Shift+V: paste\nCtrl+Shift+F: find in the terminal output\nCtrl+Shift+S: snippets\nCtrl+= / Ctrl+-: larger / smaller text on the screen\nCtrl+0: text at the saved size\n\nCtrl+Alt shortcuts: N/P or ↓/↑ next/previous tab, C new tab, R rename, 1–9 tab, K keyboard, M menu, U URLs, V paste, +/- text size.\n\nTurn the Ctrl shortcuts off with terminal-keyboard-shortcuts = false in termux.properties, to send these keys to programs.</string>
     <string name="terminal_font_title">Font</string>

@@ -30,3 +30,5 @@ app/src/main/java/com/termux/app/terminal/links
 app/src/test/java/com/termux/app/terminal/links
 app/src/main/res/values/fork_links.xml
 history.md
+app/src/main/java/com/termux/app/terminal/snippets
+app/src/test/java/com/termux/app/terminal/snippets

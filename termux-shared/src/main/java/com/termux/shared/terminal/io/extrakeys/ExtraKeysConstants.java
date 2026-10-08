@@ -126,6 +126,7 @@ public class ExtraKeysConstants {
             // Make the terminal text larger or smaller until the app is opened again.
             put("FONT_LARGER", "A+");
             put("FONT_SMALLER", "A−"); // U+2212 − MINUS SIGN
+            put("SNIPPETS", "⚡"); // Saved commands
         }};
 
         /**

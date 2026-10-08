@@ -19,6 +19,7 @@ import com.termux.R;
 import com.termux.app.TermuxActivity;
 import com.termux.app.terminal.fonts.TerminalFontDialog;
 import com.termux.app.terminal.fonts.TerminalFonts;
+import com.termux.app.terminal.snippets.SnippetStore;
 import com.termux.app.terminal.ssh.SshHostStore;
 import com.termux.shared.logger.Logger;
 import com.termux.shared.packages.PackageUtils;
@@ -137,6 +138,7 @@ public final class SettingsBackup {
         putFile(entries, SettingsBackupArchive.ENTRY_PROPERTIES, TermuxPropertyConstants.getTermuxPropertiesFile());
         putFile(entries, SettingsBackupArchive.ENTRY_COLORS, TermuxConstants.TERMUX_COLOR_PROPERTIES_FILE);
         putFile(entries, SettingsBackupArchive.ENTRY_SSH_HOSTS, SshHostStore.HOSTS_FILE);
+        putFile(entries, SettingsBackupArchive.ENTRY_SNIPPETS, SnippetStore.SNIPPETS_FILE);
 
         JSONObject preferences = new JSONObject();
         Map<String, ?> values = getAppPreferences(context).getAll();
@@ -265,6 +267,7 @@ public final class SettingsBackup {
         copyIfExists(TermuxPropertyConstants.getTermuxPropertiesFile(), new File(dir, SettingsBackupArchive.ENTRY_PROPERTIES));
         copyIfExists(TermuxConstants.TERMUX_COLOR_PROPERTIES_FILE, new File(dir, SettingsBackupArchive.ENTRY_COLORS));
         copyIfExists(SshHostStore.HOSTS_FILE, new File(dir, SettingsBackupArchive.ENTRY_SSH_HOSTS));
+        copyIfExists(SnippetStore.SNIPPETS_FILE, new File(dir, SettingsBackupArchive.ENTRY_SNIPPETS));
         copyIfExists(TermuxConstants.TERMUX_FONT_FILE, new File(dir, SettingsBackupArchive.ENTRY_FONT_FILE));
         return dir;
     }
@@ -285,6 +288,8 @@ public final class SettingsBackup {
             // Write ~/.ssh/termux_hosts and the include of it again from the imported hosts.
             SshHostStore.save(SshHostStore.load());
         }
+        byte[] snippets = entries.get(SettingsBackupArchive.ENTRY_SNIPPETS);
+        if (snippets != null) writeFile(SnippetStore.SNIPPETS_FILE, snippets);
         byte[] fontFile = entries.get(SettingsBackupArchive.ENTRY_FONT_FILE);
         if (fontFile != null && !entries.containsKey(SettingsBackupArchive.ENTRY_FONT))
             writeFile(TermuxConstants.TERMUX_FONT_FILE, fontFile);
