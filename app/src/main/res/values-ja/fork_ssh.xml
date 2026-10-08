@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="action_terminal_tabs_menu_ssh">SSH</string>
+
+    <string name="title_ssh_hosts">SSH ホスト</string>
+    <string name="title_ssh_add_host">SSH ホストを追加</string>
+    <string name="title_ssh_edit_host">SSH ホストを編集</string>
+    <string name="title_ssh_keys">SSH 鍵</string>
+    <string name="title_ssh_choose_key">公開鍵を選択</string>
+    <string name="title_ssh_generate_key">SSH 鍵を生成</string>
+
+    <string name="action_ssh_add_host">ホストを追加</string>
+    <string name="action_ssh_keys">鍵</string>
+    <string name="action_ssh_close">閉じる</string>
+    <string name="action_ssh_connect">接続</string>
+    <string name="action_ssh_edit_host">編集</string>
+    <string name="action_ssh_delete_host">削除</string>
+    <string name="action_ssh_copy_id">公開鍵をインストール (ssh-copy-id)</string>
+    <string name="action_ssh_generate_key">鍵を生成</string>
+    <string name="action_ssh_save">保存</string>
+    <string name="action_ssh_forwards">ポートフォワーディング</string>
+    <string name="title_ssh_forwards">ポートフォワーディング · %1$s</string>
+    <string name="action_ssh_forwards_close">閉じる</string>
+    <string name="action_ssh_forward_add">追加</string>
+    <string name="msg_ssh_forwards_empty">ポートフォワーディングはありません。SSH でホストに追加すると接続のたびに開始されます。この接続だけに追加することもできます。</string>
+    <string name="msg_ssh_forwards_empty_not_connected">ポートフォワーディングはありません。SSH でホストに追加してください。タブの接続中はタブに追加できます。</string>
+    <string name="msg_ssh_forwards_not_connected">タブが接続されていないため、ポートフォワーディングを追加または停止できません</string>
+    <string name="ssh_forward_checking">確認しています…</string>
+    <string name="ssh_forward_listening">● 待ち受け中</string>
+    <string name="ssh_forward_not_listening">○ 待ち受けていません</string>
+    <string name="ssh_forward_on_server">%1$s 上</string>
+    <string name="ssh_forward_added">追加済み</string>
+    <string name="action_ssh_forward_open">%1$s を開く</string>
+    <string name="action_ssh_forward_copy">%1$s をコピー</string>
+    <string name="msg_ssh_forward_copied">コピーしました</string>
+    <string name="action_ssh_forward_stop">フォワーディングを停止</string>
+    <string name="msg_ssh_forward_stopped">%1$s を停止しました</string>
+    <string name="msg_ssh_forward_added">%1$s をフォワーディングしています</string>
+    <string name="title_ssh_forward_failed">ポートフォワーディングに失敗しました</string>
+    <string name="msg_ssh_forward_invalid">[bind:]port:host:hostport、または SOCKS の場合は [bind:]port を入力してください</string>
+    <string name="ssh_forward_type_local">ローカル (-L): このデバイスのポートからサーバーへ</string>
+    <string name="ssh_forward_type_remote">リモート (-R): サーバーのポートからこのデバイスへ</string>
+    <string name="ssh_forward_type_socks">SOCKS プロキシ (-D)</string>
+    <string name="action_ssh_disconnect">切断</string>
+    <string name="action_ssh_reconnect">再接続</string>
+
+    <string name="ssh_field_name">名前 (`ssh name` として使用)</string>
+    <string name="ssh_field_host">ホスト</string>
+    <string name="ssh_field_port">ポート</string>
+    <string name="ssh_field_user">ユーザー</string>
+    <string name="ssh_field_password">パスワード</string>
+    <string name="ssh_field_identity_file">秘密鍵ファイル (省略可)</string>
+    <string name="ssh_field_startup_command">接続後に実行するコマンド (省略可)</string>
+    <string name="ssh_field_extra_options">その他の ssh_config オプション (省略可、1 行に 1 つ)</string>
+    <string name="ssh_field_jump_host">踏み台ホスト (ProxyJump、省略可)</string>
+    <string name="ssh_field_local_forwards">ローカルポートフォワーディング (-L、1 行に 1 つ: port:host:hostport)</string>
+    <string name="ssh_field_remote_forwards">リモートポートフォワーディング (-R、1 行に 1 つ: port:host:hostport)</string>
+    <string name="ssh_field_socks_port">SOCKS プロキシのポート (-D、省略可)</string>
+    <string name="ssh_use_mosh">mosh で接続 (両側に mosh が必要、ポートフォワーディングなし)</string>
+    <string name="ssh_auto_reconnect">接続が切れたら自動的に再接続 (ssh のみ)</string>
+    <string name="ssh_auto_reconnect_short">自動再接続</string>
+    <string name="ssh_password_hint">省略可。アプリ内に暗号化して保存されます。</string>
+    <string name="ssh_password_keep_hint">保存済み。変更しない場合は空欄のままにしてください。</string>
+    <string name="ssh_remove_saved_password">保存したパスワードを削除</string>
+    <string name="ssh_password_saved">パスワード保存済み</string>
+    <string name="ssh_host_from_config">~/.ssh/config から</string>
+
+    <string name="ssh_error_name">英数字と . _ - @ のみ使用できます</string>
+    <string name="ssh_error_name_exists">この名前のホストは既に存在します</string>
+    <string name="ssh_error_host">ホスト名またはアドレスを入力してください</string>
+    <string name="ssh_error_port">1～65535 のポートを入力してください</string>
+    <string name="ssh_error_jump_host">踏み台ホストはスペースを入れずにカンマで区切ってください</string>
+    <string name="ssh_error_forward">無効なフォワーディング \"%1$s\"。[bind:]port:host:hostport の形式で指定してください</string>
+
+    <string name="msg_ssh_no_hosts">SSH ホストはまだありません。[ホストを追加] で追加してください。\n\n接続には openssh パッケージが必要です: pkg install openssh</string>
+    <string name="msg_ssh_confirm_delete_host">ホスト %1$s と保存したパスワードを削除しますか？</string>
+    <string name="msg_ssh_save_failed">SSH ホストを保存できませんでした: %1$s</string>
+    <string name="msg_ssh_password_not_saved">パスワードを保存できませんでした</string>
+    <string name="msg_ssh_no_keys">~/.ssh に SSH 鍵はまだありません。</string>
+    <string name="msg_ssh_key_copied">%1$s をクリップボードにコピーしました</string>
+    <string name="msg_ssh_generate_key">このファイル名で ~/.ssh に ed25519 鍵が生成されます。ssh-keygen が新しいタブで任意のパスフレーズを尋ねます。</string>
+</resources>

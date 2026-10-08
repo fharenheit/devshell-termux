@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="action_close_terminal_tab">关闭会话</string>
+    <string name="title_terminal_tab_menu">会话 %1$d</string>
+    <string name="action_rename_terminal_tab">重命名</string>
+    <string name="action_close_terminal_tab_menu">关闭</string>
+    <string name="action_reset_terminal_tab_name">重置</string>
+
+    <string name="action_terminal_tabs_menu">菜单</string>
+    <string name="action_terminal_tabs_menu_settings">设置</string>
+    <string name="action_terminal_tabs_menu_sessions">会话列表</string>
+    <string name="action_terminal_tabs_menu_keyboard">显示/隐藏键盘</string>
+    <string name="action_terminal_tabs_menu_edit_properties">编辑 termux.properties</string>
+    <string name="action_terminal_tabs_menu_reload_settings">重新加载设置</string>
+    <string name="msg_terminal_tabs_settings_reloaded">已重新加载设置</string>
+    <string name="action_terminal_tabs_menu_font">字体</string>
+    <string name="action_terminal_tabs_menu_export_settings">导出设置</string>
+    <string name="action_terminal_tabs_menu_import_settings">导入设置</string>
+
+    <string name="title_settings_exported">设置已导出</string>
+    <string name="msg_settings_exported">已保存到 %1$s\n\n其中包含 termux.properties、colors.properties、SSH 主机、应用偏好设置和字体。不包含已保存的 SSH 密码。</string>
+    <string name="msg_settings_export_failed">无法导出设置：%1$s</string>
+    <string name="msg_settings_export_permission">请授予存储权限后重新导出。</string>
+    <string name="title_settings_import">导入设置</string>
+    <string name="msg_settings_import">请选择从此应用导出的 termux-settings-*.zip 文件。其中的 termux.properties、colors.properties、SSH 主机、应用偏好设置和字体将替换当前的设置，当前设置会先复制到 ~/.termux/backup。导出的设置中不包含已保存的 SSH 密码。</string>
+    <string name="action_settings_choose_file">选择文件</string>
+    <string name="msg_settings_no_file_picker">未找到文件选择器应用</string>
+    <string name="msg_settings_import_failed">无法导入设置：%1$s</string>
+    <string name="msg_settings_imported">设置已导入。之前的设置已复制到 %1$s</string>
+
+    <string name="msg_terminal_copy_select_first">长按文本将其选中，然后点按 ⧉ 进行复制。在 ⧉ 上向上滑动可复制整个屏幕。</string>
+    <string name="msg_terminal_copied_selection">已复制所选内容</string>
+    <string name="msg_terminal_copied_screen">已复制屏幕内容</string>
+    <string name="action_terminal_search">查找</string>
+    <string name="hint_terminal_search">在输出中查找</string>
+    <string name="action_terminal_search_older">上一个匹配项</string>
+    <string name="action_terminal_search_newer">下一个匹配项</string>
+    <string name="action_terminal_search_close">关闭</string>
+    <string name="title_snippets">代码片段</string>
+    <string name="title_snippets_for_host">代码片段 · %1$s</string>
+    <string name="msg_snippets_empty">还没有代码片段。添加常用命令后，点按即可将其输入到当前标签页。</string>
+    <string name="action_snippet_add">添加</string>
+    <string name="action_snippets_close">关闭</string>
+    <string name="action_snippet_type">输入到标签页</string>
+    <string name="action_snippet_edit">编辑</string>
+    <string name="action_snippet_move_up">上移</string>
+    <string name="action_snippet_move_down">下移</string>
+    <string name="action_snippet_delete">删除</string>
+    <string name="action_snippet_save">保存</string>
+    <string name="msg_snippet_delete">要删除代码片段 %1$s 吗？</string>
+    <string name="msg_snippet_no_session">当前标签页已结束</string>
+    <string name="msg_snippet_command_empty">请输入命令</string>
+    <string name="msg_snippets_save_failed">无法保存代码片段：%1$s</string>
+    <string name="snippet_name">名称</string>
+    <string name="snippet_name_hint">可选，留空则显示命令</string>
+    <string name="snippet_command">命令（可包含多行）</string>
+    <string name="snippet_run">在命令后按 Enter</string>
+    <string name="snippet_host">显示位置</string>
+    <string name="snippet_host_all">所有标签页</string>
+    <string name="title_terminal_keyboard_shortcuts">键盘快捷键</string>
+    <string name="msg_terminal_keyboard_shortcuts">Ctrl+Tab：下一个标签页\nCtrl+Shift+Tab：上一个标签页\nCtrl+Shift+T：新建标签页\nCtrl+Shift+W：关闭标签页\nCtrl+Shift+C：复制所选内容\nCtrl+Shift+V：粘贴\nCtrl+Shift+F：在终端输出中查找\nCtrl+Shift+S：代码片段\nCtrl+= / Ctrl+-：放大 / 缩小屏幕文字\nCtrl+0：恢复为已保存的文字大小\n\nCtrl+Alt 快捷键：N/P 或 ↓/↑ 下一个/上一个标签页，C 新建标签页，R 重命名，1–9 切换标签页，K 键盘，M 菜单，U 网址，V 粘贴，+/- 文字大小。\n\n如需将这些按键发送给程序，可在 termux.properties 中设置 terminal-keyboard-shortcuts = false 来关闭 Ctrl 快捷键。</string>
+    <string name="terminal_font_title">字体</string>
+    <string name="terminal_font_size_title">字体大小</string>
+    <string name="terminal_font_size_value">%1$d px (%2$d dp)</string>
+    <string name="action_terminal_font_size_save">保存</string>
+    <string name="action_terminal_font_size_default">默认</string>
+    <string name="action_terminal_font_size">大小…</string>
+    <string name="terminal_font_custom">自定义字体 (~/.termux/font.ttf)</string>
+    <string name="terminal_font_default_suffix">（默认）</string>
+    <string name="msg_terminal_font_applying">正在将字体设为 %1$s…</string>
+    <string name="msg_terminal_font_applied">字体已设为 %1$s</string>
+    <string name="msg_terminal_font_failed">无法将字体设为 %1$s：%2$s</string>
+    <string name="action_terminal_font_apply">应用</string>
+    <string name="terminal_font_downloaded">已下载</string>
+    <string name="msg_terminal_font_downloading">正在下载 %1$s</string>
+    <string name="msg_terminal_font_not_downloaded">应用时下载 (%1$s)</string>
+    <string name="msg_terminal_font_loading">正在加载…</string>
+    <string name="msg_terminal_font_preview_failed">无法加载字体</string>
+    <string name="msg_terminal_font_backed_up">之前的 font.ttf 已移至 %1$s</string>
+    <string name="action_move_terminal_tab_left">左移</string>
+    <string name="action_move_terminal_tab_right">右移</string>
+    <string name="terminal_tab_state_output">新输出</string>
+    <string name="terminal_tab_state_bell">响铃</string>
+
+    <string name="notification_terminal_session_bell">响铃</string>
+    <string name="notification_terminal_session_exited">已退出</string>
+    <string name="notification_terminal_session_exited_code">已退出（代码 %1$d）</string>
+    <string name="notification_terminal_session_exited_signal">已退出（信号 %1$d）</string>
+</resources>

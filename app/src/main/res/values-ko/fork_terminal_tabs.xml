@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="action_close_terminal_tab">세션 닫기</string>
+    <string name="title_terminal_tab_menu">세션 %1$d</string>
+    <string name="action_rename_terminal_tab">이름 바꾸기</string>
+    <string name="action_close_terminal_tab_menu">닫기</string>
+    <string name="action_reset_terminal_tab_name">초기화</string>
+
+    <string name="action_terminal_tabs_menu">메뉴</string>
+    <string name="action_terminal_tabs_menu_settings">설정</string>
+    <string name="action_terminal_tabs_menu_sessions">세션 목록</string>
+    <string name="action_terminal_tabs_menu_keyboard">키보드 표시/숨기기</string>
+    <string name="action_terminal_tabs_menu_edit_properties">termux.properties 편집</string>
+    <string name="action_terminal_tabs_menu_reload_settings">설정 다시 불러오기</string>
+    <string name="msg_terminal_tabs_settings_reloaded">설정을 다시 불러왔습니다</string>
+    <string name="action_terminal_tabs_menu_font">글꼴</string>
+    <string name="action_terminal_tabs_menu_export_settings">설정 내보내기</string>
+    <string name="action_terminal_tabs_menu_import_settings">설정 가져오기</string>
+
+    <string name="title_settings_exported">설정을 내보냈습니다</string>
+    <string name="msg_settings_exported">%1$s에 저장했습니다\n\ntermux.properties, colors.properties, SSH 호스트, 앱 환경설정, 글꼴이 들어 있습니다. 저장된 SSH 비밀번호는 포함되지 않습니다.</string>
+    <string name="msg_settings_export_failed">설정을 내보내지 못했습니다: %1$s</string>
+    <string name="msg_settings_export_permission">저장소 권한을 허용하고 다시 내보내세요.</string>
+    <string name="title_settings_import">설정 가져오기</string>
+    <string name="msg_settings_import">이 앱에서 내보낸 termux-settings-*.zip 파일을 선택하세요. 파일의 termux.properties, colors.properties, SSH 호스트, 앱 환경설정, 글꼴이 현재 설정을 대체하며, 현재 설정은 먼저 ~/.termux/backup에 복사됩니다. 저장된 SSH 비밀번호는 내보낸 설정에 포함되지 않습니다.</string>
+    <string name="action_settings_choose_file">파일 선택</string>
+    <string name="msg_settings_no_file_picker">파일 선택 앱을 찾을 수 없습니다</string>
+    <string name="msg_settings_import_failed">설정을 가져오지 못했습니다: %1$s</string>
+    <string name="msg_settings_imported">설정을 가져왔습니다. 이전 설정은 %1$s에 복사되었습니다</string>
+
+    <string name="msg_terminal_copy_select_first">텍스트를 길게 눌러 선택한 후 ⧉를 눌러 복사하세요. ⧉를 위로 밀면 화면을 복사합니다.</string>
+    <string name="msg_terminal_copied_selection">선택 영역을 복사했습니다</string>
+    <string name="msg_terminal_copied_screen">화면을 복사했습니다</string>
+    <string name="action_terminal_search">찾기</string>
+    <string name="hint_terminal_search">출력에서 찾기</string>
+    <string name="action_terminal_search_older">이전 결과</string>
+    <string name="action_terminal_search_newer">다음 결과</string>
+    <string name="action_terminal_search_close">닫기</string>
+    <string name="title_snippets">스니펫</string>
+    <string name="title_snippets_for_host">스니펫 · %1$s</string>
+    <string name="msg_snippets_empty">아직 스니펫이 없습니다. 자주 쓰는 명령을 추가한 뒤 누르면 현재 탭에 입력됩니다.</string>
+    <string name="action_snippet_add">추가</string>
+    <string name="action_snippets_close">닫기</string>
+    <string name="action_snippet_type">탭에 입력</string>
+    <string name="action_snippet_edit">편집</string>
+    <string name="action_snippet_move_up">위로 이동</string>
+    <string name="action_snippet_move_down">아래로 이동</string>
+    <string name="action_snippet_delete">삭제</string>
+    <string name="action_snippet_save">저장</string>
+    <string name="msg_snippet_delete">%1$s 스니펫을 삭제할까요?</string>
+    <string name="msg_snippet_no_session">현재 탭이 종료되었습니다</string>
+    <string name="msg_snippet_command_empty">명령을 입력하세요</string>
+    <string name="msg_snippets_save_failed">스니펫을 저장하지 못했습니다: %1$s</string>
+    <string name="snippet_name">이름</string>
+    <string name="snippet_name_hint">선택 사항, 비어 있으면 명령이 표시됩니다</string>
+    <string name="snippet_command">명령 (여러 줄 가능)</string>
+    <string name="snippet_run">명령 후 Enter 누르기</string>
+    <string name="snippet_host">표시할 곳</string>
+    <string name="snippet_host_all">모든 탭</string>
+    <string name="title_terminal_keyboard_shortcuts">키보드 단축키</string>
+    <string name="msg_terminal_keyboard_shortcuts">Ctrl+Tab: 다음 탭\nCtrl+Shift+Tab: 이전 탭\nCtrl+Shift+T: 새 탭\nCtrl+Shift+W: 탭 닫기\nCtrl+Shift+C: 선택 영역 복사\nCtrl+Shift+V: 붙여넣기\nCtrl+Shift+F: 터미널 출력에서 찾기\nCtrl+Shift+S: 스니펫\nCtrl+= / Ctrl+-: 화면 텍스트 크게 / 작게\nCtrl+0: 저장된 크기로 텍스트 표시\n\nCtrl+Alt 단축키: N/P 또는 ↓/↑ 다음/이전 탭, C 새 탭, R 이름 바꾸기, 1–9 탭, K 키보드, M 메뉴, U URL, V 붙여넣기, +/- 텍스트 크기.\n\n이 키를 프로그램에 보내려면 termux.properties에서 terminal-keyboard-shortcuts = false로 Ctrl 단축키를 끄세요.</string>
+    <string name="terminal_font_title">글꼴</string>
+    <string name="terminal_font_size_title">글꼴 크기</string>
+    <string name="terminal_font_size_value">%1$d px (%2$d dp)</string>
+    <string name="action_terminal_font_size_save">저장</string>
+    <string name="action_terminal_font_size_default">기본값</string>
+    <string name="action_terminal_font_size">크기…</string>
+    <string name="terminal_font_custom">사용자 글꼴 (~/.termux/font.ttf)</string>
+    <string name="terminal_font_default_suffix">(기본값)</string>
+    <string name="msg_terminal_font_applying">글꼴을 %1$s(으)로 설정하는 중…</string>
+    <string name="msg_terminal_font_applied">글꼴을 %1$s(으)로 설정했습니다</string>
+    <string name="msg_terminal_font_failed">글꼴을 %1$s(으)로 설정하지 못했습니다: %2$s</string>
+    <string name="action_terminal_font_apply">적용</string>
+    <string name="terminal_font_downloaded">다운로드됨</string>
+    <string name="msg_terminal_font_downloading">%1$s 다운로드 중</string>
+    <string name="msg_terminal_font_not_downloaded">적용할 때 다운로드됨 (%1$s)</string>
+    <string name="msg_terminal_font_loading">불러오는 중…</string>
+    <string name="msg_terminal_font_preview_failed">글꼴을 불러오지 못했습니다</string>
+    <string name="msg_terminal_font_backed_up">이전 font.ttf를 %1$s(으)로 옮겼습니다</string>
+    <string name="action_move_terminal_tab_left">왼쪽으로 이동</string>
+    <string name="action_move_terminal_tab_right">오른쪽으로 이동</string>
+    <string name="terminal_tab_state_output">새 출력</string>
+    <string name="terminal_tab_state_bell">벨</string>
+
+    <string name="notification_terminal_session_bell">벨</string>
+    <string name="notification_terminal_session_exited">종료됨</string>
+    <string name="notification_terminal_session_exited_code">종료됨 (코드 %1$d)</string>
+    <string name="notification_terminal_session_exited_signal">종료됨 (시그널 %1$d)</string>
+</resources>

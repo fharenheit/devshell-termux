@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="action_terminal_tabs_menu_ssh">SSH</string>
+
+    <string name="title_ssh_hosts">SSH 主机</string>
+    <string name="title_ssh_add_host">添加 SSH 主机</string>
+    <string name="title_ssh_edit_host">编辑 SSH 主机</string>
+    <string name="title_ssh_keys">SSH 密钥</string>
+    <string name="title_ssh_choose_key">选择公钥</string>
+    <string name="title_ssh_generate_key">生成 SSH 密钥</string>
+
+    <string name="action_ssh_add_host">添加主机</string>
+    <string name="action_ssh_keys">密钥</string>
+    <string name="action_ssh_close">关闭</string>
+    <string name="action_ssh_connect">连接</string>
+    <string name="action_ssh_edit_host">编辑</string>
+    <string name="action_ssh_delete_host">删除</string>
+    <string name="action_ssh_copy_id">安装公钥 (ssh-copy-id)</string>
+    <string name="action_ssh_generate_key">生成密钥</string>
+    <string name="action_ssh_save">保存</string>
+    <string name="action_ssh_forwards">端口转发</string>
+    <string name="title_ssh_forwards">端口转发 · %1$s</string>
+    <string name="action_ssh_forwards_close">关闭</string>
+    <string name="action_ssh_forward_add">添加</string>
+    <string name="msg_ssh_forwards_empty">没有端口转发。可在 SSH 中将其添加到主机，以便每次连接时启动；也可以为此连接添加一个。</string>
+    <string name="msg_ssh_forwards_empty_not_connected">没有端口转发。可在 SSH 中将其添加到主机。标签页处于连接状态时，也可以为其添加转发。</string>
+    <string name="msg_ssh_forwards_not_connected">标签页未连接，因此无法添加或停止转发</string>
+    <string name="ssh_forward_checking">正在检查…</string>
+    <string name="ssh_forward_listening">● 正在监听</string>
+    <string name="ssh_forward_not_listening">○ 未监听</string>
+    <string name="ssh_forward_on_server">位于 %1$s</string>
+    <string name="ssh_forward_added">已添加</string>
+    <string name="action_ssh_forward_open">打开 %1$s</string>
+    <string name="action_ssh_forward_copy">复制 %1$s</string>
+    <string name="msg_ssh_forward_copied">已复制</string>
+    <string name="action_ssh_forward_stop">停止转发</string>
+    <string name="msg_ssh_forward_stopped">已停止 %1$s</string>
+    <string name="msg_ssh_forward_added">正在转发 %1$s</string>
+    <string name="title_ssh_forward_failed">端口转发失败</string>
+    <string name="msg_ssh_forward_invalid">请输入 [bind:]port:host:hostport，SOCKS 则输入 [bind:]port</string>
+    <string name="ssh_forward_type_local">本地 (-L)：从本机端口到服务器</string>
+    <string name="ssh_forward_type_remote">远程 (-R)：从服务器端口到本机</string>
+    <string name="ssh_forward_type_socks">SOCKS 代理 (-D)</string>
+    <string name="action_ssh_disconnect">断开连接</string>
+    <string name="action_ssh_reconnect">重新连接</string>
+
+    <string name="ssh_field_name">名称（用于 `ssh name`）</string>
+    <string name="ssh_field_host">主机</string>
+    <string name="ssh_field_port">端口</string>
+    <string name="ssh_field_user">用户</string>
+    <string name="ssh_field_password">密码</string>
+    <string name="ssh_field_identity_file">私钥文件（可选）</string>
+    <string name="ssh_field_startup_command">连接后运行的命令（可选）</string>
+    <string name="ssh_field_extra_options">更多 ssh_config 选项（可选，每行一个）</string>
+    <string name="ssh_field_jump_host">跳板主机（ProxyJump，可选）</string>
+    <string name="ssh_field_local_forwards">本地端口转发（-L，每行一个：port:host:hostport）</string>
+    <string name="ssh_field_remote_forwards">远程端口转发（-R，每行一个：port:host:hostport）</string>
+    <string name="ssh_field_socks_port">SOCKS 代理端口（-D，可选）</string>
+    <string name="ssh_use_mosh">使用 mosh 连接（两端都需要安装 mosh，不支持端口转发）</string>
+    <string name="ssh_auto_reconnect">连接断开时自动重新连接（仅限 ssh）</string>
+    <string name="ssh_auto_reconnect_short">自动重新连接</string>
+    <string name="ssh_password_hint">可选。加密保存在应用中。</string>
+    <string name="ssh_password_keep_hint">已保存。留空则保持不变。</string>
+    <string name="ssh_remove_saved_password">移除已保存的密码</string>
+    <string name="ssh_password_saved">已保存密码</string>
+    <string name="ssh_host_from_config">来自 ~/.ssh/config</string>
+
+    <string name="ssh_error_name">只能使用字母、数字和 . _ - @</string>
+    <string name="ssh_error_name_exists">已存在同名主机</string>
+    <string name="ssh_error_host">请输入主机名或地址</string>
+    <string name="ssh_error_port">请输入 1 到 65535 之间的端口</string>
+    <string name="ssh_error_jump_host">多个跳板主机请用逗号分隔，不要加空格</string>
+    <string name="ssh_error_forward">转发 \"%1$s\" 无效。请使用 [bind:]port:host:hostport</string>
+
+    <string name="msg_ssh_no_hosts">还没有 SSH 主机。请点按“添加主机”添加。\n\n连接需要 openssh 软件包：pkg install openssh</string>
+    <string name="msg_ssh_confirm_delete_host">要删除主机 %1$s 及其已保存的密码吗？</string>
+    <string name="msg_ssh_save_failed">无法保存 SSH 主机：%1$s</string>
+    <string name="msg_ssh_password_not_saved">无法保存密码</string>
+    <string name="msg_ssh_no_keys">~/.ssh 中还没有 SSH 密钥。</string>
+    <string name="msg_ssh_key_copied">已将 %1$s 复制到剪贴板</string>
+    <string name="msg_ssh_generate_key">将在 ~/.ssh 中以此文件名生成 ed25519 密钥。ssh-keygen 会在新标签页中询问可选的密码短语。</string>
+</resources>

@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!DOCTYPE resources [
+    <!ENTITY TERMUX_PACKAGE_NAME "com.termux">
+    <!ENTITY TERMUX_APP_NAME "Termux">
+    <!ENTITY TERMUX_API_APP_NAME "Termux:API">
+    <!ENTITY TERMUX_BOOT_APP_NAME "Termux:Boot">
+    <!ENTITY TERMUX_FLOAT_APP_NAME "Termux:Float">
+    <!ENTITY TERMUX_STYLING_APP_NAME "Termux:Styling">
+    <!ENTITY TERMUX_TASKER_APP_NAME "Termux:Tasker">
+    <!ENTITY TERMUX_WIDGET_APP_NAME "Termux:Widget">
+    ]>
+
+<resources>
+
+    <string name="application_name">&TERMUX_APP_NAME;</string>
+    <string name="shared_user_label">&TERMUX_APP_NAME; 用户</string>
+
+    <string name="permission_run_command_label">在 &TERMUX_APP_NAME; 环境中运行命令</string>
+    <string name="permission_run_command_description">在 &TERMUX_APP_NAME; 环境中执行任意命令并访问文件</string>
+
+    <string name="bootstrap_installer_body">正在安装引导软件包…</string>
+    <string name="bootstrap_error_title">无法安装引导软件包</string>
+    <string name="bootstrap_error_body">&TERMUX_APP_NAME; 无法安装引导软件包。</string>
+    <string name="bootstrap_error_abort">中止</string>
+    <string name="bootstrap_error_try_again">重试</string>
+    <string name="bootstrap_error_not_primary_user_message">&TERMUX_APP_NAME; 只能以主用户身份运行。\n为 &TERMUX_APP_NAME; 编译的引导二进制文件中硬编码了 $PREFIX 路径，只能安装在 %1$s 下，无法安装到其他路径。</string>
+
+    <string name="action_new_session">新建会话</string>
+    <string name="action_new_session_failsafe">安全模式</string>
+    <string name="title_max_terminals_reached">已达到终端数量上限</string>
+    <string name="msg_max_terminals_reached">请先关闭现有终端再新建。</string>
+
+    <string name="title_rename_session">设置会话名称</string>
+    <string name="action_rename_session_confirm">设置</string>
+    <string name="title_create_named_session">新建命名会话</string>
+    <string name="action_create_named_session_confirm">创建</string>
+
+    <string name="action_toggle_soft_keyboard">键盘</string>
+
+    <string name="msg_enabling_terminal_toolbar">正在启用终端工具栏</string>
+    <string name="msg_disabling_terminal_toolbar">正在停用终端工具栏</string>
+
+    <string name="action_select_url">选择网址</string>
+    <string name="title_select_url_dialog">点按网址可复制，长按可打开</string>
+    <string name="title_select_url_none_found">终端中未找到网址。</string>
+    <string name="msg_select_url_copied_to_clipboard">网址已复制到剪贴板</string>
+
+    <string name="action_share_transcript">分享终端记录</string>
+    <string name="title_share_transcript">终端记录</string>
+    <string name="title_share_transcript_with">将终端记录发送到：</string>
+
+    <string name="action_share_selected_text">分享所选文本</string>
+    <string name="title_share_selected_text">终端文本</string>
+    <string name="title_share_selected_text_with">将所选文本发送到：</string>
+
+    <string name="action_autofill_username">自动填充用户名</string>
+    <string name="action_autofill_password">自动填充密码</string>
+
+    <string name="action_reset_terminal">重置</string>
+    <string name="msg_terminal_reset">终端已重置</string>
+
+    <string name="action_kill_process">结束进程 (%d)</string>
+    <string name="title_confirm_kill_process">确定要结束此会话吗？</string>
+
+    <string name="action_style_terminal">样式</string>
+    <string name="action_toggle_keep_screen_on">保持屏幕常亮</string>
+    <string name="action_open_help">帮助</string>
+    <string name="action_open_settings">设置</string>
+
+    <string name="action_report_issue">报告问题</string>
+    <string name="msg_generating_report">正在生成报告</string>
+    <string name="msg_add_termux_debug_info">要在报告中添加 termux 调试信息吗？</string>
+
+    <string name="error_styling_not_installed">未安装 &TERMUX_STYLING_APP_NAME; 插件应用。</string>
+    <string name="action_styling_install">安装</string>
+
+    <string name="notification_action_exit">退出</string>
+    <string name="notification_action_wake_lock">获取唤醒锁</string>
+    <string name="notification_action_wake_unlock">释放唤醒锁</string>
+
+    <string name="error_display_over_other_apps_permission_not_granted">在 Android >= 10 上，&TERMUX_APP_NAME; 需要“显示在其他应用的上层”权限才能从后台启动终端会话。请在“设置 -> 应用 -> &TERMUX_APP_NAME; -> 高级”中授予该权限</string>
+
+    <string name="error_run_command_service_invalid_intent_action">RunCommandService 的 intent 操作无效：`%1$s`</string>
+    <string name="error_run_command_service_mandatory_extra_missing">RunCommandService 缺少必需的 extra：\"%1$s\"</string>
+    <string name="error_run_command_service_api_help">有关 RUN_COMMAND Intent 用法的更多信息，请访问 %1$s。</string>
+
+    <string name="title_file_received">将文件保存到 ~/downloads/</string>
+    <string name="action_file_received_edit">编辑</string>
+    <string name="action_file_received_open_directory">打开文件夹</string>
+
+    <string name="error_allow_external_apps_ungranted">%1$s 需要在 `%2$s` 文件中将 `allow-external-apps` 属性设置为 `true`。</string>
+
+    <string name="title_activity_termux_settings">&TERMUX_APP_NAME; 设置</string>
+
+    <string name="termux_preferences_title">&TERMUX_APP_NAME;</string>
+    <string name="termux_preferences_summary">&TERMUX_APP_NAME; 应用的偏好设置</string>
+
+    <string name="termux_debugging_preferences_title">调试</string>
+    <string name="termux_debugging_preferences_summary">调试相关的偏好设置</string>
+
+    <string name="termux_logging_header">日志</string>
+
+    <string name="termux_log_level_title">日志级别</string>
+
+    <string name="termux_terminal_view_key_logging_enabled_title">终端视图按键日志</string>
+    <string name="termux_terminal_view_key_logging_enabled_off">日志中不会记录终端视图按键。（默认）</string>
+    <string name="termux_terminal_view_key_logging_enabled_on">Logcat 日志中会记录终端视图按键。这些日志非常冗长，正常情况下应停用，否则会导致性能问题。</string>
+
+    <string name="termux_plugin_error_notifications_enabled_title">插件错误通知</string>
+    <string name="termux_plugin_error_notifications_enabled_off">不显示插件错误的提示和通知。</string>
+    <string name="termux_plugin_error_notifications_enabled_on">显示插件错误的提示和通知。（默认）</string>
+
+    <string name="termux_crash_report_notifications_enabled_title">崩溃报告通知</string>
+    <string name="termux_crash_report_notifications_enabled_off">不显示崩溃报告的通知。</string>
+    <string name="termux_crash_report_notifications_enabled_on">显示崩溃报告的通知。（默认）</string>
+
+    <string name="termux_terminal_io_preferences_title">终端 I/O</string>
+    <string name="termux_terminal_io_preferences_summary">终端 I/O 的偏好设置</string>
+
+    <string name="termux_keyboard_header">键盘</string>
+
+    <string name="termux_soft_keyboard_enabled_title">启用软键盘</string>
+    <string name="termux_soft_keyboard_enabled_off">将停用软键盘。</string>
+    <string name="termux_soft_keyboard_enabled_on">将启用软键盘。（默认）</string>
+
+    <string name="termux_soft_keyboard_enabled_only_if_no_hardware_title">仅在无硬件键盘时使用软键盘</string>
+    <string name="termux_soft_keyboard_enabled_only_if_no_hardware_off">即使连接了硬件键盘也会启用软键盘。（默认）</string>
+    <string name="termux_soft_keyboard_enabled_only_if_no_hardware_on">仅在未连接硬件键盘时启用软键盘。</string>
+
+    <string name="termux_terminal_view_preferences_title">终端视图</string>
+    <string name="termux_terminal_view_preferences_summary">终端视图的偏好设置</string>
+
+    <string name="termux_terminal_view_view_header">视图</string>
+
+    <string name="termux_terminal_view_terminal_margin_adjustment_title">终端边距调整</string>
+    <string name="termux_terminal_view_terminal_margin_adjustment_off">将停用终端边距调整。</string>
+    <string name="termux_terminal_view_terminal_margin_adjustment_on">将启用终端边距调整。启用后可尝试修复软键盘遮挡部分附加按键或终端视图的问题。如果在您的设备上导致屏幕闪烁，请停用此功能。（默认）</string>
+
+    <string name="termux_api_preferences_title">&TERMUX_API_APP_NAME;</string>
+    <string name="termux_api_preferences_summary">&TERMUX_API_APP_NAME; 应用的偏好设置</string>
+
+    <string name="termux_float_preferences_title">&TERMUX_FLOAT_APP_NAME;</string>
+    <string name="termux_float_preferences_summary">&TERMUX_FLOAT_APP_NAME; 应用的偏好设置</string>
+
+    <string name="termux_tasker_preferences_title">&TERMUX_TASKER_APP_NAME;</string>
+    <string name="termux_tasker_preferences_summary">&TERMUX_TASKER_APP_NAME; 应用的偏好设置</string>
+
+    <string name="termux_widget_preferences_title">&TERMUX_WIDGET_APP_NAME;</string>
+    <string name="termux_widget_preferences_summary">&TERMUX_WIDGET_APP_NAME; 应用的偏好设置</string>
+
+    <string name="about_preference_title">关于</string>
+
+    <string name="donate_preference_title">捐赠</string>
+
+</resources>

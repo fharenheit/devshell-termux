@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="action_close_terminal_tab">セッションを閉じる</string>
+    <string name="title_terminal_tab_menu">セッション %1$d</string>
+    <string name="action_rename_terminal_tab">名前を変更</string>
+    <string name="action_close_terminal_tab_menu">閉じる</string>
+    <string name="action_reset_terminal_tab_name">リセット</string>
+
+    <string name="action_terminal_tabs_menu">メニュー</string>
+    <string name="action_terminal_tabs_menu_settings">設定</string>
+    <string name="action_terminal_tabs_menu_sessions">セッション一覧</string>
+    <string name="action_terminal_tabs_menu_keyboard">キーボードの表示/非表示</string>
+    <string name="action_terminal_tabs_menu_edit_properties">termux.properties を編集</string>
+    <string name="action_terminal_tabs_menu_reload_settings">設定を再読み込み</string>
+    <string name="msg_terminal_tabs_settings_reloaded">設定を再読み込みしました</string>
+    <string name="action_terminal_tabs_menu_font">フォント</string>
+    <string name="action_terminal_tabs_menu_export_settings">設定をエクスポート</string>
+    <string name="action_terminal_tabs_menu_import_settings">設定をインポート</string>
+
+    <string name="title_settings_exported">設定をエクスポートしました</string>
+    <string name="msg_settings_exported">%1$s に保存しました\n\ntermux.properties、colors.properties、SSH ホスト、アプリの設定、フォントが含まれます。保存した SSH パスワードは含まれません。</string>
+    <string name="msg_settings_export_failed">設定をエクスポートできませんでした: %1$s</string>
+    <string name="msg_settings_export_permission">ストレージの権限を許可して、もう一度エクスポートしてください。</string>
+    <string name="title_settings_import">設定をインポート</string>
+    <string name="msg_settings_import">このアプリからエクスポートした termux-settings-*.zip ファイルを選択してください。その termux.properties、colors.properties、SSH ホスト、アプリの設定、フォントで現在のものが置き換えられます。現在のものは先に ~/.termux/backup にコピーされます。保存した SSH パスワードはエクスポートした設定に含まれません。</string>
+    <string name="action_settings_choose_file">ファイルを選択</string>
+    <string name="msg_settings_no_file_picker">ファイル選択アプリが見つかりません</string>
+    <string name="msg_settings_import_failed">設定をインポートできませんでした: %1$s</string>
+    <string name="msg_settings_imported">設定をインポートしました。以前の設定は %1$s にコピーされました</string>
+
+    <string name="msg_terminal_copy_select_first">テキストを長押しして選択し、⧉ をタップするとコピーします。⧉ を上にスワイプすると画面をコピーします。</string>
+    <string name="msg_terminal_copied_selection">選択範囲をコピーしました</string>
+    <string name="msg_terminal_copied_screen">画面をコピーしました</string>
+    <string name="action_terminal_search">検索</string>
+    <string name="hint_terminal_search">出力内を検索</string>
+    <string name="action_terminal_search_older">前の一致</string>
+    <string name="action_terminal_search_newer">次の一致</string>
+    <string name="action_terminal_search_close">閉じる</string>
+    <string name="title_snippets">スニペット</string>
+    <string name="title_snippets_for_host">スニペット · %1$s</string>
+    <string name="msg_snippets_empty">スニペットはまだありません。よく使うコマンドを追加し、タップすると現在のタブに入力されます。</string>
+    <string name="action_snippet_add">追加</string>
+    <string name="action_snippets_close">閉じる</string>
+    <string name="action_snippet_type">タブに入力</string>
+    <string name="action_snippet_edit">編集</string>
+    <string name="action_snippet_move_up">上へ移動</string>
+    <string name="action_snippet_move_down">下へ移動</string>
+    <string name="action_snippet_delete">削除</string>
+    <string name="action_snippet_save">保存</string>
+    <string name="msg_snippet_delete">スニペット %1$s を削除しますか？</string>
+    <string name="msg_snippet_no_session">現在のタブは終了しています</string>
+    <string name="msg_snippet_command_empty">コマンドを入力してください</string>
+    <string name="msg_snippets_save_failed">スニペットを保存できませんでした: %1$s</string>
+    <string name="snippet_name">名前</string>
+    <string name="snippet_name_hint">省略可。空欄の場合はコマンドが表示されます</string>
+    <string name="snippet_command">コマンド (複数行可)</string>
+    <string name="snippet_run">コマンドの後に Enter を押す</string>
+    <string name="snippet_host">表示先</string>
+    <string name="snippet_host_all">すべてのタブ</string>
+    <string name="title_terminal_keyboard_shortcuts">キーボードショートカット</string>
+    <string name="msg_terminal_keyboard_shortcuts">Ctrl+Tab: 次のタブ\nCtrl+Shift+Tab: 前のタブ\nCtrl+Shift+T: 新しいタブ\nCtrl+Shift+W: タブを閉じる\nCtrl+Shift+C: 選択範囲をコピー\nCtrl+Shift+V: 貼り付け\nCtrl+Shift+F: ターミナルの出力を検索\nCtrl+Shift+S: スニペット\nCtrl+= / Ctrl+-: 画面の文字を大きく / 小さく\nCtrl+0: 文字を保存したサイズに戻す\n\nCtrl+Alt ショートカット: N/P または ↓/↑ 次/前のタブ、C 新しいタブ、R 名前を変更、1～9 タブ、K キーボード、M メニュー、U URL、V 貼り付け、+/- 文字サイズ。\n\nこれらのキーをプログラムに送るには、termux.properties で terminal-keyboard-shortcuts = false を設定して Ctrl ショートカットをオフにしてください。</string>
+    <string name="terminal_font_title">フォント</string>
+    <string name="terminal_font_size_title">フォントサイズ</string>
+    <string name="terminal_font_size_value">%1$d px (%2$d dp)</string>
+    <string name="action_terminal_font_size_save">保存</string>
+    <string name="action_terminal_font_size_default">デフォルト</string>
+    <string name="action_terminal_font_size">サイズ…</string>
+    <string name="terminal_font_custom">カスタムフォント (~/.termux/font.ttf)</string>
+    <string name="terminal_font_default_suffix">(デフォルト)</string>
+    <string name="msg_terminal_font_applying">フォントを %1$s に設定しています…</string>
+    <string name="msg_terminal_font_applied">フォントを %1$s に設定しました</string>
+    <string name="msg_terminal_font_failed">フォントを %1$s に設定できませんでした: %2$s</string>
+    <string name="action_terminal_font_apply">適用</string>
+    <string name="terminal_font_downloaded">ダウンロード済み</string>
+    <string name="msg_terminal_font_downloading">%1$s をダウンロードしています</string>
+    <string name="msg_terminal_font_not_downloaded">適用時にダウンロードされます (%1$s)</string>
+    <string name="msg_terminal_font_loading">読み込んでいます…</string>
+    <string name="msg_terminal_font_preview_failed">フォントを読み込めませんでした</string>
+    <string name="msg_terminal_font_backed_up">以前の font.ttf は %1$s に移動しました</string>
+    <string name="action_move_terminal_tab_left">左へ移動</string>
+    <string name="action_move_terminal_tab_right">右へ移動</string>
+    <string name="terminal_tab_state_output">新しい出力</string>
+    <string name="terminal_tab_state_bell">ベル</string>
+
+    <string name="notification_terminal_session_bell">ベル</string>
+    <string name="notification_terminal_session_exited">終了しました</string>
+    <string name="notification_terminal_session_exited_code">終了しました (コード %1$d)</string>
+    <string name="notification_terminal_session_exited_signal">終了しました (シグナル %1$d)</string>
+</resources>
