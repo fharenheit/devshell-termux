@@ -7,13 +7,27 @@
 - **Added**: 새 기능, **Changed**: 동작·문서·패치 변경, **Fixed**: 버그 수정
 - "패치 갱신" 커밋은 업스트림 파일을 고친 커밋 뒤에 `custom/update-patches.sh`로 `custom/patches/`를 다시 만든 것입니다.
 
+## v0.118.3-ko.19 (2026-10-08)
+
+| 커밋 | 내용 |
+|---|---|
+| [`0039b07`](https://github.com/fharenheit/termux-app/commit/0039b07) | Added: 하단 키를 키캡 모양으로(`extra-keys-style = keycaps`, 기본값). 아이콘과 그 아래 작은 이름, 눌린 Ctrl/Alt는 파란색 |
+| [`83f16ae`](https://github.com/fharenheit/termux-app/commit/83f16ae) | Changed: 패치 갱신(`0022`)과 문서 |
+| [`3eafcdc`](https://github.com/fharenheit/termux-app/commit/3eafcdc) | Added: 앱 언어 선택(설정·⚙ 메뉴 → Language). 각 화면·서비스·앱의 context를 고른 언어로 감싸고(`AppLocale`), 바꾸면 화면을 다시 만듦 |
+| [`01d9808`](https://github.com/fharenheit/termux-app/commit/01d9808) | Added: 한국어·일본어·중국어(간체) 번역 약 420개 문자열씩, 번역마다 문자열과 자리 표시자를 확인하는 `TranslationsTest` |
+| [`ea43350`](https://github.com/fharenheit/termux-app/commit/ea43350) | Changed: 패치 갱신(`0023`)과 문서 |
+| [`083ed32`](https://github.com/fharenheit/termux-app/commit/083ed32) | Fixed: 터미널 글자 크기(A+/A−, 확대/축소, Ctrl+=/−)를 현재 탭에만 적용. 탭마다 크기를 기억하고 탭을 바꾸면 그 크기로 |
+| [`fe92487`](https://github.com/fharenheit/termux-app/commit/fe92487) | Changed: 패치 갱신(`0024`) |
+| [`71294f1`](https://github.com/fharenheit/termux-app/commit/71294f1) | Changed: 패치 문서 |
+| (이 릴리즈 커밋) | Added: v0.118.3-ko.19 릴리즈 노트와 이력 |
+
 ## v0.118.3-ko.18 (2026-10-08)
 
 | 커밋 | 내용 |
 |---|---|
 | [`2028cbd`](https://github.com/fharenheit/termux-app/commit/2028cbd) | Added: 기본 extra keys에 ⧉ COPY(선택 복사, 위로 밀면 화면 복사)와 ⎘ PASTE 추가, Ctrl+Shift+C도 같은 방식. SFTP 편집기 툴바에 잘라내기/복사/붙여넣기/전체 선택(선택이 없으면 현재 줄, 각각 Undo 한 단계) |
 | [`d499700`](https://github.com/fharenheit/termux-app/commit/d499700) | Changed: 패치 갱신(`0021`)과 문서 |
-| (이 릴리즈 커밋) | Added: v0.118.3-ko.18 릴리즈 노트와 이력 |
+| [`69430ee`](https://github.com/fharenheit/termux-app/commit/69430ee) | Added: v0.118.3-ko.18 릴리즈 노트와 이력 |
 
 ## v0.118.3-ko.17 (2026-10-08)
 
