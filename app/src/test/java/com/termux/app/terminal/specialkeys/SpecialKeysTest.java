@@ -127,4 +127,12 @@ public class SpecialKeysTest {
         Assert.assertEquals(Arrays.asList("F5"), SpecialKeyFavorites.load(file));
     }
 
+    /** Every key has a caption below its label, so that the keys of a row line up alike. */
+    @Test
+    public void testEveryKeyHasCaption() {
+        for (SpecialKeys.Tab tab : SpecialKeys.TABS)
+            for (SpecialKeys.Key key : tab.keys)
+                Assert.assertTrue(key.macro, key.captionId != 0 || key.caption != null);
+    }
+
 }

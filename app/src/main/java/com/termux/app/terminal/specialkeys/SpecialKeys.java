@@ -27,12 +27,15 @@ public final class SpecialKeys {
         public final int captionId;
         /** A description that is not translated, like `Ctrl+V`, or {@code null}. */
         @Nullable public final String caption;
+        /** The number formatted into {@link #captionId}, like 5 for F5, or 0 if none. */
+        public final int captionArg;
 
-        Key(@NonNull String macro, @NonNull String label, int captionId, @Nullable String caption) {
+        Key(@NonNull String macro, @NonNull String label, int captionId, @Nullable String caption, int captionArg) {
             this.macro = macro;
             this.label = label;
             this.captionId = captionId;
             this.caption = caption;
+            this.captionArg = captionArg;
         }
     }
 
@@ -53,20 +56,16 @@ public final class SpecialKeys {
     private SpecialKeys() {}
 
     private static Key key(String macro, String label, int captionId) {
-        return new Key(macro, label, captionId, null);
+        return new Key(macro, label, captionId, null, 0);
     }
 
     private static Key key(String macro, String label, String caption) {
-        return new Key(macro, label, 0, caption);
-    }
-
-    private static Key key(String macro, String label) {
-        return new Key(macro, label, 0, null);
+        return new Key(macro, label, 0, caption, 0);
     }
 
     private static List<Key> functionKeys(int from, int to) {
         List<Key> keys = new ArrayList<>();
-        for (int i = from; i <= to; i++) keys.add(key("F" + i, "F" + i));
+        for (int i = from; i <= to; i++) keys.add(new Key("F" + i, "F" + i, R.string.special_key_function, null, i));
         return keys;
     }
 
@@ -91,7 +90,7 @@ public final class SpecialKeys {
             key("CTRL r", "^R", R.string.special_key_search_history),
             key("CTRL w", "^W", R.string.special_key_delete_word),
             key("CTRL u", "^U", R.string.special_key_delete_before),
-            key("DEL", "Del", "Delete"))));
+            key("DEL", "Del", R.string.special_key_delete))));
 
     public static final List<Key> CTRL = Collections.unmodifiableList(Arrays.asList(
         key("CTRL c", "^C", R.string.special_key_interrupt),
@@ -112,27 +111,27 @@ public final class SpecialKeys {
         key("CTRL o", "^O", "Ctrl+O"),
         key("CTRL b", "^B", R.string.special_key_tmux_prefix),
         key("CTRL y", "^Y", R.string.special_key_yank),
-        key("CTRL t", "^T", "Ctrl+T"),
-        key("CTRL g", "^G", "Ctrl+G"),
+        key("CTRL t", "^T", R.string.special_key_swap_characters),
+        key("CTRL g", "^G", R.string.special_key_cancel),
         key("CTRL _", "^_", R.string.special_key_undo)));
 
     public static final List<Key> FUNCTION = Collections.unmodifiableList(functionKeys(1, 12));
 
     public static final List<Key> EDIT = Collections.unmodifiableList(Arrays.asList(
-        key("ESC", "Esc", "Escape"),
-        key("INS", "Ins", "Insert"),
-        key("DEL", "Del", "Delete"),
-        key("BKSP", "⌫", "Backspace"),
-        key("TAB", "↹", "Tab"),
-        key("SHIFT TAB", "⇧↹", "Shift+Tab"),
-        key("HOME", "⇤", "Home"),
-        key("END", "⇥", "End"),
-        key("PGUP", "⇞", "PgUp"),
-        key("PGDN", "⇟", "PgDn"),
-        key("UP", "↑"),
-        key("DOWN", "↓"),
-        key("LEFT", "←"),
-        key("RIGHT", "→")));
+        key("ESC", "Esc", R.string.special_key_escape),
+        key("INS", "Ins", R.string.special_key_insert),
+        key("DEL", "Del", R.string.special_key_delete),
+        key("BKSP", "⌫", R.string.special_key_backspace),
+        key("TAB", "↹", R.string.special_key_tab),
+        key("SHIFT TAB", "⇧↹", R.string.special_key_back_tab),
+        key("HOME", "⇤", R.string.special_key_home),
+        key("END", "⇥", R.string.special_key_end),
+        key("PGUP", "⇞", R.string.special_key_page_up),
+        key("PGDN", "⇟", R.string.special_key_page_down),
+        key("UP", "↑", R.string.special_key_up),
+        key("DOWN", "↓", R.string.special_key_down),
+        key("LEFT", "←", R.string.special_key_left),
+        key("RIGHT", "→", R.string.special_key_right)));
 
     public static final List<Key> ALT = Collections.unmodifiableList(Arrays.asList(
         key("ALT b", "Alt+B", R.string.special_key_word_back),
@@ -140,17 +139,26 @@ public final class SpecialKeys {
         key("ALT .", "Alt+.", R.string.special_key_last_argument),
         key("ALT BKSP", "Alt+⌫", R.string.special_key_delete_word),
         key("ALT d", "Alt+D", R.string.special_key_delete_word_after),
-        key("ALT ENTER", "Alt+↲", "Alt+Enter"),
+        key("ALT ENTER", "Alt+↲", R.string.special_key_new_line),
         key("ALT u", "Alt+U", R.string.special_key_uppercase_word),
         key("ALT l", "Alt+L", R.string.special_key_lowercase_word)));
 
     public static final List<Key> SYMBOLS;
 
     static {
+        String[] symbolKeys = {"~", "`", "|", "\\", "{", "}", "[", "]", "<", ">", "^", "&", "$", "#", "_", "=",
+            ";", ":", "\"", "'", "*", "%", "!", "?", "@"};
+        int[] symbolNames = {R.string.special_key_tilde, R.string.special_key_backtick, R.string.special_key_pipe,
+            R.string.special_key_backslash, R.string.special_key_left_brace, R.string.special_key_right_brace,
+            R.string.special_key_left_bracket, R.string.special_key_right_bracket, R.string.special_key_less_than,
+            R.string.special_key_greater_than, R.string.special_key_caret, R.string.special_key_ampersand,
+            R.string.special_key_dollar, R.string.special_key_hash, R.string.special_key_underscore,
+            R.string.special_key_equals, R.string.special_key_semicolon, R.string.special_key_colon,
+            R.string.special_key_double_quote, R.string.special_key_single_quote, R.string.special_key_asterisk,
+            R.string.special_key_percent, R.string.special_key_exclamation, R.string.special_key_question,
+            R.string.special_key_at};
         List<Key> symbols = new ArrayList<>();
-        for (String symbol : new String[]{"~", "`", "|", "\\", "{", "}", "[", "]", "<", ">", "^", "&", "$", "#", "_", "=",
-            ";", ":", "\"", "'", "*", "%", "!", "?", "@"})
-            symbols.add(key(symbol, symbol));
+        for (int i = 0; i < symbolKeys.length; i++) symbols.add(key(symbolKeys[i], symbolKeys[i], symbolNames[i]));
         SYMBOLS = Collections.unmodifiableList(symbols);
     }
 

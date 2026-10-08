@@ -212,7 +212,8 @@ public class SpecialKeysPanel {
         for (int i = 0; i < keys.size(); i++) {
             SpecialKeys.Key key = keys.get(i);
             GridLayout.LayoutParams params = new GridLayout.LayoutParams(
-                GridLayout.spec(i / columns), GridLayout.spec(i % columns, GridLayout.FILL, 1f));
+                // Fill the row instead of aligning the text baselines, which moves keys whose caption takes more lines.
+                GridLayout.spec(i / columns, GridLayout.FILL), GridLayout.spec(i % columns, GridLayout.FILL, 1f));
             params.width = 0;
             params.height = dp(KEY_HEIGHT_DP);
             params.setMargins(dp(KEY_GAP_DP / 2f), dp(KEY_GAP_DP / 2f), dp(KEY_GAP_DP / 2f), dp(KEY_GAP_DP / 2f));
@@ -229,7 +230,8 @@ public class SpecialKeysPanel {
 
     @Nullable
     private String getCaption(@NonNull SpecialKeys.Key key) {
-        return key.captionId != 0 ? mActivity.getString(key.captionId) : key.caption;
+        if (key.captionId == 0) return key.caption;
+        return key.captionArg != 0 ? mActivity.getString(key.captionId, key.captionArg) : mActivity.getString(key.captionId);
     }
 
     @NonNull
