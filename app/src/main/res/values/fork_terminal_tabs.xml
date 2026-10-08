@@ -41,6 +41,11 @@
     <string name="msg_settings_import_failed">Failed to import the settings: %1$s</string>
     <string name="msg_settings_imported">Settings imported. The previous ones were copied to %1$s</string>
 
+    <string name="action_terminal_search">Find</string>
+    <string name="hint_terminal_search">Find in the output</string>
+    <string name="action_terminal_search_older">Older match</string>
+    <string name="action_terminal_search_newer">Newer match</string>
+    <string name="action_terminal_search_close">Close</string>
     <string name="title_snippets">Snippets</string>
     <string name="title_snippets_for_host">Snippets · %1$s</string>
     <string name="msg_snippets_empty">No snippets yet. Add the commands you use often, then tap one to type it into the current tab.</string>

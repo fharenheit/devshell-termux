@@ -31,6 +31,7 @@ import com.termux.app.terminal.backup.SettingsBackup;
 import com.termux.app.terminal.fonts.TerminalFontDialog;
 import com.termux.app.terminal.fonts.TerminalFonts;
 import com.termux.app.terminal.sftp.SftpBrowserActivity;
+import com.termux.app.terminal.search.TerminalSearchBar;
 import com.termux.app.terminal.snippets.SnippetsDialog;
 import com.termux.app.terminal.ssh.SshConnector;
 import com.termux.app.terminal.ssh.SshHostsDialog;
@@ -61,6 +62,15 @@ public class TerminalTabsController {
 
     /** Sessions closed from a tab while running, to be removed once their process has exited. */
     private static final Set<TerminalSession> sSessionsToRemoveOnExit = Collections.newSetFromMap(new WeakHashMap<>());
+
+    private TerminalSearchBar mSearchBar;
+
+    /** The bar to find text in the terminal output, created when first used. */
+    @NonNull
+    public TerminalSearchBar getSearchBar() {
+        if (mSearchBar == null) mSearchBar = new TerminalSearchBar(mActivity);
+        return mSearchBar;
+    }
 
     public TerminalTabsController(@NonNull TermuxActivity activity) {
         mActivity = activity;
@@ -124,6 +134,7 @@ public class TerminalTabsController {
     private static final int MENU_IMPORT_SETTINGS = 9;
     private static final int MENU_KEYBOARD_SHORTCUTS = 10;
     private static final int MENU_SNIPPETS = 11;
+    private static final int MENU_FIND = 12;
 
     /** Show the menu of the settings button of the tab bar. */
     private void showMenu(View anchor) {
@@ -131,6 +142,7 @@ public class TerminalTabsController {
         Menu menu = popupMenu.getMenu();
         menu.add(Menu.NONE, MENU_SSH, Menu.NONE, R.string.action_terminal_tabs_menu_ssh);
         menu.add(Menu.NONE, MENU_SNIPPETS, Menu.NONE, R.string.title_snippets);
+        menu.add(Menu.NONE, MENU_FIND, Menu.NONE, R.string.action_terminal_search);
         menu.add(Menu.NONE, MENU_SETTINGS, Menu.NONE, R.string.action_terminal_tabs_menu_settings);
         menu.add(Menu.NONE, MENU_SESSIONS, Menu.NONE, R.string.action_terminal_tabs_menu_sessions);
         menu.add(Menu.NONE, MENU_KEYBOARD, Menu.NONE, R.string.action_terminal_tabs_menu_keyboard);
@@ -156,6 +168,9 @@ public class TerminalTabsController {
                     return true;
                 case MENU_IMPORT_SETTINGS:
                     SettingsBackup.startImport(mActivity);
+                    return true;
+                case MENU_FIND:
+                    getSearchBar().show();
                     return true;
                 case MENU_SNIPPETS:
                     SnippetsDialog.show(mActivity);
@@ -248,6 +263,7 @@ public class TerminalTabsController {
 
     /** Called when the session displayed in the terminal has changed or may have changed. */
     public void onCurrentSessionChanged(TerminalSession currentSession) {
+        if (mSearchBar != null) mSearchBar.onSessionChanged();
         TerminalTabStates.markSeen(currentSession);
         // The session may be changed while the activity is not visible, like when another one exits.
         if (mActivity.isVisible())

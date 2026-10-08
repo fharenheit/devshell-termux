@@ -31,18 +31,7 @@ import com.termux.view.TerminalView;
  */
 public final class TerminalKeyboardShortcuts {
 
-    /** Actions of shortcuts that other parts of the fork register, like find and snippets. */
-    public interface Action {
-        void run(@NonNull TermuxActivity activity);
-    }
-
-    private static Action sFindAction;
-
     private TerminalKeyboardShortcuts() {}
-
-    public static void setFindAction(Action action) {
-        sFindAction = action;
-    }
 
     /**
      * Handle a key down event if it is a shortcut, and return whether it was. Called before the
@@ -99,8 +88,9 @@ public final class TerminalKeyboardShortcuts {
                 if (!repeat) sessionClient.onPasteTextFromClipboard(session);
                 return true;
             case KeyEvent.KEYCODE_F:
-                if (!repeat && sFindAction != null) sFindAction.run(activity);
-                return sFindAction != null;
+                if (!repeat && activity.getTerminalTabsController() != null)
+                    activity.getTerminalTabsController().getSearchBar().show();
+                return true;
             case KeyEvent.KEYCODE_S:
                 if (!repeat) SnippetsDialog.show(activity);
                 return true;

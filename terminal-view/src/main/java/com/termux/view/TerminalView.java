@@ -1091,6 +1091,10 @@ public final class TerminalView extends View {
 
             mRenderer.render(mEmulator, canvas, mTopRow, sel[0], sel[1], sel[2], sel[3]);
 
+            // Draw over the text, like the matches of a search.
+            if (mOverlay != null)
+                mOverlay.draw(canvas, mEmulator, mTopRow, mRenderer.mFontWidth, mRenderer.mFontLineSpacing, mRenderer.mFontLineSpacingAndAscent);
+
             // render the text being composed by the IME at the cursor
             mRenderer.renderComposingText(mEmulator, canvas, mTopRow, mComposingText);
 
@@ -1124,6 +1128,23 @@ public final class TerminalView extends View {
 
     public int getPointY(int cy) {
         return Math.round((cy - mTopRow) * mRenderer.mFontLineSpacing);
+    }
+
+    /** Draws over the terminal text, like the matches of a search. */
+    public interface Overlay {
+        /**
+         * Draw over the rows from {@code topRow}. A column is {@code columnWidth} wide, and row
+         * {@code topRow + i} spans from {@code firstRowTop + i * rowHeight} for {@code rowHeight}.
+         */
+        void draw(Canvas canvas, TerminalEmulator emulator, int topRow, float columnWidth, int rowHeight, int firstRowTop);
+    }
+
+    private Overlay mOverlay;
+
+    /** Set what to draw over the terminal text, or {@code null} for nothing. */
+    public void setOverlay(@Nullable Overlay overlay) {
+        mOverlay = overlay;
+        invalidate();
     }
 
     public int getTopRow() {
