@@ -1,0 +1,34 @@
+From 1ff2a207051f4d2f93f854ae7891d4137b44f446 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Thu, 8 Oct 2026 02:06:47 +0000
+Subject: [PATCH] Fixed: Run unit tests on JDK 11
+
+Robolectric 4.4 fails to load classes on the newer default JDK of the
+runner, so every test using it failed.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01GLNsTPnn2xKUQ4uFcevT6G
+---
+ .github/workflows/run_tests.yml | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/.github/workflows/run_tests.yml b/.github/workflows/run_tests.yml
+index f8d33fd..2534cd8 100644
+--- a/.github/workflows/run_tests.yml
++++ b/.github/workflows/run_tests.yml
+@@ -16,6 +16,12 @@ jobs:
+     steps:
+     - name: Clone repository
+       uses: actions/checkout@v4
++    - name: Set up JDK 11
++      # Robolectric 4.4 can't read the class files of newer JDKs.
++      uses: actions/setup-java@v4
++      with:
++        distribution: temurin
++        java-version: 11
+     - name: Execute tests
+       run: |
+         ./gradlew test
+-- 
+2.43.0
+
