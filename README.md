@@ -8,7 +8,7 @@
 > - SSH 파일 탐색(SFTP): 이미지 보기, 텍스트 편집(문법 강조, Undo/Redo, 인코딩, 16진수 보기), 업로드/다운로드
 > - 터미널의 URL 열기, 설정 내보내기/가져오기, extra keys의 ENTER·KEYBOARD 버튼
 >
-> 기능별 설명은 [custom/README.md](custom/README.md), 변경 이력은 [history.md](history.md)에 있습니다.
+> 전체 기능 목록은 [FEATURES.md](FEATURES.md), 구현 방식은 [custom/README.md](custom/README.md), 변경 이력은 [history.md](history.md)에 있습니다.
 
 [![Build status](https://github.com/termux/termux-app/workflows/Build/badge.svg)](https://github.com/termux/termux-app/actions)
 [![Testing status](https://github.com/termux/termux-app/workflows/Unit%20tests/badge.svg)](https://github.com/termux/termux-app/actions)
