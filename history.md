@@ -7,6 +7,14 @@
 - **Added**: 새 기능, **Changed**: 동작·문서·패치 변경, **Fixed**: 버그 수정
 - "패치 갱신" 커밋은 업스트림 파일을 고친 커밋 뒤에 `custom/update-patches.sh`로 `custom/patches/`를 다시 만든 것입니다.
 
+## v0.118.3-ko.20 (2026-10-08)
+
+| 커밋 | 내용 |
+|---|---|
+| [`be6cd0f`](https://github.com/fharenheit/termux-app/commit/be6cd0f) | Added: 특수 키 패널. 두 줄 높이의 좁은 ⊞ 키로 열고, 10개 탭(자주·Ctrl·Fn·편집·Alt·기호·tmux·vim·nano·★), 누르면 전송 후 닫힘, 길게 눌러 설명과 ★ 즐겨찾기. 하단 키에 `rows`, `width` 속성 |
+| [`f81ffbf`](https://github.com/fharenheit/termux-app/commit/f81ffbf) | Changed: 패치 갱신(`0025`)과 문서 |
+| (이 릴리즈 커밋) | Added: v0.118.3-ko.20 릴리즈 노트와 이력 |
+
 ## v0.118.3-ko.19 (2026-10-08)
 
 | 커밋 | 내용 |
@@ -19,7 +27,7 @@
 | [`083ed32`](https://github.com/fharenheit/termux-app/commit/083ed32) | Fixed: 터미널 글자 크기(A+/A−, 확대/축소, Ctrl+=/−)를 현재 탭에만 적용. 탭마다 크기를 기억하고 탭을 바꾸면 그 크기로 |
 | [`fe92487`](https://github.com/fharenheit/termux-app/commit/fe92487) | Changed: 패치 갱신(`0024`) |
 | [`71294f1`](https://github.com/fharenheit/termux-app/commit/71294f1) | Changed: 패치 문서 |
-| (이 릴리즈 커밋) | Added: v0.118.3-ko.19 릴리즈 노트와 이력 |
+| [`59cbc92`](https://github.com/fharenheit/termux-app/commit/59cbc92) | Added: v0.118.3-ko.19 릴리즈 노트와 이력 |
 
 ## v0.118.3-ko.18 (2026-10-08)
 
