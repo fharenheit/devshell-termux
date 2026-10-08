@@ -23,8 +23,8 @@ import com.termux.terminal.TerminalSession;
  * Ctrl+Shift+T                new tab
  * Ctrl+Shift+W                close tab
  * Ctrl+Shift+C / Ctrl+Shift+V copy the selection / paste
- * Ctrl+= or Ctrl++ / Ctrl+-   larger / smaller text on the screen
- * Ctrl+0                      text at the saved size
+ * Ctrl+= or Ctrl++ / Ctrl+-   larger / smaller text of the current tab
+ * Ctrl+0                      the current tab at the saved text size
  * Ctrl+Shift+F                find in the terminal output
  * Ctrl+Shift+S                snippets
  * </pre>
@@ -63,7 +63,7 @@ public final class TerminalKeyboardShortcuts {
             case KeyEvent.KEYCODE_0:
             case KeyEvent.KEYCODE_NUMPAD_0:
                 if (shift) return false;
-                viewClient.applySavedFontSize();
+                viewClient.resetFontSize();
                 return true;
         }
 

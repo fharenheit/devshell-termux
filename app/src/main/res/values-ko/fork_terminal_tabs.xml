@@ -58,7 +58,7 @@
     <string name="snippet_host">표시할 곳</string>
     <string name="snippet_host_all">모든 탭</string>
     <string name="title_terminal_keyboard_shortcuts">키보드 단축키</string>
-    <string name="msg_terminal_keyboard_shortcuts">Ctrl+Tab: 다음 탭\nCtrl+Shift+Tab: 이전 탭\nCtrl+Shift+T: 새 탭\nCtrl+Shift+W: 탭 닫기\nCtrl+Shift+C: 선택 영역 복사\nCtrl+Shift+V: 붙여넣기\nCtrl+Shift+F: 터미널 출력에서 찾기\nCtrl+Shift+S: 스니펫\nCtrl+= / Ctrl+-: 화면 텍스트 크게 / 작게\nCtrl+0: 저장된 크기로 텍스트 표시\n\nCtrl+Alt 단축키: N/P 또는 ↓/↑ 다음/이전 탭, C 새 탭, R 이름 바꾸기, 1–9 탭, K 키보드, M 메뉴, U URL, V 붙여넣기, +/- 텍스트 크기.\n\n이 키를 프로그램에 보내려면 termux.properties에서 terminal-keyboard-shortcuts = false로 Ctrl 단축키를 끄세요.</string>
+    <string name="msg_terminal_keyboard_shortcuts">Ctrl+Tab: 다음 탭\nCtrl+Shift+Tab: 이전 탭\nCtrl+Shift+T: 새 탭\nCtrl+Shift+W: 탭 닫기\nCtrl+Shift+C: 선택 영역 복사\nCtrl+Shift+V: 붙여넣기\nCtrl+Shift+F: 터미널 출력에서 찾기\nCtrl+Shift+S: 스니펫\nCtrl+= / Ctrl+-: 현재 탭의 텍스트 크게 / 작게\nCtrl+0: 현재 탭을 저장된 크기로\n\nCtrl+Alt 단축키: N/P 또는 ↓/↑ 다음/이전 탭, C 새 탭, R 이름 바꾸기, 1–9 탭, K 키보드, M 메뉴, U URL, V 붙여넣기, +/- 텍스트 크기.\n\n이 키를 프로그램에 보내려면 termux.properties에서 terminal-keyboard-shortcuts = false로 Ctrl 단축키를 끄세요.</string>
     <string name="terminal_font_title">글꼴</string>
     <string name="terminal_font_size_title">글꼴 크기</string>
     <string name="terminal_font_size_value">%1$d px (%2$d dp)</string>

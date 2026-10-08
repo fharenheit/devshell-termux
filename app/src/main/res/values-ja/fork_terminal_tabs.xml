@@ -58,7 +58,7 @@
     <string name="snippet_host">表示先</string>
     <string name="snippet_host_all">すべてのタブ</string>
     <string name="title_terminal_keyboard_shortcuts">キーボードショートカット</string>
-    <string name="msg_terminal_keyboard_shortcuts">Ctrl+Tab: 次のタブ\nCtrl+Shift+Tab: 前のタブ\nCtrl+Shift+T: 新しいタブ\nCtrl+Shift+W: タブを閉じる\nCtrl+Shift+C: 選択範囲をコピー\nCtrl+Shift+V: 貼り付け\nCtrl+Shift+F: ターミナルの出力を検索\nCtrl+Shift+S: スニペット\nCtrl+= / Ctrl+-: 画面の文字を大きく / 小さく\nCtrl+0: 文字を保存したサイズに戻す\n\nCtrl+Alt ショートカット: N/P または ↓/↑ 次/前のタブ、C 新しいタブ、R 名前を変更、1～9 タブ、K キーボード、M メニュー、U URL、V 貼り付け、+/- 文字サイズ。\n\nこれらのキーをプログラムに送るには、termux.properties で terminal-keyboard-shortcuts = false を設定して Ctrl ショートカットをオフにしてください。</string>
+    <string name="msg_terminal_keyboard_shortcuts">Ctrl+Tab: 次のタブ\nCtrl+Shift+Tab: 前のタブ\nCtrl+Shift+T: 新しいタブ\nCtrl+Shift+W: タブを閉じる\nCtrl+Shift+C: 選択範囲をコピー\nCtrl+Shift+V: 貼り付け\nCtrl+Shift+F: ターミナルの出力を検索\nCtrl+Shift+S: スニペット\nCtrl+= / Ctrl+-: 現在のタブの文字を大きく / 小さく\nCtrl+0: 現在のタブを保存したサイズに戻す\n\nCtrl+Alt ショートカット: N/P または ↓/↑ 次/前のタブ、C 新しいタブ、R 名前を変更、1～9 タブ、K キーボード、M メニュー、U URL、V 貼り付け、+/- 文字サイズ。\n\nこれらのキーをプログラムに送るには、termux.properties で terminal-keyboard-shortcuts = false を設定して Ctrl ショートカットをオフにしてください。</string>
     <string name="terminal_font_title">フォント</string>
     <string name="terminal_font_size_title">フォントサイズ</string>
     <string name="terminal_font_size_value">%1$d px (%2$d dp)</string>

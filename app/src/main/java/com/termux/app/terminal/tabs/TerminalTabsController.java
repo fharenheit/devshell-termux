@@ -273,6 +273,9 @@ public class TerminalTabsController {
     /** Called when the session displayed in the terminal has changed or may have changed. */
     public void onCurrentSessionChanged(TerminalSession currentSession) {
         if (mSearchBar != null) mSearchBar.onSessionChanged();
+        // Each tab has its own font size on the screen.
+        if (mActivity.getTermuxTerminalViewClient() != null)
+            mActivity.getTermuxTerminalViewClient().onSessionChanged(currentSession);
         TerminalTabStates.markSeen(currentSession);
         // The session may be changed while the activity is not visible, like when another one exits.
         if (mActivity.isVisible())

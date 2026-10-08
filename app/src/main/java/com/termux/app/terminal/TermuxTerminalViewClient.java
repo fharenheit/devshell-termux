@@ -47,6 +47,7 @@ import com.termux.terminal.KeyHandler;
 import com.termux.terminal.TerminalBuffer;
 import com.termux.terminal.TerminalEmulator;
 import com.termux.terminal.TerminalSession;
+import androidx.annotation.Nullable;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -74,6 +75,8 @@ public class TermuxTerminalViewClient extends TermuxTerminalViewClientBase {
     /** The font size on the screen, and the saved one it started from. */
     private int mFontSize;
     private int mSavedFontSize;
+    /** The font sizes of tabs changed on the screen, which other tabs do not share. */
+    private final java.util.Map<TerminalSession, Integer> mSessionFontSizes = new java.util.WeakHashMap<>();
 
     private static final String LOG_TAG = "TermuxTerminalViewClient";
 
@@ -497,21 +500,45 @@ public class TermuxTerminalViewClient extends TermuxTerminalViewClientBase {
 
 
     /**
-     * Make the text larger or smaller on the screen, for the A+ and A− extra keys, pinch zoom and
-     * Ctrl+Alt+/-. The size is not saved, so the saved size of the Font size setting is used when
-     * the app is opened again.
+     * Make the text of the current tab larger or smaller on the screen, for the A+ and A− extra
+     * keys, pinch zoom and Ctrl+Alt+/-. Other tabs keep their size. The size is not saved, so the
+     * saved size of the Font size setting is used when the app is opened again.
      */
     public void changeFontSize(boolean increase) {
         int[] sizes = TermuxAppSharedPreferences.getDefaultFontSizes(mActivity);
-        mFontSize = Math.max(sizes[1], Math.min(sizes[2], mFontSize + (increase ? 2 : -2)));
-        mActivity.getTerminalView().setTextSize(mFontSize);
+        int size = Math.max(sizes[1], Math.min(sizes[2], mFontSize + (increase ? 2 : -2)));
+        TerminalSession session = mActivity.getCurrentSession();
+        if (session != null) {
+            if (size == mSavedFontSize) mSessionFontSizes.remove(session);
+            else mSessionFontSizes.put(session, size);
+        }
+        showFontSize(size);
     }
 
-    /** Show the text at the saved font size, like after it was changed in the settings. */
+    /** Show the text of the current tab at the saved font size again, for Ctrl+0. */
+    public void resetFontSize() {
+        TerminalSession session = mActivity.getCurrentSession();
+        if (session != null) mSessionFontSizes.remove(session);
+        showFontSize(mSavedFontSize);
+    }
+
+    /** Show the text of a tab that became current at its size. */
+    public void onSessionChanged(@Nullable TerminalSession session) {
+        Integer size = session == null ? null : mSessionFontSizes.get(session);
+        int fontSize = size != null ? size : mSavedFontSize;
+        if (fontSize != mFontSize) showFontSize(fontSize);
+    }
+
+    private void showFontSize(int size) {
+        mFontSize = size;
+        mActivity.getTerminalView().setTextSize(size);
+    }
+
+    /** Show the text of all tabs at the saved font size, like after it was changed in the settings. */
     public void applySavedFontSize() {
         mSavedFontSize = mActivity.getPreferences().getFontSize();
-        mFontSize = mSavedFontSize;
-        mActivity.getTerminalView().setTextSize(mFontSize);
+        mSessionFontSizes.clear();
+        showFontSize(mSavedFontSize);
     }
 
     /** Show the text at the saved font size if it was changed in the settings since it was shown. */
