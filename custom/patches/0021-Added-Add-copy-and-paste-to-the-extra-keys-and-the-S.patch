@@ -1,0 +1,81 @@
+From 2028cbdc9b7b717a45fb2f55b4b7116e1905f3f6 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Thu, 8 Oct 2026 04:28:32 +0000
+Subject: [PATCH] Added: Add copy and paste to the extra keys and the SFTP
+ editor toolbar
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+The default extra keys have ⧉ (COPY) and ⎘ (PASTE) right of A+ and A-.
+⧉ copies the selected text, or tells how to select text if nothing is
+selected, and swiping up on it copies the screen. Ctrl+Shift+C copies
+the same way.
+
+The SFTP editor toolbar has cut, copy, paste and select all after undo
+and redo. Cut and copy take the line of the cursor if nothing is
+selected, paste replaces the selection with plain text, and cut and
+paste are undone as steps of their own. In the hex view, copy takes the
+hex dump of up to the first 64 KB.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01GLNsTPnn2xKUQ4uFcevT6G
+---
+ .../com/termux/app/terminal/io/TermuxTerminalExtraKeys.java | 6 ++++++
+ .../shared/settings/properties/TermuxPropertyConstants.java | 2 +-
+ .../shared/terminal/io/extrakeys/ExtraKeysConstants.java    | 2 ++
+ 3 files changed, 9 insertions(+), 1 deletion(-)
+
+diff --git a/app/src/main/java/com/termux/app/terminal/io/TermuxTerminalExtraKeys.java b/app/src/main/java/com/termux/app/terminal/io/TermuxTerminalExtraKeys.java
+index 56ccbf9..b120256 100644
+--- a/app/src/main/java/com/termux/app/terminal/io/TermuxTerminalExtraKeys.java
++++ b/app/src/main/java/com/termux/app/terminal/io/TermuxTerminalExtraKeys.java
+@@ -9,6 +9,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
+ 
+ import com.termux.app.terminal.TermuxTerminalSessionClient;
+ import com.termux.app.terminal.TermuxTerminalViewClient;
++import com.termux.app.terminal.clipboard.TerminalClipboard;
+ import com.termux.app.terminal.snippets.SnippetsDialog;
+ import com.termux.shared.terminal.io.TerminalExtraKeys;
+ import com.termux.view.TerminalView;
+@@ -42,6 +43,11 @@ public class TermuxTerminalExtraKeys extends TerminalExtraKeys {
+         } else if ("FONT_LARGER".equals(key) || "FONT_SMALLER".equals(key)) {
+             if (mTermuxTerminalViewClient != null)
+                 mTermuxTerminalViewClient.changeFontSize("FONT_LARGER".equals(key));
++        } else if ("COPY".equals(key) || "COPY_SCREEN".equals(key)) {
++            if (mTermuxTerminalViewClient != null) {
++                if ("COPY".equals(key)) TerminalClipboard.copySelection(mTermuxTerminalViewClient.getActivity());
++                else TerminalClipboard.copyScreen(mTermuxTerminalViewClient.getActivity());
++            }
+         } else if ("SNIPPETS".equals(key)) {
+             if (mTermuxTerminalViewClient != null)
+                 SnippetsDialog.show(mTermuxTerminalViewClient.getActivity());
+diff --git a/termux-shared/src/main/java/com/termux/shared/settings/properties/TermuxPropertyConstants.java b/termux-shared/src/main/java/com/termux/shared/settings/properties/TermuxPropertyConstants.java
+index 56bb03c..09a77bf 100644
+--- a/termux-shared/src/main/java/com/termux/shared/settings/properties/TermuxPropertyConstants.java
++++ b/termux-shared/src/main/java/com/termux/shared/settings/properties/TermuxPropertyConstants.java
+@@ -282,7 +282,7 @@ public final class TermuxPropertyConstants {
+     /** Defines the key for extra keys */
+     public static final String KEY_EXTRA_KEYS =  "extra-keys"; // Default: "extra-keys"
+     //public static final String DEFAULT_IVALUE_EXTRA_KEYS = "[[ESC, TAB, CTRL, ALT, {key: '-', popup: '|'}, DOWN, UP]]"; // Single row
+-    public static final String DEFAULT_IVALUE_EXTRA_KEYS = "[['ESC','/',{key: '-', popup: '|'},'HOME','UP','END','PGUP','FONT_LARGER','ENTER'], ['TAB','CTRL','ALT','LEFT','DOWN','RIGHT','PGDN','FONT_SMALLER','KEYBOARD']]"; // Double row
++    public static final String DEFAULT_IVALUE_EXTRA_KEYS = "[['ESC','/',{key: '-', popup: '|'},'HOME','UP','END','PGUP','FONT_LARGER',{key: 'COPY', popup: 'COPY_SCREEN'},'ENTER'], ['TAB','CTRL','ALT','LEFT','DOWN','RIGHT','PGDN','FONT_SMALLER','PASTE','KEYBOARD']]"; // Double row
+ 
+     /** Defines the key for extra keys style */
+     public static final String KEY_EXTRA_KEYS_STYLE =  "extra-keys-style"; // Default: "extra-keys-style"
+diff --git a/termux-shared/src/main/java/com/termux/shared/terminal/io/extrakeys/ExtraKeysConstants.java b/termux-shared/src/main/java/com/termux/shared/terminal/io/extrakeys/ExtraKeysConstants.java
+index ffc431f..c2ab7e0 100644
+--- a/termux-shared/src/main/java/com/termux/shared/terminal/io/extrakeys/ExtraKeysConstants.java
++++ b/termux-shared/src/main/java/com/termux/shared/terminal/io/extrakeys/ExtraKeysConstants.java
+@@ -127,6 +127,8 @@ public class ExtraKeysConstants {
+             put("FONT_LARGER", "A+");
+             put("FONT_SMALLER", "A−"); // U+2212 − MINUS SIGN
+             put("SNIPPETS", "⚡"); // Saved commands
++            put("COPY", "⧉"); // U+29C9 TWO JOINED SQUARES, copy the selection
++            put("COPY_SCREEN", "⧉ all"); // Copy the screen
+         }};
+ 
+         /**
+-- 
+2.43.0
+
