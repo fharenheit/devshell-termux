@@ -9,6 +9,7 @@ import android.os.Environment;
 import android.provider.MediaStore;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -55,19 +56,32 @@ public final class DownloadsDirectory {
      */
     @NonNull
     public static NewFile createNewFile(@NonNull Context context, @NonNull String fileName, @NonNull String mimeType) throws IOException {
+        return createNewFile(context, null, fileName, mimeType);
+    }
+
+    /**
+     * Create a new file in a directory in the Download directory, like `Download/logs/a.txt` for
+     * {@code subDirectory} `logs`, or in the Download directory itself if it is {@code null}.
+     */
+    @NonNull
+    public static NewFile createNewFile(@NonNull Context context, @Nullable String subDirectory, @NonNull String fileName,
+                                        @NonNull String mimeType) throws IOException {
+        String relativePath = subDirectory == null || subDirectory.isEmpty() ? Environment.DIRECTORY_DOWNLOADS
+            : Environment.DIRECTORY_DOWNLOADS + "/" + subDirectory;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             // MediaStore needs no permission for files the app adds.
             ContentValues values = new ContentValues();
             values.put(MediaStore.Downloads.DISPLAY_NAME, fileName);
             values.put(MediaStore.Downloads.MIME_TYPE, mimeType);
-            values.put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS);
+            values.put(MediaStore.Downloads.RELATIVE_PATH, relativePath);
             ContentResolver resolver = context.getContentResolver();
             Uri uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values);
             OutputStream out = uri == null ? null : resolver.openOutputStream(uri);
             if (out == null) throw new IOException("Failed to create " + fileName + " in the Download directory");
-            return new NewFile(out, Environment.DIRECTORY_DOWNLOADS + "/" + fileName, () -> resolver.delete(uri, null, null));
+            return new NewFile(out, relativePath + "/" + fileName, () -> resolver.delete(uri, null, null));
         }
         File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        if (subDirectory != null && !subDirectory.isEmpty()) dir = new File(dir, subDirectory);
         if (!dir.isDirectory() && !dir.mkdirs()) throw new IOException("Failed to create " + dir.getAbsolutePath());
         File file = new File(dir, fileName);
         int dot = fileName.lastIndexOf('.');
@@ -76,7 +90,7 @@ public final class DownloadsDirectory {
         for (int i = 1; file.exists(); i++) file = new File(dir, base + " (" + i + ")" + extension);
         final File created = file;
         //noinspection ResultOfMethodCallIgnored
-        return new NewFile(new FileOutputStream(file), Environment.DIRECTORY_DOWNLOADS + "/" + file.getName(), created::delete);
+        return new NewFile(new FileOutputStream(file), relativePath + "/" + file.getName(), created::delete);
     }
 
 }
