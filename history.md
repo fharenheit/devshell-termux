@@ -7,12 +7,21 @@
 - **Added**: 새 기능, **Changed**: 동작·문서·패치 변경, **Fixed**: 버그 수정
 - "패치 갱신" 커밋은 업스트림 파일을 고친 커밋 뒤에 `custom/update-patches.sh`로 `custom/patches/`를 다시 만든 것입니다.
 
+## v0.118.3-ko.24 (2026-10-08)
+
+| 커밋 | 내용 |
+|---|---|
+| [`5edd8e7`](https://github.com/fharenheit/termux-app/commit/5edd8e7) | Changed: `FEATURES.md`에 특수 키 아래 이름과 기본 스니펫 반영 |
+| [`04fceb9`](https://github.com/fharenheit/termux-app/commit/04fceb9) | Added: 기본 스니펫에 Git 강제 되돌리기/강제 pull/특정 커밋으로 되돌리기, 이름으로 찾기, 내 프로세스, 내 포트와 PID |
+| [`2bc68d7`](https://github.com/fharenheit/termux-app/commit/2bc68d7) | Added: 스니펫 명령의 `<NAME>`, `<NAME=기본값>`을 누를 때 입력받는 창(보낼 명령 미리 보기, 실행/입력만, 마지막 값 기억). 기본 스니펫이 메시지·해시·사용자 이름 등을 입력받도록 바꾸고 `git revert <HASH>` 추가, 예전 기본 명령 자동 변경 |
+| (이 릴리즈 커밋) | Added: v0.118.3-ko.24 릴리즈 노트와 이력 |
+
 ## v0.118.3-ko.23 (2026-10-08)
 
 | 커밋 | 내용 |
 |---|---|
 | [`cd3848d`](https://github.com/fharenheit/termux-app/commit/cd3848d) | Added: 기본 스니펫(Git, 시스템 상태, Termux, tmux). 처음 열 때 들어 있고, 스니펫 창의 **기본** 버튼으로 묶음을 골라 다시 추가(같은 명령은 건너뜀), 이름은 앱 언어로 |
-| (이 릴리즈 커밋) | Added: v0.118.3-ko.23 릴리즈 노트와 이력 |
+| [`c10995a`](https://github.com/fharenheit/termux-app/commit/c10995a) | Added: v0.118.3-ko.23 릴리즈 노트와 이력 |
 
 ## v0.118.3-ko.22 (2026-10-08)
 
