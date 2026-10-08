@@ -7,6 +7,13 @@
 - **Added**: 새 기능, **Changed**: 동작·문서·패치 변경, **Fixed**: 버그 수정
 - "패치 갱신" 커밋은 업스트림 파일을 고친 커밋 뒤에 `custom/update-patches.sh`로 `custom/patches/`를 다시 만든 것입니다.
 
+## v0.118.3-ko.23 (2026-10-08)
+
+| 커밋 | 내용 |
+|---|---|
+| [`cd3848d`](https://github.com/fharenheit/termux-app/commit/cd3848d) | Added: 기본 스니펫(Git, 시스템 상태, Termux, tmux). 처음 열 때 들어 있고, 스니펫 창의 **기본** 버튼으로 묶음을 골라 다시 추가(같은 명령은 건너뜀), 이름은 앱 언어로 |
+| (이 릴리즈 커밋) | Added: v0.118.3-ko.23 릴리즈 노트와 이력 |
+
 ## v0.118.3-ko.22 (2026-10-08)
 
 | 커밋 | 내용 |
@@ -14,7 +21,7 @@
 | [`fefe7bd`](https://github.com/fharenheit/termux-app/commit/fefe7bd) | Added: 전체 기능 목록 `FEATURES.md`, README에서 링크 |
 | [`dff4b94`](https://github.com/fharenheit/termux-app/commit/dff4b94) | Changed: 패치 갱신(`0028`)과 문서 |
 | [`b96227b`](https://github.com/fharenheit/termux-app/commit/b96227b) | Fixed: 특수 키 패널에서 아래 이름이 있는 키와 없는 키가 섞인 줄의 키가 어긋나던 문제. 모든 키에 번역된 아래 이름(기능 키, 화살표, 편집 키, 기호), 줄 높이에 맞춰 배치 |
-| (이 릴리즈 커밋) | Added: v0.118.3-ko.22 릴리즈 노트와 이력 |
+| [`ef74aed`](https://github.com/fharenheit/termux-app/commit/ef74aed) | Added: v0.118.3-ko.22 릴리즈 노트와 이력 |
 
 ## v0.118.3-ko.21 (2026-10-08)
 
