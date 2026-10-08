@@ -73,4 +73,21 @@ public class SftpEditorViewTest {
         Assert.assertFalse(mEditor.isDirty());
     }
 
+    @Test
+    public void testFontSize() {
+        float defaultSize = mEditor.getTextView().getTextSize();
+        mEditor.setFontSize(mEditor.getFontSize() + 4);
+        Assert.assertEquals(18, mEditor.getFontSize());
+        Assert.assertTrue(mEditor.getTextView().getTextSize() > defaultSize);
+
+        // Kept within limits, and remembered for the next editor.
+        mEditor.setFontSize(100);
+        Assert.assertEquals(32, mEditor.getFontSize());
+        mEditor.setFontSize(1);
+        Assert.assertEquals(8, mEditor.getFontSize());
+        mEditor.setFontSize(20);
+        SftpEditorView next = new SftpEditorView(mEditor.getContext(), Typeface.MONOSPACE);
+        Assert.assertEquals(20, next.getFontSize());
+    }
+
 }

@@ -240,6 +240,15 @@ public class LineNumberEditText extends EditText {
             text.setSpan(new SyntaxSpan(TOKEN_COLORS[type]), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE));
     }
 
+    /** Set the size of the text and line numbers, in sp, keeping the cursor in view. */
+    public void setFontSize(float size) {
+        setTextSize(TypedValue.COMPLEX_UNIT_SP, size);
+        updateGutter();
+        mHighlightStale = true;
+        scheduleHighlight(0);
+        post(() -> bringPointIntoView(Math.max(0, getSelectionStart())));
+    }
+
     /** Make the gutter wide enough for the largest line number. */
     private void updateGutter() {
         mNumberPaint.setTextSize(getTextSize() * 0.85f);

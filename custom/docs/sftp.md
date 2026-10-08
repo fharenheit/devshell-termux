@@ -29,12 +29,13 @@ SSH 호스트의 파일과 디렉터리를 탐색하고, 이미지를 보고, �
 | 항목 메뉴(길게 누름) | Open, Open as text, Download, Rename, Delete(폴더는 안의 내용까지), Properties(경로, 크기, 권한, uid:gid, 수정 시간) |
 | 목록 메뉴 | New folder, New file, Upload(여러 파일 선택, 같은 이름이 있으면 Replace/Skip existing 선택) |
 | 이미지 뷰어 | jpg/png/gif/webp/bmp/heic, 32MB까지. 두 손가락 확대, 끌기, 두 번 눌러 확대/원래대로, ◀ ▶로 같은 폴더의 이전/다음 이미지 |
-| 편집기 | 터미널 글꼴(`~/.termux/font.ttf`), 줄 번호, 문법 강조. 툴바: ↶ Undo, ↷ Redo, Find, Ln(줄로 이동), Wrap(자동 줄 바꿈), 인코딩, 줄 끝(LF/CRLF), HEX. 메뉴: Save, Find/Find next, Go to line, Syntax highlighting, Reload |
+| 편집기 | 터미널 글꼴(`~/.termux/font.ttf`), 줄 번호, 문법 강조. 툴바: ↶ Undo, ↷ Redo, Find, Ln(줄로 이동), Wrap(자동 줄 바꿈), A− 14 A+(글꼴 크기), 인코딩, 줄 끝(LF/CRLF), HEX. 메뉴: Save, Find/Find next, Go to line, Syntax highlighting, Reload |
 
 ## 편집기 툴바
 
 - **Undo/Redo**: 이어서 입력한 글자(1.5초 이내, 줄 바꿈 전까지)와 한글 조합 입력은 한 단계로 묶음. 연속 지우기도 한 단계.
   저장한 상태까지 되돌리면 저장 안 됨 표시(●)가 없어짐. 기록은 최대 약 400만 글자
+- **A− 14 A+**: 글꼴 크기(8~32, 기본 14). 숫자를 누르면 14로 돌아감. 16진수 화면은 2 작게. 설정은 기억함
 - **Wrap**: 자동 줄 바꿈. 줄 번호는 파일의 줄 기준(넘어간 줄에는 번호 없음). 설정은 기억함
 - **인코딩**: 파일을 열 때 BOM → UTF-8 → CP949(EUC-KR) → ISO-8859-1 순서로 자동 판별. 버튼에 현재 인코딩(+BOM) 표시.
   Reopen with encoding(다른 인코딩으로 다시 읽기), Save with encoding(글자는 그대로 두고 저장할 인코딩만 바꾸기).

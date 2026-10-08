@@ -45,6 +45,12 @@ public class SftpEditorView extends LinearLayout {
 
     private static final String PREFERENCES = "sftp_editor";
     private static final String KEY_WORD_WRAP = "word_wrap";
+    private static final String KEY_FONT_SIZE = "font_size";
+    /** The font sizes of the text in sp. The hex view is a bit smaller to fit 16 bytes a line. */
+    private static final int DEFAULT_FONT_SIZE = 14;
+    private static final int MIN_FONT_SIZE = 8;
+    private static final int MAX_FONT_SIZE = 32;
+    private static final int HEX_FONT_SIZE_DIFFERENCE = 2;
 
     private final LineNumberEditText mText;
     private final ListView mHexList;
@@ -62,6 +68,10 @@ public class SftpEditorView extends LinearLayout {
     private final Button mEncodingButton;
     private final Button mLineEndingButton;
     private final Button mHexButton;
+    private final Button mSmallerButton;
+    private final Button mFontSizeButton;
+    private final Button mLargerButton;
+    private int mFontSize = DEFAULT_FONT_SIZE;
 
     /** The bytes of the file as read or last saved, possibly only its start. */
     private byte[] mBytes = new byte[0];
@@ -99,6 +109,12 @@ public class SftpEditorView extends LinearLayout {
         mFindButton = addToolbarButton(toolbar, getContext().getString(R.string.sftp_action_find), R.string.sftp_action_find, v -> showFindDialog());
         mGoToButton = addToolbarButton(toolbar, getContext().getString(R.string.sftp_toolbar_go_to_line), R.string.sftp_action_go_to_line, v -> showGoToLineDialog());
         mWrapButton = addToolbarButton(toolbar, getContext().getString(R.string.sftp_toolbar_word_wrap), R.string.sftp_action_word_wrap, v -> toggleWordWrap());
+        mSmallerButton = addToolbarButton(toolbar, "A−", R.string.sftp_action_font_smaller, v -> changeFontSize(-1));
+        mFontSizeButton = addToolbarButton(toolbar, String.valueOf(DEFAULT_FONT_SIZE), R.string.sftp_action_font_size_reset, v -> setFontSize(DEFAULT_FONT_SIZE));
+        mFontSizeButton.setMinWidth(dp(32));
+        mFontSizeButton.setMinimumWidth(dp(32));
+        mFontSizeButton.setPadding(dp(2), 0, dp(2), 0);
+        mLargerButton = addToolbarButton(toolbar, "A+", R.string.sftp_action_font_larger, v -> changeFontSize(1));
         mEncodingButton = addToolbarButton(toolbar, "UTF-8", R.string.sftp_action_encoding, v -> showEncodingDialog());
         mLineEndingButton = addToolbarButton(toolbar, "LF", R.string.sftp_action_line_ending, v -> showLineEndingDialog());
         mHexButton = addToolbarButton(toolbar, "HEX", R.string.sftp_action_hex, v -> setHex(!mHex));
@@ -129,6 +145,7 @@ public class SftpEditorView extends LinearLayout {
         mHistory = new EditHistory(mText);
         mHistory.setListener(this::onStateChanged);
         setWordWrap(getPreferences().getBoolean(KEY_WORD_WRAP, false));
+        setFontSize(getPreferences().getInt(KEY_FONT_SIZE, DEFAULT_FONT_SIZE));
         updateToolbar();
     }
 
@@ -288,6 +305,9 @@ public class SftpEditorView extends LinearLayout {
         mLineEndingButton.setText(mCrlf ? "CRLF" : "LF");
         setEnabled(mLineEndingButton, editable);
         setChecked(mHexButton, mHex);
+        mFontSizeButton.setText(String.valueOf(mFontSize));
+        setEnabled(mSmallerButton, mFontSize > MIN_FONT_SIZE);
+        setEnabled(mLargerButton, mFontSize < MAX_FONT_SIZE);
     }
 
     private static void setEnabled(Button button, boolean enabled) {
@@ -306,6 +326,26 @@ public class SftpEditorView extends LinearLayout {
 
     private void redo() {
         mHistory.redo();
+    }
+
+    // Font size
+
+    private void changeFontSize(int change) {
+        setFontSize(mFontSize + change);
+    }
+
+    public int getFontSize() {
+        return mFontSize;
+    }
+
+    /** Set the font size of the text and the hex view in sp, and remember it. */
+    public void setFontSize(int size) {
+        mFontSize = Math.max(MIN_FONT_SIZE, Math.min(MAX_FONT_SIZE, size));
+        mText.setFontSize(mFontSize);
+        mHexAdapter.updateBytesPerLine(mHexList.getWidth());
+        mHexAdapter.notifyDataSetChanged();
+        getPreferences().edit().putInt(KEY_FONT_SIZE, mFontSize).apply();
+        updateToolbar();
     }
 
     // Word wrap
@@ -361,13 +401,18 @@ public class SftpEditorView extends LinearLayout {
         mText.setVisibility(VISIBLE);
     }
 
+    private int getHexFontSize() {
+        return Math.max(MIN_FONT_SIZE, mFontSize - HEX_FONT_SIZE_DIFFERENCE);
+    }
+
     private class HexAdapter extends BaseAdapter {
         int mBytesPerLine = 16;
 
         void updateBytesPerLine(int width) {
             Paint paint = new Paint();
             paint.setTypeface(mTypeface);
-            paint.setTextSize(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 12, getResources().getDisplayMetrics()));
+            paint.setTextSize(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, getHexFontSize(), getResources().getDisplayMetrics()));
+            if (width <= 0) return;
             float available = width - dp(16);
             int bytesPerLine = paint.measureText("0") * SftpText.getHexLineLength(16) <= available ? 16 : 8;
             if (bytesPerLine != mBytesPerLine) {
@@ -386,12 +431,12 @@ public class SftpEditorView extends LinearLayout {
             if (view == null) {
                 view = new TextView(getContext());
                 view.setTypeface(mTypeface);
-                view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
                 view.setTextColor(0xFFDDDDDD);
                 view.setSingleLine();
                 view.setEllipsize(null);
                 view.setPadding(dp(8), dp(1), dp(8), dp(1));
             }
+            view.setTextSize(TypedValue.COMPLEX_UNIT_SP, getHexFontSize());
             view.setText(SftpText.formatHexLine(mHexBytes, mHexByteCount, position * mBytesPerLine, mBytesPerLine));
             return view;
         }

@@ -41,6 +41,9 @@
     <string name="sftp_action_go_to_line">Go to line</string>
     <string name="sftp_toolbar_go_to_line">Ln</string>
     <string name="sftp_action_word_wrap">Word wrap</string>
+    <string name="sftp_action_font_smaller">Smaller font</string>
+    <string name="sftp_action_font_larger">Larger font</string>
+    <string name="sftp_action_font_size_reset">Font size (tap to reset to 14)</string>
     <string name="sftp_toolbar_word_wrap">Wrap</string>
     <string name="sftp_action_encoding">Encoding</string>
     <string name="sftp_encoding_title">Encoding: %1$s</string>
