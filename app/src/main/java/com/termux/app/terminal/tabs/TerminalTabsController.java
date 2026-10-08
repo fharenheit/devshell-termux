@@ -30,6 +30,7 @@ import com.termux.app.terminal.TermuxTerminalSessionClient;
 import com.termux.app.terminal.backup.SettingsBackup;
 import com.termux.app.terminal.fonts.TerminalFontDialog;
 import com.termux.app.terminal.fonts.TerminalFonts;
+import com.termux.app.terminal.sftp.SftpBrowserActivity;
 import com.termux.app.terminal.ssh.SshConnector;
 import com.termux.app.terminal.ssh.SshHostsDialog;
 import com.termux.shared.settings.properties.TermuxPropertyConstants;
@@ -396,6 +397,9 @@ public class TerminalTabsController {
                 items.add(mActivity.getString(R.string.action_ssh_reconnect));
                 actions.add(() -> SshConnector.reconnect(mActivity, session));
             }
+            String hostName = SshConnector.getHostName(session);
+            items.add(mActivity.getString(R.string.action_sftp_browse_files));
+            actions.add(() -> SftpBrowserActivity.start(mActivity, hostName, SshConnector.getControlPath(session)));
         }
         items.add(mActivity.getString(R.string.action_rename_terminal_tab));
         actions.add(() -> showRenameDialog(session));

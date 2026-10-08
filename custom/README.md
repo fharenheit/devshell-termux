@@ -18,6 +18,7 @@
 | 글꼴 목록(⚙ 메뉴 → Font, 설정 → Terminal View → Font): 터미널과 같은 방식으로 그리는 미리보기, 글꼴별 지원 문자 표시, 큰 글꼴은 처음 적용할 때 `custom/fonts/`에서 내려받기(SHA-256 확인). 고른 글꼴을 `~/.termux/font.ttf`로 복사. 자세한 내용은 `custom/docs/fonts-and-settings.md` | `custom/patches/0011-*.patch` + `app/.../terminal/fonts/`, `app/src/main/assets/fonts/`, `custom/fonts/` |
 | 설정 내보내기/가져오기(⚙ 메뉴): `Download/termux-settings-*.zip`에 termux.properties, colors, SSH 호스트, 앱 설정, 글꼴 저장(SSH 비밀번호 제외). 가져올 때 기존 파일은 `~/.termux/backup/`에 백업 | `custom/patches/0012-*.patch` (`TermuxActivity.java`) + `app/.../terminal/backup/` |
 | SSH 접속 관리(⚙ 메뉴 → SSH): 호스트 등록/수정/삭제, 탭으로 접속, Disconnect/Reconnect, 비밀번호 암호화 저장, 키 생성/복사, `ssh-copy-id`, 점프 호스트, 포트 포워딩, 자동 재접속, mosh. 자세한 내용은 `custom/docs/ssh.md` | 포크 전용 파일만 (`app/.../terminal/ssh/`, `fork_ssh.xml`, `TerminalTabsController.java`) |
+| SSH 파일 탐색(SSH 탭 또는 호스트 메뉴 → Browse files): SFTP로 파일 목록, 이미지 보기, 텍스트 보기/편집/저장(충돌 확인, 안전한 저장), 업로드/다운로드, 이름 바꾸기, 삭제, 새 폴더/파일, 속성. ssh 탭의 연결을 공유. 자세한 내용은 `custom/docs/sftp.md` | `custom/patches/0013-*.patch` (`AndroidManifest.xml`) + `app/.../terminal/sftp/`, `fork_sftp.xml` |
 | 세션을 바꿀 때 IME가 조합 중인 글자(한글)를 버림 | `custom/patches/0005-*.patch` (`TerminalView.java`) |
 | 기본 extra keys에 ENTER(PGUP 오른쪽), KEYBOARD(PGDN 오른쪽, 키보드 표시/숨기기) 버튼 추가 | `custom/patches/0006-*.patch` (`TermuxPropertyConstants.java`) |
 | README 상단 안내 문구 | `custom/patches/0003-*.patch` (`README.md`) |

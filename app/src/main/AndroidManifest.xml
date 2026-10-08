@@ -97,6 +97,15 @@
             android:theme="@style/Theme.AppCompat.Light.DarkActionBar" />
 
         <activity
+            android:name=".app.terminal.sftp.SftpBrowserActivity"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden"
+            android:exported="false"
+            android:label="@string/action_sftp_browse_files"
+            android:resizeableActivity="true"
+            android:theme="@android:style/Theme.Material"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
             android:name=".shared.activities.ReportActivity"
             android:theme="@style/Theme.AppCompat.TermuxReportActivity"
             android:documentLaunchMode="intoExisting"

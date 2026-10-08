@@ -23,6 +23,7 @@ import androidx.annotation.Nullable;
 
 import com.termux.R;
 import com.termux.app.TermuxActivity;
+import com.termux.app.terminal.sftp.SftpBrowserActivity;
 import com.termux.app.terminal.tabs.TerminalTabsController;
 import com.termux.shared.logger.Logger;
 
@@ -115,12 +116,14 @@ public final class SshHostsDialog {
         }
     }
 
-    /** The menu of a host: connect, edit, install a public key, delete. */
+    /** The menu of a host: connect, browse files, edit, install a public key, delete. */
     private static void showHostMenu(@NonNull TermuxActivity activity, @NonNull Item item) {
         List<CharSequence> labels = new ArrayList<>();
         List<Runnable> actions = new ArrayList<>();
         labels.add(activity.getString(R.string.action_ssh_connect));
         actions.add(() -> SshConnector.connect(activity, item.name));
+        labels.add(activity.getString(R.string.action_sftp_browse_files));
+        actions.add(() -> SftpBrowserActivity.start(activity, item.name, SshConnector.findControlPath(item.name)));
         if (item.host != null) {
             labels.add(activity.getString(R.string.action_ssh_edit_host));
             actions.add(() -> showHostDialog(activity, item.host));

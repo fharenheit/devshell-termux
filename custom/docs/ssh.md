@@ -8,10 +8,10 @@
 
 | 화면 | 기능 |
 |---|---|
-| SSH hosts | 등록한 호스트와 `~/.ssh/config`의 다른 호스트 목록. 누르면 접속, 길게 누르면 Connect / Edit / Install public key / Delete. 아래 버튼: Add host, Keys, Close |
+| SSH hosts | 등록한 호스트와 `~/.ssh/config`의 다른 호스트 목록. 누르면 접속, 길게 누르면 Connect / Browse files / Edit / Install public key / Delete. 아래 버튼: Add host, Keys, Close |
 | 호스트 편집 | 이름(= `ssh 이름`의 별칭), 호스트, 포트, 사용자, 비밀번호, 개인키 파일, 접속 후 실행할 명령, mosh로 접속, 자동 재접속, 점프 호스트, 로컬/원격 포트 포워딩, SOCKS 포트, 추가 `ssh_config` 옵션 |
 | Keys | `~/.ssh/*.pub` 목록. 누르면 공개키를 클립보드로 복사. Generate key로 새 탭에서 `ssh-keygen -t ed25519` |
-| 탭 메뉴 | SSH 탭을 길게 누르면 실행 중일 때 **Disconnect**(ssh에 SIGTERM), 끝났을 때 **Reconnect**(같은 위치에 새로 접속) |
+| 탭 메뉴 | SSH 탭을 길게 누르면 실행 중일 때 **Disconnect**(ssh에 SIGTERM), 끝났을 때 **Reconnect**(같은 위치에 새로 접속), **Browse files**(파일 탐색, `custom/docs/sftp.md`) |
 
 ## 저장 위치
 

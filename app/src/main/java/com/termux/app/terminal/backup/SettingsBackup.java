@@ -2,8 +2,6 @@ package com.termux.app.terminal.backup;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -12,7 +10,6 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
-import android.provider.MediaStore;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -104,7 +101,7 @@ public final class SettingsBackup {
             String error = null;
             try {
                 Map<String, byte[]> entries = collect(context);
-                try (OutputStream out = openDownloadFile(context, fileName)) {
+                try (OutputStream out = DownloadsDirectory.createNewFile(context, fileName, "application/zip").out) {
                     SettingsBackupArchive.write(entries, out);
                 }
             } catch (IOException | JSONException | SecurityException e) {
@@ -174,26 +171,6 @@ public final class SettingsBackup {
                 offset += read;
             entries.put(name, offset == content.length ? content : Arrays.copyOf(content, offset));
         }
-    }
-
-    /** Open a new file in the Download directory. */
-    @NonNull
-    private static OutputStream openDownloadFile(@NonNull Context context, @NonNull String fileName) throws IOException {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            // MediaStore needs no permission for files the app adds.
-            ContentValues values = new ContentValues();
-            values.put(MediaStore.Downloads.DISPLAY_NAME, fileName);
-            values.put(MediaStore.Downloads.MIME_TYPE, "application/zip");
-            values.put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS);
-            ContentResolver resolver = context.getContentResolver();
-            Uri uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values);
-            OutputStream out = uri == null ? null : resolver.openOutputStream(uri);
-            if (out == null) throw new IOException("Failed to create " + fileName + " in the Download directory");
-            return out;
-        }
-        File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-        if (!dir.isDirectory() && !dir.mkdirs()) throw new IOException("Failed to create " + dir.getAbsolutePath());
-        return new FileOutputStream(new File(dir, fileName));
     }
 
     // Import
