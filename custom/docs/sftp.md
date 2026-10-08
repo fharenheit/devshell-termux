@@ -15,8 +15,8 @@ SSH 호스트의 파일과 디렉터리를 탐색하고, 이미지를 보고, �
   (mosh 탭은 만들지 않음). 자동 재접속할 때마다 소켓을 새로 만듦
 - 파일 화면은 `ssh -o ControlMaster=no -o ControlPath=<소켓> -s <호스트> sftp`를 실행하고 그 표준 입출력으로
   SFTP v3를 직접 처리(`SftpClient`). 소켓이 없으면 `ControlPath=none`으로 새로 접속하고, 비밀번호는 탭과 같은
-  askpass + FIFO 방식으로 전달. 터미널이 없으므로 다른 질문(호스트 키 확인 등)에는 답하지 않고 실패 → 탭에서
-  한 번 접속해서 호스트 키를 받아 두면 됨
+  askpass + FIFO 방식으로 전달. 터미널이 없으므로 다른 질문(호스트 키 확인 등)에는 답하지 않고 실패 → 오류 창의
+  **Check host key**(또는 호스트 메뉴 → Host key)로 지문을 보고 신뢰하면 다시 접속
 - 파일 화면이 보이지 않게 되면(onStop) sftp를 끝내서 공유한 탭이 `exit`로 바로 끝날 수 있게 함. 다시 보이면 필요할 때
   다시 연결
 - 읽기/쓰기는 32KB 요청을 16개까지 동시에 보내서 지연이 있어도 빠르게 전송
@@ -82,12 +82,33 @@ SSH 호스트의 파일과 디렉터리를 탐색하고, 이미지를 보고, �
 ## 다운로드
 
 - `Download/` 폴더에 저장(Android 10 이상은 MediaStore, 그 아래는 저장소 권한). 같은 이름이 있으면 `이름 (1).확장자`
-- 진행률과 Cancel. 취소하거나 실패하면 받던 파일을 지움
+- 취소하거나 실패하면 받던 파일을 지움
+
+## 전송 대기열
+
+- 다운로드와 업로드(파일, 폴더)는 `SftpTransfers` 대기열에 들어가 하나씩 백그라운드에서 실행. 파일 화면을 나가도 계속됨
+- 대기열은 호스트마다 따로 sftp 연결을 열어서 탐색과 동시에 진행. 남은 전송이 없으면 연결을 닫음(공유한 ssh 탭이 끝날 수 있게)
+- 전송이 있는 동안 `SftpTransferService`가 포그라운드 서비스로 알림에 진행률, 남은 개수, **Cancel all**을 보여 줌.
+  끝나면 완료/실패 개수 알림. 알림을 누르면 그 호스트의 파일 화면과 전송 목록이 열림
+- 파일 화면 메뉴 → **Transfers (n)**: 모든 호스트의 전송(최신 순), 진행률, 결과. 누르면 중지 또는 오류 보기, Clear finished, Cancel all
+- 전송이 끝나면 같은 호스트의 파일 화면에 결과를 알리고, 업로드한 폴더를 보고 있으면 목록을 새로 고침
+- 고른 파일/폴더는 `takePersistableUriPermission`으로 업로드가 끝날 때까지 읽을 수 있게 유지하고 끝나면 풂
+- 삭제는 지금처럼 화면의 진행 창에서 실행
+
+## 호스트 키
+
+- `SshHostKeys`: `ssh -G`로 known_hosts 이름(`[host]:port`)과 파일을 알아내고, 임시 known_hosts에
+  `StrictHostKeyChecking=accept-new`, `PreferredAuthentications=none`으로 접속해서 서버 키만 받아 옴(로그인하지 않음).
+  `ssh-keygen -l`로 지문, `ssh-keygen -F`로 저장된 키를 찾아 신뢰함/모름/바뀜을 판단
+- 모르는 키는 지문(`ED25519 SHA256:…`)을 보여 주고 **Trust**로 known_hosts에 추가. 바뀐 키는 경고와 새/기존 지문을 보여 주고
+  한 번 더 확인한 뒤 `ssh-keygen -R`로 지우고 새 키를 추가. 신뢰하는 키는 **Remove**로 지울 수 있음
 
 ## 테스트
 
 - `SftpTextTest`, `SftpPathsTest`: 줄 끝, 인코딩 판별(CP949, BOM, UTF-16), 쓸 수 없는 글자, 16진수 줄, 잘린 UTF-8, 경로 처리
 - `EditHistoryTest`, `SftpEditorViewTest`, `LineNumberEditTextTest`: 입력/한글 조합/지우기 묶음, 저장 위치, 저장 내용, 읽기 전용, 문법 강조
+- `SftpTransfersTest`: 대기열 순서, 결과/오류 메시지, 대기 중/실행 중 취소
+- `SshHostKeysTest`: 키 비교(신뢰함/모름/바뀜), `ssh -G` 출력 해석, 지문 표시
 - `SftpClientTest`: 환경 변수 `TERMUX_SFTP_TEST_HOST`에 키로 로그인되는 ssh 호스트를 주면 실제 OpenSSH `sftp-server`에
   대해 목록(유니코드 이름), 3MB 파이프라인 전송, 크기 제한, 이름 바꾸기/덮어쓰기, 배타적 생성, chmod, 폴더 통째로 지우기,
   취소를 확인. 없으면 건너뜀

@@ -1,0 +1,77 @@
+From 865503382cf08e9599b45e93ffc2d0a6b6ca2ab5 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Thu, 8 Oct 2026 11:57:00 +0000
+Subject: [PATCH] Added: Paste recently copied text from a clipboard history
+
+The text copied while the app is in the foreground, and the text on the
+clipboard when the app gets the focus, are kept in a history of the
+last 20 copies, only in memory since they can be passwords. Swiping up
+on the paste extra key, the tab bar settings menu or Ctrl+Shift+H show
+it: tapping an item pastes it into the current tab, and a long press
+copies it to the clipboard or deletes it.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01GLNsTPnn2xKUQ4uFcevT6G
+---
+ .../com/termux/app/terminal/io/TermuxTerminalExtraKeys.java    | 3 +++
+ .../shared/settings/properties/TermuxPropertyConstants.java    | 2 +-
+ .../shared/terminal/io/extrakeys/ExtraKeysConstants.java       | 2 ++
+ 3 files changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/app/src/main/java/com/termux/app/terminal/io/TermuxTerminalExtraKeys.java b/app/src/main/java/com/termux/app/terminal/io/TermuxTerminalExtraKeys.java
+index deafdc7..0b59dcf 100644
+--- a/app/src/main/java/com/termux/app/terminal/io/TermuxTerminalExtraKeys.java
++++ b/app/src/main/java/com/termux/app/terminal/io/TermuxTerminalExtraKeys.java
+@@ -9,6 +9,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
+ 
+ import com.termux.app.terminal.TermuxTerminalSessionClient;
+ import com.termux.app.terminal.TermuxTerminalViewClient;
++import com.termux.app.terminal.clipboard.ClipboardHistory;
+ import com.termux.app.terminal.clipboard.TerminalClipboard;
+ import com.termux.app.terminal.snippets.SnippetsDialog;
+ import com.termux.app.terminal.specialkeys.SpecialKeysPanel;
+@@ -44,6 +45,8 @@ public class TermuxTerminalExtraKeys extends TerminalExtraKeys {
+         } else if ("FONT_LARGER".equals(key) || "FONT_SMALLER".equals(key)) {
+             if (mTermuxTerminalViewClient != null)
+                 mTermuxTerminalViewClient.changeFontSize("FONT_LARGER".equals(key));
++        } else if ("CLIPBOARD".equals(key)) {
++            if (mTermuxTerminalViewClient != null) ClipboardHistory.show(mTermuxTerminalViewClient.getActivity());
+         } else if ("COPY".equals(key) || "COPY_SCREEN".equals(key)) {
+             if (mTermuxTerminalViewClient != null) {
+                 if ("COPY".equals(key)) TerminalClipboard.copySelection(mTermuxTerminalViewClient.getActivity());
+diff --git a/termux-shared/src/main/java/com/termux/shared/settings/properties/TermuxPropertyConstants.java b/termux-shared/src/main/java/com/termux/shared/settings/properties/TermuxPropertyConstants.java
+index eabb768..7c1cdbf 100644
+--- a/termux-shared/src/main/java/com/termux/shared/settings/properties/TermuxPropertyConstants.java
++++ b/termux-shared/src/main/java/com/termux/shared/settings/properties/TermuxPropertyConstants.java
+@@ -282,7 +282,7 @@ public final class TermuxPropertyConstants {
+     /** Defines the key for extra keys */
+     public static final String KEY_EXTRA_KEYS =  "extra-keys"; // Default: "extra-keys"
+     //public static final String DEFAULT_IVALUE_EXTRA_KEYS = "[[ESC, TAB, CTRL, ALT, {key: '-', popup: '|'}, DOWN, UP]]"; // Single row
+-    public static final String DEFAULT_IVALUE_EXTRA_KEYS = "[['ESC','/',{key: '-', popup: '|'},'HOME','UP','END','PGUP','FONT_LARGER',{key: 'COPY', popup: 'COPY_SCREEN'},'ENTER',{key: 'SPECIAL_KEYS', rows: 2, width: 0.5}], ['TAB','CTRL','ALT','LEFT','DOWN','RIGHT','PGDN','FONT_SMALLER','PASTE','KEYBOARD']]"; // Double row
++    public static final String DEFAULT_IVALUE_EXTRA_KEYS = "[['ESC','/',{key: '-', popup: '|'},'HOME','UP','END','PGUP','FONT_LARGER',{key: 'COPY', popup: 'COPY_SCREEN'},'ENTER',{key: 'SPECIAL_KEYS', rows: 2, width: 0.5}], ['TAB','CTRL','ALT','LEFT','DOWN','RIGHT','PGDN','FONT_SMALLER',{key: 'PASTE', popup: 'CLIPBOARD'},'KEYBOARD']]"; // Double row
+ 
+     /** Defines the key for extra keys style */
+     public static final String KEY_EXTRA_KEYS_STYLE =  "extra-keys-style"; // Default: "extra-keys-style"
+diff --git a/termux-shared/src/main/java/com/termux/shared/terminal/io/extrakeys/ExtraKeysConstants.java b/termux-shared/src/main/java/com/termux/shared/terminal/io/extrakeys/ExtraKeysConstants.java
+index 1c37052..226393b 100644
+--- a/termux-shared/src/main/java/com/termux/shared/terminal/io/extrakeys/ExtraKeysConstants.java
++++ b/termux-shared/src/main/java/com/termux/shared/terminal/io/extrakeys/ExtraKeysConstants.java
+@@ -130,6 +130,7 @@ public class ExtraKeysConstants {
+             put("SPECIAL_KEYS", "⊞"); // U+229E SQUARED PLUS, the panel of special keys
+             put("COPY", "⧉"); // U+29C9 TWO JOINED SQUARES, copy the selection
+             put("COPY_SCREEN", "⧉ all"); // Copy the screen
++            put("CLIPBOARD", "⎘ …"); // The clipboard history
+         }};
+ 
+         /**
+@@ -189,6 +190,7 @@ public class ExtraKeysConstants {
+             put("PASTE", "⎘\nPaste");
+             put("COPY", "⧉\nCopy");
+             put("COPY_SCREEN", "⧉\nScreen");
++            put("CLIPBOARD", "⎘\nHistory");
+             put("FONT_LARGER", "A+\nFont");
+             put("FONT_SMALLER", "A−\nFont");
+             put("SNIPPETS", "⚡\nSnip");
+-- 
+2.43.0
+
