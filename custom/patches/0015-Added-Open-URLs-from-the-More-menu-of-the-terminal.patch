@@ -1,0 +1,100 @@
+From bac21b587cce3108546ff8fa7b52ec6c6170344a Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Thu, 8 Oct 2026 02:16:58 +0000
+Subject: [PATCH] Added: Open URLs from the More menu of the terminal
+
+Long pressing a URL and choosing More now shows Open URL, which opens
+the selected URL in the browser, or asks which one if the selection has
+several. Long pressing a word that wraps over rows, like a long URL,
+selects all of it.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01GLNsTPnn2xKUQ4uFcevT6G
+---
+ .../java/com/termux/app/TermuxActivity.java   |  7 +++++
+ .../TextSelectionCursorController.java        | 29 ++++++++++++++++---
+ 2 files changed, 32 insertions(+), 4 deletions(-)
+
+diff --git a/app/src/main/java/com/termux/app/TermuxActivity.java b/app/src/main/java/com/termux/app/TermuxActivity.java
+index 7372052..d3d7b0e 100644
+--- a/app/src/main/java/com/termux/app/TermuxActivity.java
++++ b/app/src/main/java/com/termux/app/TermuxActivity.java
+@@ -42,6 +42,7 @@ import com.termux.app.activities.SettingsActivity;
+ import com.termux.shared.settings.preferences.TermuxAppSharedPreferences;
+ import com.termux.app.terminal.TermuxSessionsListViewController;
+ import com.termux.app.terminal.backup.SettingsBackup;
++import com.termux.app.terminal.links.TerminalLinks;
+ import com.termux.app.terminal.tabs.TerminalSessionNotifications;
+ import com.termux.app.terminal.tabs.TerminalTabsController;
+ import com.termux.app.terminal.io.TerminalToolbarViewPager;
+@@ -179,6 +180,7 @@ public final class TermuxActivity extends Activity implements ServiceConnection
+     private static final int CONTEXT_MENU_HELP_ID = 7;
+     private static final int CONTEXT_MENU_SETTINGS_ID = 8;
+     private static final int CONTEXT_MENU_REPORT_ID = 9;
++    private static final int CONTEXT_MENU_OPEN_URL_ID = 12;
+ 
+     private static final String ARG_TERMINAL_TOOLBAR_TEXT_INPUT = "terminal_toolbar_text_input";
+ 
+@@ -623,6 +625,8 @@ public final class TermuxActivity extends Activity implements ServiceConnection
+ 
+         boolean autoFillEnabled = mTerminalView.isAutoFillEnabled();
+ 
++        if (!TerminalLinks.findUrls(mTerminalView.getStoredSelectedText()).isEmpty())
++            menu.add(Menu.NONE, CONTEXT_MENU_OPEN_URL_ID, Menu.NONE, R.string.action_open_url);
+         menu.add(Menu.NONE, CONTEXT_MENU_SELECT_URL_ID, Menu.NONE, R.string.action_select_url);
+         menu.add(Menu.NONE, CONTEXT_MENU_SHARE_TRANSCRIPT_ID, Menu.NONE, R.string.action_share_transcript);
+         if (!DataUtils.isNullOrEmpty(mTerminalView.getStoredSelectedText()))
+@@ -652,6 +656,9 @@ public final class TermuxActivity extends Activity implements ServiceConnection
+         TerminalSession session = getCurrentSession();
+ 
+         switch (item.getItemId()) {
++            case CONTEXT_MENU_OPEN_URL_ID:
++                TerminalLinks.open(this, TerminalLinks.findUrls(mTerminalView.getStoredSelectedText()));
++                return true;
+             case CONTEXT_MENU_SELECT_URL_ID:
+                 mTermuxTerminalViewClient.showUrlSelection();
+                 return true;
+diff --git a/terminal-view/src/main/java/com/termux/view/textselection/TextSelectionCursorController.java b/terminal-view/src/main/java/com/termux/view/textselection/TextSelectionCursorController.java
+index 714d56e..fed376e 100644
+--- a/terminal-view/src/main/java/com/termux/view/textselection/TextSelectionCursorController.java
++++ b/terminal-view/src/main/java/com/termux/view/textselection/TextSelectionCursorController.java
+@@ -99,11 +99,32 @@ public class TextSelectionCursorController implements CursorController {
+         TerminalBuffer screen = terminalView.mEmulator.getScreen();
+         if (!" ".equals(screen.getSelectedText(mSelX1, mSelY1, mSelX1, mSelY1))) {
+             // Selecting something other than whitespace. Expand to word.
+-            while (mSelX1 > 0 && !"".equals(screen.getSelectedText(mSelX1 - 1, mSelY1, mSelX1 - 1, mSelY1))) {
+-                mSelX1--;
++            int columns = terminalView.mEmulator.mColumns;
++            while (true) {
++                while (mSelX1 > 0 && !"".equals(screen.getSelectedText(mSelX1 - 1, mSelY1, mSelX1 - 1, mSelY1))) {
++                    mSelX1--;
++                }
++                // Continue on the previous row if the word wrapped from it, like a long URL.
++                if (mSelX1 == 0 && mSelY1 - 1 >= -screen.getActiveTranscriptRows() && screen.getLineWrap(mSelY1 - 1)
++                    && !"".equals(screen.getSelectedText(columns - 1, mSelY1 - 1, columns - 1, mSelY1 - 1))) {
++                    mSelY1--;
++                    mSelX1 = columns - 1;
++                } else {
++                    break;
++                }
+             }
+-            while (mSelX2 < terminalView.mEmulator.mColumns - 1 && !"".equals(screen.getSelectedText(mSelX2 + 1, mSelY1, mSelX2 + 1, mSelY1))) {
+-                mSelX2++;
++            while (true) {
++                while (mSelX2 < columns - 1 && !"".equals(screen.getSelectedText(mSelX2 + 1, mSelY2, mSelX2 + 1, mSelY2))) {
++                    mSelX2++;
++                }
++                // Continue on the next row if the word wraps to it.
++                if (mSelX2 == columns - 1 && mSelY2 + 1 < terminalView.mEmulator.mRows && screen.getLineWrap(mSelY2)
++                    && !"".equals(screen.getSelectedText(0, mSelY2 + 1, 0, mSelY2 + 1))) {
++                    mSelY2++;
++                    mSelX2 = 0;
++                } else {
++                    break;
++                }
+             }
+         }
+     }
+-- 
+2.43.0
+
