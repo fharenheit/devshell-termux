@@ -1,0 +1,27 @@
+From fefe7bd3f7fb12d2663f7fb4e9038a635a95f18a Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Thu, 8 Oct 2026 12:22:27 +0000
+Subject: [PATCH] Added: List all features in FEATURES.md
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01GLNsTPnn2xKUQ4uFcevT6G
+---
+ README.md | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/README.md b/README.md
+index cecd560..292018d 100644
+--- a/README.md
++++ b/README.md
+@@ -8,7 +8,7 @@
+ > - SSH 파일 탐색(SFTP): 이미지 보기, 텍스트 편집(문법 강조, Undo/Redo, 인코딩, 16진수 보기), 업로드/다운로드
+ > - 터미널의 URL 열기, 설정 내보내기/가져오기, extra keys의 ENTER·KEYBOARD 버튼
+ >
+-> 기능별 설명은 [custom/README.md](custom/README.md), 변경 이력은 [history.md](history.md)에 있습니다.
++> 전체 기능 목록은 [FEATURES.md](FEATURES.md), 구현 방식은 [custom/README.md](custom/README.md), 변경 이력은 [history.md](history.md)에 있습니다.
+ 
+ [![Build status](https://github.com/termux/termux-app/workflows/Build/badge.svg)](https://github.com/termux/termux-app/actions)
+ [![Testing status](https://github.com/termux/termux-app/workflows/Unit%20tests/badge.svg)](https://github.com/termux/termux-app/actions)
+-- 
+2.43.0
+
