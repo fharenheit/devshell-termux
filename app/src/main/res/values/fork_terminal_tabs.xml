@@ -41,6 +41,8 @@
     <string name="msg_settings_import_failed">Failed to import the settings: %1$s</string>
     <string name="msg_settings_imported">Settings imported. The previous ones were copied to %1$s</string>
 
+    <string name="title_terminal_keyboard_shortcuts">Keyboard shortcuts</string>
+    <string name="msg_terminal_keyboard_shortcuts">Ctrl+Tab: next tab\nCtrl+Shift+Tab: previous tab\nCtrl+Shift+T: new tab\nCtrl+Shift+W: close tab\nCtrl+Shift+C: copy the selection\nCtrl+Shift+V: paste\nCtrl+Shift+F: find in the terminal output\nCtrl+Shift+S: snippets\nCtrl+= / Ctrl+-: larger / smaller text on the screen\nCtrl+0: text at the saved size\n\nCtrl+Alt shortcuts: N/P or ↓/↑ next/previous tab, C new tab, R rename, 1–9 tab, K keyboard, M menu, U URLs, V paste, +/- text size.\n\nTurn the Ctrl shortcuts off with terminal-keyboard-shortcuts = false in termux.properties, to send these keys to programs.</string>
     <string name="terminal_font_title">Font</string>
     <string name="terminal_font_size_title">Font size</string>
     <string name="terminal_font_size_value">%1$d px (%2$d dp)</string>

@@ -34,6 +34,7 @@ import com.termux.shared.activities.ReportActivity;
 import com.termux.shared.models.ReportInfo;
 import com.termux.app.models.UserAction;
 import com.termux.app.terminal.io.KeyboardShortcut;
+import com.termux.app.terminal.tabs.TerminalKeyboardShortcuts;
 import com.termux.shared.settings.preferences.TermuxAppSharedPreferences;
 import com.termux.shared.settings.properties.TermuxPropertyConstants;
 import com.termux.shared.data.DataUtils;
@@ -240,6 +241,9 @@ public class TermuxTerminalViewClient extends TermuxTerminalViewClientBase {
 
         if (keyCode == KeyEvent.KEYCODE_ENTER && !currentSession.isRunning()) {
             mTermuxTerminalSessionClient.removeFinishedSession(currentSession);
+            return true;
+        } else if (!mActivity.getProperties().areHardwareKeyboardShortcutsDisabled() &&
+            TerminalKeyboardShortcuts.onKeyDown(mActivity, this, mTermuxTerminalSessionClient, keyCode, e, currentSession)) {
             return true;
         } else if (!mActivity.getProperties().areHardwareKeyboardShortcutsDisabled() &&
             e.isCtrlPressed() && e.isAltPressed()) {

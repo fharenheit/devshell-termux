@@ -121,6 +121,7 @@ public class TerminalTabsController {
     private static final int MENU_SSH = 7;
     private static final int MENU_EXPORT_SETTINGS = 8;
     private static final int MENU_IMPORT_SETTINGS = 9;
+    private static final int MENU_KEYBOARD_SHORTCUTS = 10;
 
     /** Show the menu of the settings button of the tab bar. */
     private void showMenu(View anchor) {
@@ -135,6 +136,7 @@ public class TerminalTabsController {
         menu.add(Menu.NONE, MENU_RELOAD_SETTINGS, Menu.NONE, R.string.action_terminal_tabs_menu_reload_settings);
         menu.add(Menu.NONE, MENU_EXPORT_SETTINGS, Menu.NONE, R.string.action_terminal_tabs_menu_export_settings);
         menu.add(Menu.NONE, MENU_IMPORT_SETTINGS, Menu.NONE, R.string.action_terminal_tabs_menu_import_settings);
+        menu.add(Menu.NONE, MENU_KEYBOARD_SHORTCUTS, Menu.NONE, R.string.title_terminal_keyboard_shortcuts);
         popupMenu.setOnMenuItemClickListener(item -> {
             switch (item.getItemId()) {
                 case MENU_SETTINGS:
@@ -151,6 +153,9 @@ public class TerminalTabsController {
                     return true;
                 case MENU_IMPORT_SETTINGS:
                     SettingsBackup.startImport(mActivity);
+                    return true;
+                case MENU_KEYBOARD_SHORTCUTS:
+                    TerminalKeyboardShortcuts.showHelp(mActivity);
                     return true;
                 case MENU_SSH:
                     SshHostsDialog.show(mActivity);
@@ -441,7 +446,7 @@ public class TerminalTabsController {
     }
 
     /** Close a session from its tab, asking first if its process is still running. */
-    private void closeSession(TerminalSession session) {
+    public void closeSession(TerminalSession session) {
         if (!session.isRunning()) {
             getSessionClient().removeFinishedSession(session);
             return;

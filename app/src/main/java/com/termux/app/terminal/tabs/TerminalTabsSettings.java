@@ -21,6 +21,7 @@ import java.util.Properties;
  * max-sessions = 8                   # 1..32
  * terminal-session-notifications = all  # all | exit | bell | off
  * terminal-tab-auto-title = process  # process | cwd | off
+ * terminal-keyboard-shortcuts = true   # true | false
  * </pre>
  */
 public final class TerminalTabsSettings {
@@ -51,6 +52,9 @@ public final class TerminalTabsSettings {
     public static final String VALUE_AUTO_TITLE_CWD = "cwd";
     public static final String VALUE_AUTO_TITLE_OFF = "off";
 
+    /** Desktop terminal shortcuts like Ctrl+Tab, see {@link TerminalKeyboardShortcuts}. */
+    public static final String KEY_TERMINAL_KEYBOARD_SHORTCUTS = "terminal-keyboard-shortcuts";
+
     private static final String LOG_TAG = "TerminalTabsSettings";
 
     private static volatile String sTerminalTabs = VALUE_TERMINAL_TABS_TOP;
@@ -58,6 +62,7 @@ public final class TerminalTabsSettings {
     private static volatile int sMaxSessions = DEFAULT_MAX_SESSIONS;
     private static volatile String sSessionNotifications = VALUE_NOTIFICATIONS_ALL;
     private static volatile String sAutoTitle = VALUE_AUTO_TITLE_PROCESS;
+    private static volatile boolean sKeyboardShortcuts = true;
 
     private TerminalTabsSettings() {}
 
@@ -75,6 +80,12 @@ public final class TerminalTabsSettings {
         sSessionNotifications = getSessionNotifications(getValue(properties, KEY_TERMINAL_SESSION_NOTIFICATIONS));
         sAutoTitle = getOneOf(KEY_TERMINAL_TAB_AUTO_TITLE, getValue(properties, KEY_TERMINAL_TAB_AUTO_TITLE),
             VALUE_AUTO_TITLE_PROCESS, VALUE_AUTO_TITLE_CWD, VALUE_AUTO_TITLE_OFF);
+        sKeyboardShortcuts = SharedProperties.getBooleanValueForStringValue(KEY_TERMINAL_KEYBOARD_SHORTCUTS,
+            getValue(properties, KEY_TERMINAL_KEYBOARD_SHORTCUTS), true, true, LOG_TAG);
+    }
+
+    public static boolean areKeyboardShortcutsEnabled() {
+        return sKeyboardShortcuts;
     }
 
     /** Get the value of a key with trailing whitespace removed, which {@link Properties#load} keeps. */
