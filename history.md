@@ -7,6 +7,20 @@
 - **Added**: 새 기능, **Changed**: 동작·문서·패치 변경, **Fixed**: 버그 수정
 - "패치 갱신" 커밋은 업스트림 파일을 고친 커밋 뒤에 `custom/update-patches.sh`로 `custom/patches/`를 다시 만든 것입니다.
 
+## v0.118.3-ko.17 (2026-10-08)
+
+| 커밋 | 내용 |
+|---|---|
+| [`af1f9ed`](https://github.com/fharenheit/termux-app/commit/af1f9ed) | Added: 커밋별 변경 이력 `history.md`. `custom/README.md` 기능 목록을 분야별로 정리, README 상단에 기능 요약, 릴리즈 절차에 이력 갱신 추가 |
+| [`eb64e3d`](https://github.com/fharenheit/termux-app/commit/eb64e3d) | Changed: 패치 갱신(`0017`, README) |
+| [`5db7a0c`](https://github.com/fharenheit/termux-app/commit/5db7a0c) | Added: 데스크톱 터미널 키보드 단축키(Ctrl+Tab, Ctrl+Shift+T/W/C/V/F/S, Ctrl+=/−/0), ⚙ → Keyboard shortcuts, `terminal-keyboard-shortcuts = false`로 끔 |
+| [`e331baf`](https://github.com/fharenheit/termux-app/commit/e331baf) | Added: 스니펫. 자주 쓰는 명령을 저장해 현재 탭에 입력(⚙ → Snippets, Ctrl+Shift+S, `SNIPPETS` extra key), SSH 호스트별 스니펫, `~/.termux/snippets.json`, 설정 내보내기에 포함 |
+| [`5588fed`](https://github.com/fharenheit/termux-app/commit/5588fed) | Added: 터미널 출력에서 찾기. 스크롤된 기록까지 검색, 일치 강조, 이전/다음, 개수 표시, 여러 줄로 넘어간 줄과 한글 폭 처리(`TerminalView` 오버레이 hook) |
+| [`004b62e`](https://github.com/fharenheit/termux-app/commit/004b62e) | Added: SFTP 여러 개 선택(다운로드/삭제/권한), 폴더 다운로드·업로드, 권한(chmod) 대화상자, 호스트별 폴더 즐겨찾기 |
+| [`aeb6988`](https://github.com/fharenheit/termux-app/commit/aeb6988) | Changed: 패치 갱신(`0018`~`0020`)과 문서 |
+| [`b492c3e`](https://github.com/fharenheit/termux-app/commit/b492c3e) | Added: SSH 탭의 포트 포워딩 목록과 포트 열림 상태, 로컬 포트를 브라우저로 열기, 접속 중 `ssh -O forward/cancel`로 추가·중지 |
+| (이 릴리즈 커밋) | Added: v0.118.3-ko.17 릴리즈 노트와 이 이력 |
+
 ## v0.118.3-ko.16 (2026-10-08)
 
 | 커밋 | 내용 |
