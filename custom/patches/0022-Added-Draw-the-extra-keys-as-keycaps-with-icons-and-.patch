@@ -1,0 +1,282 @@
+From 0039b07a3cf9cf4926f9bfc42ea83485df2809dc Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Thu, 8 Oct 2026 10:53:37 +0000
+Subject: [PATCH] Added: Draw the extra keys as keycaps with icons and names
+
+A new keycaps extra keys style, which is now the default, draws each key
+as a rounded keycap. Keys with an icon have their name in small text
+below it, like Home, PgUp, Copy and Enter, and Esc, Ctrl and Alt are
+short names. An active Ctrl or Alt is filled. Text set as the display of
+a key in the properties is kept. extra-keys-style = default brings back
+the previous look.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01GLNsTPnn2xKUQ4uFcevT6G
+---
+ .../properties/TermuxPropertyConstants.java   |  2 +-
+ .../io/extrakeys/ExtraKeysConstants.java      | 31 +++++++
+ .../terminal/io/extrakeys/ExtraKeysInfo.java  | 13 +++
+ .../terminal/io/extrakeys/ExtraKeysView.java  | 90 ++++++++++++++++---
+ .../io/extrakeys/SpecialButtonState.java      |  2 +-
+ 5 files changed, 126 insertions(+), 12 deletions(-)
+
+diff --git a/termux-shared/src/main/java/com/termux/shared/settings/properties/TermuxPropertyConstants.java b/termux-shared/src/main/java/com/termux/shared/settings/properties/TermuxPropertyConstants.java
+index 09a77bf..b858466 100644
+--- a/termux-shared/src/main/java/com/termux/shared/settings/properties/TermuxPropertyConstants.java
++++ b/termux-shared/src/main/java/com/termux/shared/settings/properties/TermuxPropertyConstants.java
+@@ -286,7 +286,7 @@ public final class TermuxPropertyConstants {
+ 
+     /** Defines the key for extra keys style */
+     public static final String KEY_EXTRA_KEYS_STYLE =  "extra-keys-style"; // Default: "extra-keys-style"
+-    public static final String DEFAULT_IVALUE_EXTRA_KEYS_STYLE = "default";
++    public static final String DEFAULT_IVALUE_EXTRA_KEYS_STYLE = "keycaps";
+ 
+ 
+ 
+diff --git a/termux-shared/src/main/java/com/termux/shared/terminal/io/extrakeys/ExtraKeysConstants.java b/termux-shared/src/main/java/com/termux/shared/terminal/io/extrakeys/ExtraKeysConstants.java
+index c2ab7e0..5daf790 100644
+--- a/termux-shared/src/main/java/com/termux/shared/terminal/io/extrakeys/ExtraKeysConstants.java
++++ b/termux-shared/src/main/java/com/termux/shared/terminal/io/extrakeys/ExtraKeysConstants.java
+@@ -162,6 +162,37 @@ public class ExtraKeysConstants {
+             putAll(NICER_LOOKING_DISPLAY);
+         }};
+ 
++        /**
++         * Keys drawn as keycaps, with an icon and a small name below it, or a short name. A second
++         * line after a line feed is drawn small by {@link ExtraKeysView}. Used by the `keycaps` style.
++         */
++        public static final ExtraKeyDisplayMap KEYCAPS_CHAR_DISPLAY = new ExtraKeyDisplayMap() {{
++            putAll(CLASSIC_ARROWS_DISPLAY);
++            putAll(NICER_LOOKING_DISPLAY);
++            put("ESC", "Esc");
++            put("CTRL", "Ctrl");
++            put("ALT", "Alt");
++            put("SHIFT", "Shift");
++            put("FN", "Fn");
++            put("HOME", "⇤\nHome");
++            put("END", "⇥\nEnd");
++            put("PGUP", "⇞\nPgUp");
++            put("PGDN", "⇟\nPgDn");
++            put("ENTER", "↲\nEnter");
++            put("TAB", "↹\nTab");
++            put("BKSP", "⌫\nBksp");
++            put("DEL", "⌦\nDel");
++            put("INS", "Ins");
++            put("KEYBOARD", "⌨\nKbd");
++            put("DRAWER", "☰\nTabs");
++            put("PASTE", "⎘\nPaste");
++            put("COPY", "⧉\nCopy");
++            put("COPY_SCREEN", "⧉\nScreen");
++            put("FONT_LARGER", "A+\nFont");
++            put("FONT_SMALLER", "A−\nFont");
++            put("SNIPPETS", "⚡\nSnip");
++        }};
++
+         /**
+          * Some classic symbols everybody knows
+          */
+diff --git a/termux-shared/src/main/java/com/termux/shared/terminal/io/extrakeys/ExtraKeysInfo.java b/termux-shared/src/main/java/com/termux/shared/terminal/io/extrakeys/ExtraKeysInfo.java
+index 7bf47d7..84e21b1 100644
+--- a/termux-shared/src/main/java/com/termux/shared/terminal/io/extrakeys/ExtraKeysInfo.java
++++ b/termux-shared/src/main/java/com/termux/shared/terminal/io/extrakeys/ExtraKeysInfo.java
+@@ -107,6 +107,17 @@ public class ExtraKeysInfo {
+     public ExtraKeysInfo(@NonNull String propertiesInfo, String style,
+                          @NonNull ExtraKeysConstants.ExtraKeyDisplayMap extraKeyAliasMap) throws JSONException {
+         mButtons = initExtraKeysInfo(propertiesInfo, getCharDisplayMapForStyle(style), extraKeyAliasMap);
++        mKeycaps = STYLE_KEYCAPS.equals(style);
++    }
++
++    /** The style that draws keys as keycaps, see {@link ExtraKeysConstants.EXTRA_KEY_DISPLAY_MAPS#KEYCAPS_CHAR_DISPLAY}. */
++    public static final String STYLE_KEYCAPS = "keycaps";
++
++    private boolean mKeycaps;
++
++    /** Whether the keys are drawn as keycaps. */
++    public boolean isKeycaps() {
++        return mKeycaps;
+     }
+ 
+     /**
+@@ -203,6 +214,8 @@ public class ExtraKeysInfo {
+                 return EXTRA_KEY_DISPLAY_MAPS.FULL_ISO_CHAR_DISPLAY;
+             case "none":
+                 return new ExtraKeysConstants.ExtraKeyDisplayMap();
++            case STYLE_KEYCAPS:
++                return EXTRA_KEY_DISPLAY_MAPS.KEYCAPS_CHAR_DISPLAY;
+             default:
+                 return EXTRA_KEY_DISPLAY_MAPS.DEFAULT_CHAR_DISPLAY;
+         }
+diff --git a/termux-shared/src/main/java/com/termux/shared/terminal/io/extrakeys/ExtraKeysView.java b/termux-shared/src/main/java/com/termux/shared/terminal/io/extrakeys/ExtraKeysView.java
+index e149e36..473aa1f 100644
+--- a/termux-shared/src/main/java/com/termux/shared/terminal/io/extrakeys/ExtraKeysView.java
++++ b/termux-shared/src/main/java/com/termux/shared/terminal/io/extrakeys/ExtraKeysView.java
+@@ -371,6 +371,7 @@ public final class ExtraKeysView extends GridLayout {
+ 
+         removeAllViews();
+ 
++        mKeycaps = extraKeysInfo.isKeycaps();
+         ExtraKeyButton[][] buttons = extraKeysInfo.getMatrix();
+ 
+         setRowCount(buttons.length);
+@@ -388,10 +389,14 @@ public final class ExtraKeysView extends GridLayout {
+                     button = new Button(getContext(), null, android.R.attr.buttonBarButtonStyle);
+                 }
+ 
+-                button.setText(buttonInfo.getDisplay());
+                 button.setTextColor(mButtonTextColor);
+-                button.setAllCaps(mButtonTextAllCaps);
++                setButtonLabel(button, buttonInfo.getDisplay());
+                 button.setPadding(0, 0, 0, 0);
++                if (mKeycaps) setButtonBackground(button, false);
++                if (isSpecialButton(buttonInfo)) {
++                    SpecialButtonState state = mSpecialButtons.get(SpecialButton.valueOf(buttonInfo.getKey()));
++                    if (state != null) updateSpecialButton(button, state.isActive);
++                }
+ 
+                 button.setOnClickListener(view -> {
+                     performExtraKeyButtonHapticFeedback(view, buttonInfo, button);
+@@ -401,7 +406,7 @@ public final class ExtraKeysView extends GridLayout {
+                 button.setOnTouchListener((view, event) -> {
+                     switch (event.getAction()) {
+                         case MotionEvent.ACTION_DOWN:
+-                            view.setBackgroundColor(mButtonActiveBackgroundColor);
++                            setButtonBackground(view, true);
+                             // Start long press scheduled executors which will be stopped in next MotionEvent
+                             startScheduledExecutors(view, buttonInfo, button);
+                             return true;
+@@ -411,23 +416,23 @@ public final class ExtraKeysView extends GridLayout {
+                                 // Show popup on swipe up
+                                 if (mPopupWindow == null && event.getY() < 0) {
+                                     stopScheduledExecutors();
+-                                    view.setBackgroundColor(mButtonBackgroundColor);
++                                    setButtonBackground(view, false);
+                                     showPopup(view, buttonInfo.getPopup());
+                                 }
+                                 if (mPopupWindow != null && event.getY() > 0) {
+-                                    view.setBackgroundColor(mButtonActiveBackgroundColor);
++                                    setButtonBackground(view, true);
+                                     dismissPopup();
+                                 }
+                             }
+                             return true;
+ 
+                         case MotionEvent.ACTION_CANCEL:
+-                            view.setBackgroundColor(mButtonBackgroundColor);
++                            setButtonBackground(view, false);
+                             stopScheduledExecutors();
+                             return true;
+ 
+                         case MotionEvent.ACTION_UP:
+-                            view.setBackgroundColor(mButtonBackgroundColor);
++                            setButtonBackground(view, false);
+                             stopScheduledExecutors();
+                             // If ACTION_UP up was not from a repetitive key or was with a key with a popup button
+                             if (mLongPressCount == 0 || mPopupWindow != null) {
+@@ -572,8 +577,7 @@ public final class ExtraKeysView extends GridLayout {
+             button = new Button(getContext(), null, android.R.attr.buttonBarButtonStyle);
+             button.setTextColor(mButtonTextColor);
+         }
+-        button.setText(extraButton.getDisplay());
+-        button.setAllCaps(mButtonTextAllCaps);
++        setButtonLabel(button, extraButton.getDisplay());
+         button.setPadding(0, 0, 0, 0);
+         button.setMinHeight(0);
+         button.setMinWidth(0);
+@@ -581,7 +585,7 @@ public final class ExtraKeysView extends GridLayout {
+         button.setMinimumHeight(0);
+         button.setWidth(width);
+         button.setHeight(height);
+-        button.setBackgroundColor(mButtonActiveBackgroundColor);
++        setButtonBackground(button, true);
+         mPopupWindow = new PopupWindow(this);
+         mPopupWindow.setWidth(LayoutParams.WRAP_CONTENT);
+         mPopupWindow.setHeight(LayoutParams.WRAP_CONTENT);
+@@ -629,6 +633,72 @@ public final class ExtraKeysView extends GridLayout {
+         return true;
+     }
+ 
++    /** Whether the keys are drawn as keycaps, see {@link ExtraKeysInfo#isKeycaps()}. */
++    private boolean mKeycaps;
++
++    private static final int KEYCAP_COLOR = 0xFF262626;
++    private static final int KEYCAP_BORDER_COLOR = 0xFF4A4A4A;
++    private static final int KEYCAP_ACTIVE_COLOR = 0xFF4FC3F7;
++    private static final int KEYCAP_ACTIVE_TEXT_COLOR = 0xFF000000;
++    private static final int KEYCAP_CAPTION_COLOR = 0xFFA0A0A0;
++
++    private int dp(float value) {
++        return Math.round(value * getResources().getDisplayMetrics().density);
++    }
++
++    /**
++     * Set the text of a button. With keycaps, a second line after a line feed is a small caption
++     * below an icon, and the text is not made upper case, so that names like `Ctrl` keep their case.
++     */
++    private void setButtonLabel(Button button, String display) {
++        if (!mKeycaps) {
++            button.setText(display);
++            button.setAllCaps(mButtonTextAllCaps);
++            return;
++        }
++        button.setAllCaps(false);
++        int newline = display.indexOf('\n');
++        if (newline < 0) {
++            button.setText(display);
++            return;
++        }
++        android.text.SpannableString text = new android.text.SpannableString(display);
++        text.setSpan(new android.text.style.RelativeSizeSpan(0.62f), newline + 1, display.length(), android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
++        text.setSpan(new android.text.style.ForegroundColorSpan(KEYCAP_CAPTION_COLOR), newline + 1, display.length(), android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
++        button.setLineSpacing(0, 0.85f);
++        button.setText(text);
++    }
++
++    /** Set the background of a button, pressed or not, as a flat color or a keycap. */
++    private void setButtonBackground(View view, boolean pressed) {
++        if (!mKeycaps) {
++            view.setBackgroundColor(pressed ? mButtonActiveBackgroundColor : mButtonBackgroundColor);
++            return;
++        }
++        int color = pressed ? mButtonActiveBackgroundColor : isActiveSpecialButton(view) ? KEYCAP_ACTIVE_COLOR : KEYCAP_COLOR;
++        android.graphics.drawable.GradientDrawable keycap = new android.graphics.drawable.GradientDrawable();
++        keycap.setColor(color);
++        keycap.setCornerRadius(dp(6));
++        keycap.setStroke(Math.max(1, dp(1)), KEYCAP_BORDER_COLOR);
++        view.setBackground(new android.graphics.drawable.InsetDrawable(keycap, dp(2)));
++    }
++
++    private boolean isActiveSpecialButton(View view) {
++        for (SpecialButtonState state : mSpecialButtons.values())
++            if (state.isActive && state.buttons.contains(view)) return true;
++        return false;
++    }
++
++    /** Show whether a special button like CTRL is active: its text color, and with keycaps its fill. */
++    void updateSpecialButton(Button button, boolean active) {
++        if (mKeycaps) {
++            button.setTextColor(active ? KEYCAP_ACTIVE_TEXT_COLOR : mButtonTextColor);
++            setButtonBackground(button, false);
++        } else {
++            button.setTextColor(active ? mButtonActiveTextColor : mButtonTextColor);
++        }
++    }
++
+     private Button createSpecialButton(String buttonKey, boolean needUpdate) {
+         SpecialButtonState state = mSpecialButtons.get(SpecialButton.valueOf(buttonKey));
+         if (state == null) return null;
+diff --git a/termux-shared/src/main/java/com/termux/shared/terminal/io/extrakeys/SpecialButtonState.java b/termux-shared/src/main/java/com/termux/shared/terminal/io/extrakeys/SpecialButtonState.java
+index 0af0359..d305000 100644
+--- a/termux-shared/src/main/java/com/termux/shared/terminal/io/extrakeys/SpecialButtonState.java
++++ b/termux-shared/src/main/java/com/termux/shared/terminal/io/extrakeys/SpecialButtonState.java
+@@ -38,7 +38,7 @@ public class SpecialButtonState {
+     /** Set {@link #isActive}. */
+     public void setIsActive(boolean value) {
+         isActive = value;
+-        buttons.forEach(button -> button.setTextColor(value ? mExtraKeysView.getButtonActiveTextColor() : mExtraKeysView.getButtonTextColor()));
++        buttons.forEach(button -> mExtraKeysView.updateSpecialButton(button, value));
+     }
+ 
+     /** Set {@link #isLocked}. */
+-- 
+2.43.0
+
