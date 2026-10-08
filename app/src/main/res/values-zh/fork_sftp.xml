@@ -3,7 +3,7 @@
     <string name="action_sftp_browse_files">浏览文件</string>
 
     <string name="msg_sftp_ssh_not_installed">未安装 ssh。请在终端中运行 \"pkg install openssh\"。</string>
-    <string name="msg_sftp_host_key">%1$s 的主机密钥未知或已更改。请先在终端标签页中连接一次以接受该密钥。</string>
+    <string name="msg_sftp_host_key">%1$s 的主机密钥未知或已更改。请使用“检查主机密钥”进行检查,或先在终端标签页中连接一次。</string>
     <string name="msg_sftp_login_failed">登录 %1$s 失败。请保存该主机的密码、安装公钥，或从已连接的 ssh 标签页打开文件。</string>
     <string name="msg_sftp_no_sftp">%1$s 不支持 SFTP。</string>
     <string name="msg_sftp_connect_failed">无法连接到 %1$s：%2$s</string>

@@ -130,6 +130,8 @@ public final class SshHostsDialog {
         }
         labels.add(activity.getString(R.string.action_ssh_copy_id));
         actions.add(() -> chooseKeyToCopy(activity, item.name));
+        labels.add(activity.getString(R.string.title_ssh_host_key));
+        actions.add(() -> SshHostKeyDialog.show(activity, item.name, null));
         if (item.host != null) {
             labels.add(activity.getString(R.string.action_ssh_delete_host));
             actions.add(() -> confirmDelete(activity, item.host));

@@ -3,7 +3,7 @@
     <string name="action_sftp_browse_files">ファイルを表示</string>
 
     <string name="msg_sftp_ssh_not_installed">ssh がインストールされていません。ターミナルで \"pkg install openssh\" を実行してください。</string>
-    <string name="msg_sftp_host_key">%1$s のホスト鍵が不明か、変更されています。ターミナルタブで一度接続して鍵を承認してください。</string>
+    <string name="msg_sftp_host_key">%1$s のホスト鍵が不明か、変更されています。「ホスト鍵を確認」で確認するか、ターミナルタブで一度接続してください。</string>
     <string name="msg_sftp_login_failed">%1$s へのログインに失敗しました。ホストのパスワードを保存するか、公開鍵をインストールするか、接続済みの ssh タブからファイルを開いてください。</string>
     <string name="msg_sftp_no_sftp">%1$s は SFTP に対応していません。</string>
     <string name="msg_sftp_connect_failed">%1$s に接続できませんでした: %2$s</string>

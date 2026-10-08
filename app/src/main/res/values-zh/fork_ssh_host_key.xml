@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="title_ssh_host_key">主机密钥</string>
+    <string name="action_ssh_host_key_check">检查主机密钥</string>
+    <string name="action_ssh_host_key_trust">信任</string>
+    <string name="action_ssh_host_key_replace">替换密钥</string>
+    <string name="action_ssh_host_key_remove">删除</string>
+    <string name="msg_ssh_host_key_checking">正在获取主机密钥…</string>
+    <string name="msg_ssh_host_key_saving">正在更新 known_hosts…</string>
+    <string name="msg_ssh_host_key_failed">无法检查主机密钥:\n%1$s</string>
+    <string name="msg_ssh_host_key_trusted">%1$s 的主机密钥已受信任。\n\n%2$s</string>
+    <string name="msg_ssh_host_key_unknown">%1$s 的主机密钥尚未知。信任前请与服务器的指纹进行比较。\n\n%2$s</string>
+    <string name="msg_ssh_host_key_changed">警告: %1$s 的主机密钥已更改! 可能有人正在拦截连接,或服务器已重新安装。\n\n新密钥:\n%2$s\n\n受信任的密钥:\n%3$s</string>
+    <string name="msg_ssh_host_key_replace_confirm">要替换 %1$s 的受信任主机密钥吗? 仅在知道密钥更改原因时才替换。</string>
+    <string name="msg_ssh_host_key_remove_confirm">要从 known_hosts 中删除 %1$s 的受信任主机密钥吗?</string>
+    <string name="msg_ssh_host_key_saved">已信任主机密钥</string>
+    <string name="msg_ssh_host_key_removed">已删除主机密钥</string>
+</resources>

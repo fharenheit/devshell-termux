@@ -53,3 +53,4 @@ app/src/test/java/com/termux/app/terminal/specialkeys
 app/src/main/res/values/fork_special_keys.xml
 app/src/main/res/values/fork_clipboard.xml
 app/src/test/java/com/termux/app/terminal/clipboard
+app/src/main/res/values/fork_ssh_host_key.xml

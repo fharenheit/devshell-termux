@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="title_ssh_host_key">ホスト鍵</string>
+    <string name="action_ssh_host_key_check">ホスト鍵を確認</string>
+    <string name="action_ssh_host_key_trust">信頼</string>
+    <string name="action_ssh_host_key_replace">鍵を置き換え</string>
+    <string name="action_ssh_host_key_remove">削除</string>
+    <string name="msg_ssh_host_key_checking">ホスト鍵を取得中…</string>
+    <string name="msg_ssh_host_key_saving">known_hosts を更新中…</string>
+    <string name="msg_ssh_host_key_failed">ホスト鍵を確認できませんでした:\n%1$s</string>
+    <string name="msg_ssh_host_key_trusted">%1$s のホスト鍵は信頼済みです。\n\n%2$s</string>
+    <string name="msg_ssh_host_key_unknown">%1$s のホスト鍵はまだ不明です。信頼する前にサーバーのフィンガープリントと比較してください。\n\n%2$s</string>
+    <string name="msg_ssh_host_key_changed">警告: %1$s のホスト鍵が変更されています! 接続が傍受されているか、サーバーが再インストールされた可能性があります。\n\n新しい鍵:\n%2$s\n\n信頼済みの鍵:\n%3$s</string>
+    <string name="msg_ssh_host_key_replace_confirm">%1$s の信頼済みホスト鍵を置き換えますか? 鍵が変わった理由が分かっている場合のみ置き換えてください。</string>
+    <string name="msg_ssh_host_key_remove_confirm">%1$s の信頼済みホスト鍵を known_hosts から削除しますか?</string>
+    <string name="msg_ssh_host_key_saved">ホスト鍵を信頼しました</string>
+    <string name="msg_ssh_host_key_removed">ホスト鍵を削除しました</string>
+</resources>

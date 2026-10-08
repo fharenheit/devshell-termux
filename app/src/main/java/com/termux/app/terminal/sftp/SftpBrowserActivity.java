@@ -46,6 +46,7 @@ import androidx.annotation.Nullable;
 import com.termux.R;
 import com.termux.app.terminal.backup.DownloadsDirectory;
 import com.termux.app.terminal.fonts.TerminalFonts;
+import com.termux.app.terminal.ssh.SshHostKeyDialog;
 import com.termux.shared.logger.Logger;
 import com.termux.shared.termux.TermuxConstants;
 
@@ -381,6 +382,16 @@ public class SftpBrowserActivity extends Activity {
     }
 
     private void showError(@NonNull Exception e) {
+        if (e instanceof SftpConnection.HostKeyException) {
+            new AlertDialog.Builder(this)
+                .setTitle(R.string.sftp_error_title)
+                .setMessage(e.getMessage())
+                .setPositiveButton(R.string.action_ssh_host_key_check, (d, which) ->
+                    SshHostKeyDialog.show(this, mHostName, () -> loadDirectory(mPath != null ? mPath : ".")))
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+            return;
+        }
         String message = e.getMessage();
         if (e instanceof SftpClient.SftpException) {
             int status = ((SftpClient.SftpException) e).status;

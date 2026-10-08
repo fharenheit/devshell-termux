@@ -138,7 +138,9 @@ public final class SftpConnection {
                 }
             }
             process.destroy();
-            throw new IOException(describeError(), e);
+            String message = describeError();
+            if (isHostKeyError()) throw new HostKeyException(message, e);
+            throw new IOException(message, e);
         }
         mProcess = process;
         mClient = client;
@@ -164,6 +166,19 @@ public final class SftpConnection {
         }, "SftpStderr");
         thread.setDaemon(true);
         thread.start();
+    }
+
+    /** Connecting failed because the host key is not known or changed, which can be checked with the host key dialog. */
+    public static final class HostKeyException extends IOException {
+        HostKeyException(String message, Throwable cause) {
+            super(message, cause);
+        }
+    }
+
+    private boolean isHostKeyError() {
+        synchronized (mStderr) {
+            return SftpErrors.classify(mStderr.toString()) == SftpErrors.HOST_KEY;
+        }
     }
 
     @NonNull

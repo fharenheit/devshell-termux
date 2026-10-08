@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="title_ssh_host_key">Host key</string>
+    <string name="action_ssh_host_key_check">Check host key</string>
+    <string name="action_ssh_host_key_trust">Trust</string>
+    <string name="action_ssh_host_key_replace">Replace key</string>
+    <string name="action_ssh_host_key_remove">Remove</string>
+    <string name="msg_ssh_host_key_checking">Getting the host key…</string>
+    <string name="msg_ssh_host_key_saving">Updating known_hosts…</string>
+    <string name="msg_ssh_host_key_failed">Could not check the host key:\n%1$s</string>
+    <string name="msg_ssh_host_key_trusted">The host key of %1$s is trusted.\n\n%2$s</string>
+    <string name="msg_ssh_host_key_unknown">The host key of %1$s is not known yet. Compare its fingerprint with the one of the server before trusting it.\n\n%2$s</string>
+    <string name="msg_ssh_host_key_changed">WARNING: the host key of %1$s has changed! Someone could be intercepting the connection, or the server was reinstalled.\n\nNew key:\n%2$s\n\nTrusted key:\n%3$s</string>
+    <string name="msg_ssh_host_key_replace_confirm">Replace the trusted host key of %1$s? Only do this if you know why the key changed.</string>
+    <string name="msg_ssh_host_key_remove_confirm">Remove the trusted host key of %1$s from known_hosts?</string>
+    <string name="msg_ssh_host_key_saved">Host key trusted</string>
+    <string name="msg_ssh_host_key_removed">Host key removed</string>
+</resources>

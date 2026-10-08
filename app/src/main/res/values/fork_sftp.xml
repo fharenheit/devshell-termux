@@ -4,7 +4,7 @@
     <string name="action_sftp_browse_files">Browse files</string>
 
     <string name="msg_sftp_ssh_not_installed">ssh is not installed. Run \"pkg install openssh\" in a terminal.</string>
-    <string name="msg_sftp_host_key">The host key of %1$s is not known or has changed. Connect to it once in a terminal tab to accept the key.</string>
+    <string name="msg_sftp_host_key">The host key of %1$s is not known or has changed. Check it with Check host key, or connect to it once in a terminal tab.</string>
     <string name="msg_sftp_login_failed">Login to %1$s failed. Save the password of the host, install a public key, or open the files from a connected ssh tab.</string>
     <string name="msg_sftp_no_sftp">%1$s does not support SFTP.</string>
     <string name="msg_sftp_connect_failed">Failed to connect to %1$s: %2$s</string>

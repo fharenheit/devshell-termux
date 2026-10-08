@@ -3,7 +3,7 @@
     <string name="action_sftp_browse_files">파일 탐색</string>
 
     <string name="msg_sftp_ssh_not_installed">ssh가 설치되어 있지 않습니다. 터미널에서 \"pkg install openssh\"를 실행하세요.</string>
-    <string name="msg_sftp_host_key">%1$s의 호스트 키를 알 수 없거나 변경되었습니다. 터미널 탭에서 한 번 접속하여 키를 수락하세요.</string>
+    <string name="msg_sftp_host_key">%1$s의 호스트 키를 알 수 없거나 변경되었습니다. 호스트 키 확인으로 확인하거나 터미널 탭에서 한 번 접속하세요.</string>
     <string name="msg_sftp_login_failed">%1$s에 로그인하지 못했습니다. 호스트의 비밀번호를 저장하거나, 공개 키를 설치하거나, 접속된 ssh 탭에서 파일을 여세요.</string>
     <string name="msg_sftp_no_sftp">%1$s은(는) SFTP를 지원하지 않습니다.</string>
     <string name="msg_sftp_connect_failed">%1$s에 접속하지 못했습니다: %2$s</string>
