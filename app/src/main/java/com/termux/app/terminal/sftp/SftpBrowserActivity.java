@@ -283,7 +283,9 @@ public class SftpBrowserActivity extends Activity {
             case MODE_EDITOR:
                 String name = mEditPath == null ? "" : SftpPaths.name(mEditPath);
                 getActionBar().setTitle((mDirty ? "● " : "") + name);
-                getActionBar().setSubtitle(mEditReadOnly ? getString(R.string.sftp_read_only) : mHostName);
+                SyntaxHighlighter.Language language = mEditor.getLanguage();
+                String subtitle = mEditReadOnly ? getString(R.string.sftp_read_only) : mHostName;
+                getActionBar().setSubtitle(language == null ? subtitle : subtitle + " · " + language.name);
                 break;
         }
     }
@@ -601,6 +603,9 @@ public class SftpBrowserActivity extends Activity {
 
     private void showEditor(@NonNull String path, @NonNull SftpClient.Attributes attributes, @NonNull SftpText.Text text, boolean truncated) {
         mEditPath = null; // Do not mark the text set below as changed.
+        int firstLineEnd = text.text.indexOf('\n');
+        mEditor.setLanguage(SyntaxHighlighter.detect(SftpPaths.name(path),
+            text.text.substring(0, firstLineEnd < 0 ? Math.min(text.text.length(), 256) : Math.min(firstLineEnd, 256))));
         mEditor.setText(text.text);
         mEditPath = path;
         mEditMtime = attributes.mtime;
@@ -723,6 +728,26 @@ public class SftpBrowserActivity extends Activity {
         }
         mEditor.requestFocus();
         mEditor.setSelection(index, index + query.length());
+    }
+
+    /** Choose the language to highlight the editor text as, or plain text. */
+    private void chooseSyntax() {
+        List<SyntaxHighlighter.Language> languages = SyntaxHighlighter.getLanguages();
+        CharSequence[] names = new CharSequence[languages.size() + 1];
+        names[0] = getString(R.string.sftp_syntax_plain_text);
+        int checked = 0;
+        for (int i = 0; i < languages.size(); i++) {
+            names[i + 1] = languages.get(i).name;
+            if (languages.get(i) == mEditor.getLanguage()) checked = i + 1;
+        }
+        new AlertDialog.Builder(this)
+            .setTitle(R.string.sftp_action_syntax)
+            .setSingleChoiceItems(names, checked, (d, which) -> {
+                mEditor.setLanguage(which == 0 ? null : languages.get(which - 1));
+                updateTitle();
+                d.dismiss();
+            })
+            .show();
     }
 
     /** Leave the editor, asking first if the text has unsaved changes. */
@@ -1005,6 +1030,7 @@ public class SftpBrowserActivity extends Activity {
     private static final int MENU_FIND = 11;
     private static final int MENU_FIND_NEXT = 12;
     private static final int MENU_RELOAD = 13;
+    private static final int MENU_SYNTAX = 14;
     private static final int MENU_DOWNLOAD_IMAGE = 20;
 
     @Override
@@ -1025,6 +1051,7 @@ public class SftpBrowserActivity extends Activity {
                 if (!mEditReadOnly) menu.add(Menu.NONE, MENU_SAVE, Menu.NONE, R.string.sftp_action_save).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
                 menu.add(Menu.NONE, MENU_FIND, Menu.NONE, R.string.sftp_action_find);
                 menu.add(Menu.NONE, MENU_FIND_NEXT, Menu.NONE, R.string.sftp_action_find_next);
+                menu.add(Menu.NONE, MENU_SYNTAX, Menu.NONE, R.string.sftp_action_syntax);
                 menu.add(Menu.NONE, MENU_RELOAD, Menu.NONE, R.string.sftp_action_reload);
                 break;
             case MODE_IMAGE:
@@ -1064,6 +1091,9 @@ public class SftpBrowserActivity extends Activity {
             case MENU_FIND_NEXT:
                 if (mFindQuery == null) showFindDialog();
                 else findNext();
+                return true;
+            case MENU_SYNTAX:
+                chooseSyntax();
                 return true;
             case MENU_RELOAD:
                 if (mEditPath != null) openText(mEditPath, true);

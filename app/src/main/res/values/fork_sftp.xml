@@ -34,6 +34,8 @@
     <string name="sftp_action_find">Find</string>
     <string name="sftp_action_find_next">Find next</string>
     <string name="sftp_action_reload">Reload</string>
+    <string name="sftp_action_syntax">Syntax highlighting</string>
+    <string name="sftp_syntax_plain_text">Plain text</string>
     <string name="sftp_action_overwrite">Overwrite</string>
     <string name="sftp_action_discard">Discard</string>
     <string name="sftp_action_replace">Replace</string>

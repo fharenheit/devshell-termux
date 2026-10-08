@@ -29,7 +29,7 @@ SSH 호스트의 파일과 디렉터리를 탐색하고, 이미지를 보고, �
 | 항목 메뉴(길게 누름) | Open, Open as text, Download, Rename, Delete(폴더는 안의 내용까지), Properties(경로, 크기, 권한, uid:gid, 수정 시간) |
 | 목록 메뉴 | New folder, New file, Upload(여러 파일 선택, 같은 이름이 있으면 Replace/Skip existing 선택) |
 | 이미지 뷰어 | jpg/png/gif/webp/bmp/heic, 32MB까지. 두 손가락 확대, 끌기, 두 번 눌러 확대/원래대로, ◀ ▶로 같은 폴더의 이전/다음 이미지 |
-| 편집기 | 터미널 글꼴(`~/.termux/font.ttf`), 줄 번호, 줄 바꿈 없음, Find/Find next, Reload, Save |
+| 편집기 | 터미널 글꼴(`~/.termux/font.ttf`), 줄 번호, 줄 바꿈 없음, 문법 강조, Find/Find next, Syntax highlighting(언어 바꾸기), Reload, Save |
 
 ## 편집기 저장 규칙
 
@@ -41,6 +41,17 @@ SSH 호스트의 파일과 디렉터리를 탐색하고, 이미지를 보고, �
   바꿈(쓰는 도중 끊겨도 원본이 망가지지 않음). 파일이 심볼릭 링크이거나, 서버가 이 확장을 지원하지 않거나, 임시 파일의
   소유자가 원본과 다르면(다른 사용자의 파일을 쓰기 권한으로 고치는 경우) 원본에 바로 씀
 - 저장하지 않고 나가면 Discard를 물어봄
+
+## 문법 강조
+
+- `SyntaxHighlighter`: 언어마다 간단한 규칙(주석, 문자열, 숫자, 키워드, 키 등)으로 나누는 자체 구현. 라이브러리 없음
+- 언어: Shell, Python, JavaScript/TypeScript, JSON, Java/Groovy, Kotlin, C/C++, C#, Go, Rust, Swift, Ruby, Lua, PHP, Perl, SQL,
+  CSS, HTML/XML, YAML, TOML/INI(properties, conf, env 등), Makefile, Dockerfile, Markdown, Diff
+- 파일 이름(`Makefile`, `.bashrc` 등), 확장자, 첫 줄의 `#!`(`#!/usr/bin/env python3` 등) 순서로 언어를 고름. 모르면 일반 텍스트.
+  편집기 메뉴 → Syntax highlighting에서 바꿀 수 있고, 선택한 언어는 부제목에 표시
+- 화면에 보이는 줄과 위아래 60줄만 색칠하고, 스크롤(0.1초)이나 편집(0.2초)이 멈추면 다시 칠함. 여러 줄 주석/문자열을 알기 위해 파일
+  처음부터 훑되, 큰 파일은 256KB 앞에서부터 훑음
+- 색은 VS Code Dark+ 계열. 편집기 안에서 붙여 넣을 때는 색 없이 글자만 붙여 넣음
 
 ## 다운로드
 
