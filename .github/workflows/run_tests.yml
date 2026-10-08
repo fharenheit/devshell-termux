@@ -16,6 +16,12 @@ jobs:
     steps:
     - name: Clone repository
       uses: actions/checkout@v4
+    - name: Set up JDK 11
+      # Robolectric 4.4 can't read the class files of newer JDKs.
+      uses: actions/setup-java@v4
+      with:
+        distribution: temurin
+        java-version: 11
     - name: Execute tests
       run: |
         ./gradlew test
