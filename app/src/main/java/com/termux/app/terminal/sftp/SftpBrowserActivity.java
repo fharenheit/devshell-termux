@@ -1,5 +1,6 @@
 package com.termux.app.terminal.sftp;
 
+import com.termux.shared.locale.AppLocale;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -77,6 +78,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * ssh tab it shares the connection of from exiting, and opened again when needed.
  */
 public class SftpBrowserActivity extends Activity {
+
+    /** Show the app in the language chosen in it, see {@link AppLocale}. */
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(AppLocale.wrap(newBase));
+    }
 
     public static final String EXTRA_HOST = "com.termux.app.terminal.sftp.extra.HOST";
     public static final String EXTRA_CONTROL_PATH = "com.termux.app.terminal.sftp.extra.CONTROL_PATH";

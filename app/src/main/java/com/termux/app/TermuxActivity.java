@@ -1,5 +1,6 @@
 package com.termux.app;
 
+import com.termux.shared.locale.AppLocale;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -77,6 +78,12 @@ import androidx.viewpager.widget.ViewPager;
  * about memory leaks.
  */
 public final class TermuxActivity extends Activity implements ServiceConnection {
+
+    /** Show the app in the language chosen in it, see {@link AppLocale}. */
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(AppLocale.wrap(newBase));
+    }
 
     /**
      * The connection to the {@link TermuxService}. Requested in {@link #onCreate(Bundle)} with a call to
@@ -287,6 +294,9 @@ public final class TermuxActivity extends Activity implements ServiceConnection 
     @Override
     public void onStart() {
         super.onStart();
+
+        // The language may have been changed in the settings while the activity was stopped.
+        if (AppLocale.recreateIfOutdated(this)) return;
 
         Logger.logDebug(LOG_TAG, "onStart");
 

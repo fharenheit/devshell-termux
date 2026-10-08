@@ -1,5 +1,7 @@
 package com.termux.app.activities;
 
+import com.termux.shared.locale.AppLocale;
+import com.termux.app.language.LanguageDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Environment;
@@ -26,6 +28,12 @@ import com.termux.shared.termux.TermuxConstants;
 import com.termux.shared.termux.TermuxUtils;
 
 public class SettingsActivity extends AppCompatActivity {
+
+    /** Show the app in the language chosen in it, see {@link AppLocale}. */
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(AppLocale.wrap(newBase));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +65,7 @@ public class SettingsActivity extends AppCompatActivity {
             if (context == null) return;
 
             setPreferencesFromResource(R.xml.root_preferences, rootKey);
+            if (getActivity() != null) LanguageDialog.setupPreference(findPreference("language"), getActivity());
 
             configureTermuxAPIPreference(context);
             configureTermuxFloatPreference(context);

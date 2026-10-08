@@ -1,5 +1,6 @@
 package com.termux.shared.activities;
 
+import com.termux.shared.locale.AppLocale;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
@@ -42,6 +43,12 @@ import java.util.Locale;
  * {@code ` <activity android:name="com.termux.shared.activities.TextIOActivity" android:theme="@style/Theme.AppCompat.TermuxTextIOActivity" />` }
  */
 public class TextIOActivity extends AppCompatActivity {
+
+    /** Show the app in the language chosen in it, see {@link AppLocale}. */
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(AppLocale.wrap(newBase));
+    }
 
     private static final String CLASS_NAME = ReportActivity.class.getCanonicalName();
     public static final String EXTRA_TEXT_IO_INFO_OBJECT = CLASS_NAME + ".EXTRA_TEXT_IO_INFO_OBJECT";

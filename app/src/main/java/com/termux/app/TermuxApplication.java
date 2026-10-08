@@ -1,5 +1,7 @@
 package com.termux.app;
 
+import com.termux.shared.locale.AppLocale;
+import android.content.Context;
 import android.app.Application;
 
 import com.termux.shared.crash.TermuxCrashUtils;
@@ -8,6 +10,12 @@ import com.termux.shared.logger.Logger;
 
 
 public class TermuxApplication extends Application {
+
+    /** Show the app in the language chosen in it, see {@link AppLocale}. */
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(AppLocale.wrap(newBase));
+    }
     public void onCreate() {
         super.onCreate();
 

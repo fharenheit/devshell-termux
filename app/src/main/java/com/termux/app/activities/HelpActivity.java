@@ -1,5 +1,7 @@
 package com.termux.app.activities;
 
+import com.termux.shared.locale.AppLocale;
+import android.content.Context;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
@@ -16,6 +18,12 @@ import com.termux.shared.termux.TermuxConstants;
 
 /** Basic embedded browser for viewing help pages. */
 public final class HelpActivity extends Activity {
+
+    /** Show the app in the language chosen in it, see {@link AppLocale}. */
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(AppLocale.wrap(newBase));
+    }
 
     WebView mWebView;
 

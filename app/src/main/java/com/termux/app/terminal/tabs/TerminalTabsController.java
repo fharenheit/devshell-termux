@@ -31,6 +31,7 @@ import com.termux.app.terminal.backup.SettingsBackup;
 import com.termux.app.terminal.fonts.TerminalFontDialog;
 import com.termux.app.terminal.fonts.TerminalFonts;
 import com.termux.app.terminal.sftp.SftpBrowserActivity;
+import com.termux.app.language.LanguageDialog;
 import com.termux.app.terminal.search.TerminalSearchBar;
 import com.termux.app.terminal.snippets.SnippetsDialog;
 import com.termux.app.terminal.ssh.SshConnector;
@@ -136,6 +137,7 @@ public class TerminalTabsController {
     private static final int MENU_KEYBOARD_SHORTCUTS = 10;
     private static final int MENU_SNIPPETS = 11;
     private static final int MENU_FIND = 12;
+    private static final int MENU_LANGUAGE = 13;
 
     /** Show the menu of the settings button of the tab bar. */
     private void showMenu(View anchor) {
@@ -153,6 +155,7 @@ public class TerminalTabsController {
         menu.add(Menu.NONE, MENU_EXPORT_SETTINGS, Menu.NONE, R.string.action_terminal_tabs_menu_export_settings);
         menu.add(Menu.NONE, MENU_IMPORT_SETTINGS, Menu.NONE, R.string.action_terminal_tabs_menu_import_settings);
         menu.add(Menu.NONE, MENU_KEYBOARD_SHORTCUTS, Menu.NONE, R.string.title_terminal_keyboard_shortcuts);
+        menu.add(Menu.NONE, MENU_LANGUAGE, Menu.NONE, R.string.title_language);
         popupMenu.setOnMenuItemClickListener(item -> {
             switch (item.getItemId()) {
                 case MENU_SETTINGS:
@@ -170,6 +173,11 @@ public class TerminalTabsController {
                 case MENU_IMPORT_SETTINGS:
                     SettingsBackup.startImport(mActivity);
                     return true;
+                case MENU_LANGUAGE: {
+                    TermuxService service = mActivity.getTermuxService();
+                    LanguageDialog.show(mActivity, service != null ? service.getResources() : null);
+                    return true;
+                }
                 case MENU_FIND:
                     getSearchBar().show();
                     return true;

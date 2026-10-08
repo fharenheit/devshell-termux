@@ -35,3 +35,16 @@ app/src/test/java/com/termux/app/terminal/snippets
 app/src/main/java/com/termux/app/terminal/search
 app/src/test/java/com/termux/app/terminal/search
 app/src/main/java/com/termux/app/terminal/clipboard
+termux-shared/src/main/java/com/termux/shared/locale
+app/src/main/java/com/termux/app/language
+app/src/main/res/values/fork_language.xml
+app/src/test/java/com/termux/app/language
+app/src/main/res/values-ko
+app/src/main/res/values-ja
+app/src/main/res/values-zh
+termux-shared/src/main/res/values-ko
+termux-shared/src/main/res/values-ja
+termux-shared/src/main/res/values-zh
+terminal-view/src/main/res/values-ko
+terminal-view/src/main/res/values-ja
+terminal-view/src/main/res/values-zh

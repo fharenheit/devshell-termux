@@ -1,5 +1,6 @@
 package com.termux.app;
 
+import com.termux.shared.locale.AppLocale;
 import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -64,6 +65,12 @@ import java.util.List;
  * {@link #buildNotification()}.
  */
 public final class TermuxService extends Service implements TermuxTask.TermuxTaskClient, TermuxSession.TermuxSessionClient {
+
+    /** Show the app in the language chosen in it, see {@link AppLocale}. */
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(AppLocale.wrap(newBase));
+    }
 
     private static int EXECUTION_ID = 1000;
 

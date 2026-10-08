@@ -1,5 +1,7 @@
 package com.termux.filepicker;
 
+import com.termux.shared.locale.AppLocale;
+import android.content.Context;
 import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
@@ -28,6 +30,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
 
 public class TermuxFileReceiverActivity extends Activity {
+
+    /** Show the app in the language chosen in it, see {@link AppLocale}. */
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(AppLocale.wrap(newBase));
+    }
 
     static final String TERMUX_RECEIVEDIR = TermuxConstants.TERMUX_FILES_DIR_PATH + "/home/downloads";
     static final String EDITOR_PROGRAM = TermuxConstants.TERMUX_HOME_DIR_PATH + "/bin/termux-file-editor";

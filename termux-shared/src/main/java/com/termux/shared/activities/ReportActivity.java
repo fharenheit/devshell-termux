@@ -1,5 +1,6 @@
 package com.termux.shared.activities;
 
+import com.termux.shared.locale.AppLocale;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -46,6 +47,12 @@ import io.noties.markwon.recycler.SimpleEntry;
  * in the app to cleanup cached files.
  */
 public class ReportActivity extends AppCompatActivity {
+
+    /** Show the app in the language chosen in it, see {@link AppLocale}. */
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(AppLocale.wrap(newBase));
+    }
 
     private static final String CLASS_NAME = ReportActivity.class.getCanonicalName();
     private static final String ACTION_DELETE_REPORT_INFO_OBJECT_FILE = CLASS_NAME + ".ACTION_DELETE_REPORT_INFO_OBJECT_FILE";

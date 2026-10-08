@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Strings of choosing the app language. Kept out of upstream files to keep patches small. -->
+<resources>
+    <string name="title_language">Language</string>
+    <string name="language_system_default">System default</string>
+</resources>
