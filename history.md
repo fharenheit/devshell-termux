@@ -7,14 +7,22 @@
 - **Added**: 새 기능, **Changed**: 동작·문서·패치 변경, **Fixed**: 버그 수정
 - "패치 갱신" 커밋은 업스트림 파일을 고친 커밋 뒤에 `custom/update-patches.sh`로 `custom/patches/`를 다시 만든 것입니다.
 
+## v0.118.3-ko.25 (2026-10-09)
+
+| 커밋 | 내용 |
+|---|---|
+| [`04fceb9`](https://github.com/fharenheit/termux-app/commit/04fceb9) | Added: 기본 스니펫에 Git 강제 되돌리기/강제 pull/특정 커밋으로 되돌리기, 이름으로 찾기, 내 프로세스, 내 포트와 PID |
+| [`2bc68d7`](https://github.com/fharenheit/termux-app/commit/2bc68d7) | Added: 스니펫 명령의 `<NAME>`, `<NAME=기본값>`을 누를 때 입력받는 창(보낼 명령 미리 보기, 실행/입력만, 마지막 값 기억). 기본 스니펫이 메시지·해시·사용자 이름 등을 입력받도록 바꾸고 `git revert <HASH>` 추가, 예전 기본 명령 자동 변경 |
+| (이 릴리즈 커밋) | Added: v0.118.3-ko.25 릴리즈 노트와 이력, ko.24(사용 설명서, SSH 수정)와 합침 |
+
 ## v0.118.3-ko.24 (2026-10-08)
 
 | 커밋 | 내용 |
 |---|---|
-| [`5edd8e7`](https://github.com/fharenheit/termux-app/commit/5edd8e7) | Changed: `FEATURES.md`에 특수 키 아래 이름과 기본 스니펫 반영 |
-| [`04fceb9`](https://github.com/fharenheit/termux-app/commit/04fceb9) | Added: 기본 스니펫에 Git 강제 되돌리기/강제 pull/특정 커밋으로 되돌리기, 이름으로 찾기, 내 프로세스, 내 포트와 PID |
-| [`2bc68d7`](https://github.com/fharenheit/termux-app/commit/2bc68d7) | Added: 스니펫 명령의 `<NAME>`, `<NAME=기본값>`을 누를 때 입력받는 창(보낼 명령 미리 보기, 실행/입력만, 마지막 값 기억). 기본 스니펫이 메시지·해시·사용자 이름 등을 입력받도록 바꾸고 `git revert <HASH>` 추가, 예전 기본 명령 자동 변경 |
-| (이 릴리즈 커밋) | Added: v0.118.3-ko.24 릴리즈 노트와 이력 |
+| [`5edd8e7`](https://github.com/fharenheit/termux-app/commit/5edd8e7) | Changed: FEATURES.md에 특수 키 설명과 기본 스니펫 반영 |
+| [`cda7f90`](https://github.com/fharenheit/termux-app/commit/cda7f90) | Fixed: "접속 후 실행할 명령"이 있는 호스트에서 호스트 키 확인과 공개 키 설치가 `Cannot execute command-line and remote command`로 실패하던 문제(RemoteCommand 끄고 실행) |
+| [`258e9bb`](https://github.com/fharenheit/termux-app/commit/258e9bb) | Added: 화면과 함께 보는 사용 설명서(`custom/docs/manual`, 한국어/English)와 스크린샷을 다시 찍는 스크립트 |
+| [`01bc747`](https://github.com/fharenheit/termux-app/commit/01bc747) | Added: v0.118.3-ko.24 릴리즈 노트와 이력 |
 
 ## v0.118.3-ko.23 (2026-10-08)
 

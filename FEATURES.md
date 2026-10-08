@@ -2,6 +2,7 @@
 
 이 포크(fharenheit/termux-app)에서 쓸 수 있는 기능 전체입니다. 업스트림 Termux v0.118.3의 기능 위에 이 포크의 기능이 더해져 있습니다.
 
+- 화면과 함께 보는 사용 설명서는 [custom/docs/manual](custom/docs/manual/ko/README.md)에 있습니다([English](custom/docs/manual/en/README.md)).
 - 구현 방식과 수정한 파일은 [custom/README.md](custom/README.md)에 있습니다.
 - 릴리즈별 변경은 [history.md](history.md)에 있습니다.
 

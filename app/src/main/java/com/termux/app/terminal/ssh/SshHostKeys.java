@@ -86,8 +86,10 @@ public final class SshHostKeys {
 
         File temp = File.createTempFile("known_hosts", null, context.getCacheDir());
         try {
-            // Logging in fails without authentication methods, after the key was written.
+            // Logging in fails without authentication methods, after the key was written. A RemoteCommand
+            // of the host (its startup command) can't be used with the command given here.
             Result fetch = run(context, Arrays.asList(bin("ssh"), "-o", "BatchMode=yes", "-o", "PreferredAuthentications=none",
+                "-o", "RemoteCommand=none", "-o", "RequestTTY=no",
                 "-o", "StrictHostKeyChecking=accept-new", "-o", "UserKnownHostsFile=" + temp.getAbsolutePath(),
                 "-o", "GlobalKnownHostsFile=/dev/null", "-o", "ControlPath=none", "-o", "ConnectTimeout=15",
                 "-o", "LogLevel=ERROR", hostName, "true"));
