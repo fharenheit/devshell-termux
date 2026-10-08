@@ -7,6 +7,14 @@
 - **Added**: 새 기능, **Changed**: 동작·문서·패치 변경, **Fixed**: 버그 수정
 - "패치 갱신" 커밋은 업스트림 파일을 고친 커밋 뒤에 `custom/update-patches.sh`로 `custom/patches/`를 다시 만든 것입니다.
 
+## v0.118.3-ko.18 (2026-10-08)
+
+| 커밋 | 내용 |
+|---|---|
+| [`2028cbd`](https://github.com/fharenheit/termux-app/commit/2028cbd) | Added: 기본 extra keys에 ⧉ COPY(선택 복사, 위로 밀면 화면 복사)와 ⎘ PASTE 추가, Ctrl+Shift+C도 같은 방식. SFTP 편집기 툴바에 잘라내기/복사/붙여넣기/전체 선택(선택이 없으면 현재 줄, 각각 Undo 한 단계) |
+| [`d499700`](https://github.com/fharenheit/termux-app/commit/d499700) | Changed: 패치 갱신(`0021`)과 문서 |
+| (이 릴리즈 커밋) | Added: v0.118.3-ko.18 릴리즈 노트와 이력 |
+
 ## v0.118.3-ko.17 (2026-10-08)
 
 | 커밋 | 내용 |
@@ -19,7 +27,7 @@
 | [`004b62e`](https://github.com/fharenheit/termux-app/commit/004b62e) | Added: SFTP 여러 개 선택(다운로드/삭제/권한), 폴더 다운로드·업로드, 권한(chmod) 대화상자, 호스트별 폴더 즐겨찾기 |
 | [`aeb6988`](https://github.com/fharenheit/termux-app/commit/aeb6988) | Changed: 패치 갱신(`0018`~`0020`)과 문서 |
 | [`b492c3e`](https://github.com/fharenheit/termux-app/commit/b492c3e) | Added: SSH 탭의 포트 포워딩 목록과 포트 열림 상태, 로컬 포트를 브라우저로 열기, 접속 중 `ssh -O forward/cancel`로 추가·중지 |
-| (이 릴리즈 커밋) | Added: v0.118.3-ko.17 릴리즈 노트와 이 이력 |
+| [`4d0edbe`](https://github.com/fharenheit/termux-app/commit/4d0edbe) | Added: v0.118.3-ko.17 릴리즈 노트와 이력 |
 
 ## v0.118.3-ko.16 (2026-10-08)
 
