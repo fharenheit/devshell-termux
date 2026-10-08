@@ -1,0 +1,44 @@
+From 5766b1c6fac07120a6b54a611bca9cda79a98fe8 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Thu, 8 Oct 2026 02:01:32 +0000
+Subject: [PATCH] Added: Browse files of SSH hosts over SFTP
+
+Browse the files of an SSH host from an ssh tab or the host menu
+("Browse files"): navigate, sort, show hidden files, view images with
+zoom and previous/next, view and edit text files with conflict checks
+and atomic saves, upload, download to the Download directory, rename,
+delete, create folders and files, and show properties.
+
+The browser runs the sftp subsystem over the connection sharing socket
+of the ssh tab, so it does not log in again, and speaks SFTP v3 itself
+with pipelined transfers.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01GLNsTPnn2xKUQ4uFcevT6G
+---
+ app/src/main/AndroidManifest.xml | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/app/src/main/AndroidManifest.xml b/app/src/main/AndroidManifest.xml
+index 992de63..485da2b 100644
+--- a/app/src/main/AndroidManifest.xml
++++ b/app/src/main/AndroidManifest.xml
+@@ -96,6 +96,15 @@
+             android:label="@string/title_activity_termux_settings"
+             android:theme="@style/Theme.AppCompat.Light.DarkActionBar" />
+ 
++        <activity
++            android:name=".app.terminal.sftp.SftpBrowserActivity"
++            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden"
++            android:exported="false"
++            android:label="@string/action_sftp_browse_files"
++            android:resizeableActivity="true"
++            android:theme="@android:style/Theme.Material"
++            android:windowSoftInputMode="adjustResize" />
++
+         <activity
+             android:name=".shared.activities.ReportActivity"
+             android:theme="@style/Theme.AppCompat.TermuxReportActivity"
+-- 
+2.43.0
+
