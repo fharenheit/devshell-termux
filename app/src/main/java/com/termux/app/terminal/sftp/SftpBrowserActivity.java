@@ -88,6 +88,7 @@ public class SftpBrowserActivity extends Activity {
 
     public static final String EXTRA_HOST = "com.termux.app.terminal.sftp.extra.HOST";
     public static final String EXTRA_CONTROL_PATH = "com.termux.app.terminal.sftp.extra.CONTROL_PATH";
+    private static final String EXTRA_SHOW_TRANSFERS = "com.termux.app.terminal.sftp.extra.SHOW_TRANSFERS";
 
     private static final int MODE_BROWSER = 0;
     private static final int MODE_IMAGE = 1;
@@ -104,10 +105,17 @@ public class SftpBrowserActivity extends Activity {
 
     /** Open the files of a host, over the connection of an ssh tab if its socket is given. */
     public static void start(@NonNull Context context, @NonNull String hostName, @Nullable String controlPath) {
+        context.startActivity(newIntent(context, hostName, controlPath, false));
+    }
+
+    /** An intent to open the files of a host, showing its transfers if {@code showTransfers}. */
+    @NonNull
+    static Intent newIntent(@NonNull Context context, @NonNull String hostName, @Nullable String controlPath, boolean showTransfers) {
         Intent intent = new Intent(context, SftpBrowserActivity.class);
         intent.putExtra(EXTRA_HOST, hostName);
         if (controlPath != null) intent.putExtra(EXTRA_CONTROL_PATH, controlPath);
-        context.startActivity(intent);
+        if (showTransfers) intent.putExtra(EXTRA_SHOW_TRANSFERS, true);
+        return intent;
     }
 
     /** A file of the listed directory. */
@@ -125,6 +133,19 @@ public class SftpBrowserActivity extends Activity {
     }
 
     private String mHostName;
+    @Nullable private String mControlPath;
+    private SftpTransfers mTransfers;
+    private final SftpTransfers.Listener mTransfersListener = new SftpTransfers.Listener() {
+        @Override
+        public void onTransfersChanged() {
+            invalidateOptionsMenu();
+        }
+
+        @Override
+        public void onTransferFinished(@NonNull SftpTransfers.Transfer transfer) {
+            onTransferDone(transfer);
+        }
+    };
     private SftpConnection mConnection;
     private final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
     private final Handler mHandler = new Handler(Looper.getMainLooper());
@@ -169,11 +190,15 @@ public class SftpBrowserActivity extends Activity {
             finish();
             return;
         }
-        mConnection = new SftpConnection(this, mHostName, getIntent().getStringExtra(EXTRA_CONTROL_PATH));
+        mControlPath = getIntent().getStringExtra(EXTRA_CONTROL_PATH);
+        mConnection = new SftpConnection(this, mHostName, mControlPath);
+        mTransfers = SftpTransfers.get(this);
+        mTransfers.addListener(mTransfersListener);
         setTitle(mHostName);
         buildViews();
         showMode(MODE_BROWSER);
         loadDirectory(".");
+        if (savedInstanceState == null && getIntent().getBooleanExtra(EXTRA_SHOW_TRANSFERS, false)) showTransfers();
     }
 
     @Override
@@ -186,6 +211,7 @@ public class SftpBrowserActivity extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (mTransfers != null) mTransfers.removeListener(mTransfersListener);
         if (mConnection != null) mExecutor.execute(() -> mConnection.disconnect());
         mExecutor.shutdown();
     }
@@ -759,26 +785,19 @@ public class SftpBrowserActivity extends Activity {
         downloadPath(item.path, item.entry.attributes.size);
     }
 
-    /** Download a file to the Download directory. */
+    /** Download a file to the Download directory in the background. */
     private void downloadPath(@NonNull String path, long size) {
         if (!ensureDownloadPermission()) return;
         String name = SftpPaths.name(path);
-        String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(SftpText.getExtension(name));
-        final String[] savedPath = new String[1];
-        runTransfer(getString(R.string.sftp_downloading, name), size, (client, listener, cancelled) -> {
-            DownloadsDirectory.NewFile file = DownloadsDirectory.createNewFile(this, name, mimeType != null ? mimeType : "application/octet-stream");
-            try {
-                client.read(path, file.out, Long.MAX_VALUE, listener, cancelled);
-                file.out.close();
-                savedPath[0] = file.displayPath;
-            } catch (IOException e) {
-                // Do not leave a partial file.
-                file.delete();
-                throw e;
-            }
-        }, () -> {
-            if (savedPath[0] != null) Toast.makeText(this, getString(R.string.sftp_downloaded, savedPath[0]), Toast.LENGTH_LONG).show();
-        });
+        enqueue(getString(R.string.sftp_downloading, name), size, null, Collections.emptyList(),
+            SftpTransfers.download(Collections.singletonList(new SftpTransfers.DownloadItem(path, name, false, size))));
+    }
+
+    /** Queue a transfer of this host, and say so. */
+    private void enqueue(@NonNull String title, long total, @Nullable String remoteDir, @NonNull List<Uri> grantedUris,
+                         @NonNull SftpTransfers.Job job) {
+        mTransfers.enqueue(mHostName, mControlPath, title, total, remoteDir, grantedUris, job);
+        Toast.makeText(this, getString(R.string.sftp_transfer_queued_toast, title), Toast.LENGTH_SHORT).show();
     }
 
     private void startUpload() {
@@ -809,21 +828,8 @@ public class SftpBrowserActivity extends Activity {
         if (!uris.isEmpty()) upload(uris, mPath);
     }
 
-    /** A file to upload, with the name and size the document provider reports. */
-    private static final class Upload {
-        final Uri uri;
-        final String name;
-        final long size;
-
-        Upload(Uri uri, String name, long size) {
-            this.uri = uri;
-            this.name = name;
-            this.size = size;
-        }
-    }
-
     private void upload(@NonNull List<Uri> uris, @NonNull String dir) {
-        List<Upload> uploads = new ArrayList<>();
+        List<SftpTransfers.Upload> uploads = new ArrayList<>();
         for (Uri uri : uris) {
             String name = null;
             long size = -1;
@@ -839,12 +845,12 @@ public class SftpBrowserActivity extends Activity {
             }
             if (name == null) name = uri.getLastPathSegment();
             if (name == null || !SftpPaths.isValidName(name)) name = name == null ? "upload" : name.replace('/', '_');
-            uploads.add(new Upload(uri, name, size));
+            uploads.add(new SftpTransfers.Upload(uri, name, size));
         }
         // Ask before replacing existing files.
         runTask(client -> {
             List<String> existing = new ArrayList<>();
-            for (Upload upload : uploads) {
+            for (SftpTransfers.Upload upload : uploads) {
                 try {
                     client.stat(SftpPaths.join(dir, upload.name));
                     existing.add(upload.name);
@@ -862,8 +868,8 @@ public class SftpBrowserActivity extends Activity {
                 .setMessage(getString(R.string.sftp_replace_message, TextUtils.join(", ", existing)))
                 .setPositiveButton(R.string.sftp_action_replace, (d, which) -> doUpload(uploads, dir))
                 .setNeutralButton(R.string.sftp_action_skip, (d, which) -> {
-                    List<Upload> remaining = new ArrayList<>();
-                    for (Upload upload : uploads) if (!existing.contains(upload.name)) remaining.add(upload);
+                    List<SftpTransfers.Upload> remaining = new ArrayList<>();
+                    for (SftpTransfers.Upload upload : uploads) if (!existing.contains(upload.name)) remaining.add(upload);
                     if (!remaining.isEmpty()) doUpload(remaining, dir);
                 })
                 .setNegativeButton(android.R.string.cancel, null)
@@ -871,23 +877,14 @@ public class SftpBrowserActivity extends Activity {
         });
     }
 
-    private void doUpload(@NonNull List<Upload> uploads, @NonNull String dir) {
+    private void doUpload(@NonNull List<SftpTransfers.Upload> uploads, @NonNull String dir) {
         long total = 0;
-        for (Upload upload : uploads) total = upload.size >= 0 && total >= 0 ? total + upload.size : -1;
-        final long totalSize = total;
+        for (SftpTransfers.Upload upload : uploads) total = upload.size >= 0 && total >= 0 ? total + upload.size : -1;
         String title = uploads.size() == 1 ? getString(R.string.sftp_uploading, uploads.get(0).name)
             : getString(R.string.sftp_uploading_files, uploads.size());
-        runTransfer(title, totalSize, (client, listener, cancelled) -> {
-            long done = 0;
-            for (Upload upload : uploads) {
-                final long before = done;
-                try (InputStream in = getContentResolver().openInputStream(upload.uri)) {
-                    if (in == null) throw new IOException("Failed to open " + upload.uri);
-                    done += client.write(SftpPaths.join(dir, upload.name), in, upload.size, 0644, false,
-                        (written, size) -> listener.onProgress(before + written, totalSize), cancelled);
-                }
-            }
-        }, () -> loadDirectory(dir));
+        List<Uri> uris = new ArrayList<>();
+        for (SftpTransfers.Upload upload : uploads) uris.add(upload.uri);
+        enqueue(title, total, dir, uris, SftpTransfers.upload(uploads, dir));
     }
 
     /** Ask for a name, then run {@code action} with it if it is valid. */
@@ -1016,83 +1013,24 @@ public class SftpBrowserActivity extends Activity {
         return items;
     }
 
-    /** A file to download, and the folder in the Download directory it goes to, or null for the Download directory. */
-    private static final class DownloadFile {
-        final String path;
-        @Nullable final String folder;
-        final long size;
-
-        DownloadFile(String path, @Nullable String folder, long size) {
-            this.path = path;
-            this.folder = folder;
-            this.size = size;
-        }
-    }
-
-    /** Add the files of a folder and its subfolders. Symlinks to folders are not followed, so that loops end. */
-    private static void collectFiles(@NonNull SftpClient client, @NonNull String path, @NonNull String folder,
-                                     @NonNull List<DownloadFile> files, @NonNull AtomicBoolean cancelled) throws IOException {
-        for (SftpClient.Entry entry : client.list(path)) {
-            if (cancelled.get()) throw new InterruptedIOException("Cancelled");
-            String childPath = SftpPaths.join(path, entry.name);
-            if (entry.attributes.isDirectory()) {
-                collectFiles(client, childPath, folder + "/" + entry.name, files, cancelled);
-            } else if (entry.attributes.isRegularFile() || entry.attributes.isSymlink()) {
-                long size = entry.attributes.size;
-                if (entry.attributes.isSymlink()) {
-                    try {
-                        SftpClient.Attributes target = client.stat(childPath);
-                        if (!target.isRegularFile()) continue;
-                        size = target.size;
-                    } catch (IOException e) {
-                        continue; // A broken symlink.
-                    }
-                }
-                files.add(new DownloadFile(childPath, folder, size));
-            }
-        }
-    }
-
     /** Download files, and folders with their contents into folders of the same names, to the Download directory. */
     private void downloadItems(@NonNull List<Item> items) {
         if (items.isEmpty() || !ensureDownloadPermission()) return;
-        final String[] result = new String[1];
-        String title = items.size() == 1 ? getString(R.string.sftp_downloading, items.get(0).entry.name)
-            : getString(R.string.sftp_downloading_items, items.size());
-        runTransfer(title, -1, (client, listener, cancelled) -> {
-            List<DownloadFile> files = new ArrayList<>();
-            for (Item item : items) {
-                if (item.isDirectory && !item.entry.attributes.isSymlink()) collectFiles(client, item.path, item.entry.name, files, cancelled);
-                else if (!item.isDirectory) files.add(new DownloadFile(item.path, null, item.entry.attributes.size));
-            }
-            long total = 0;
-            for (DownloadFile file : files) total += Math.max(0, file.size);
-            final long totalSize = total;
-            long done = 0;
-            int count = 0;
-            for (DownloadFile download : files) {
-                String name = SftpPaths.name(download.path);
-                String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(SftpText.getExtension(name));
-                DownloadsDirectory.NewFile file = DownloadsDirectory.createNewFile(this, download.folder, name,
-                    mimeType != null ? mimeType : "application/octet-stream");
-                final long before = done;
-                try {
-                    done += client.read(download.path, file.out, Long.MAX_VALUE,
-                        (read, size) -> listener.onProgress(before + read, totalSize), cancelled);
-                    file.out.close();
-                } catch (IOException e) {
-                    file.delete();
-                    throw e;
-                }
-                count++;
-            }
-            result[0] = getString(R.string.sftp_downloaded_items, count, items.size() == 1 && items.get(0).isDirectory
-                ? "Download/" + items.get(0).entry.name : "Download");
-        }, () -> {
-            if (result[0] != null) Toast.makeText(this, result[0], Toast.LENGTH_LONG).show();
-            mSelection.clear();
-            onSelectionChanged();
-        });
+        List<SftpTransfers.DownloadItem> downloads = new ArrayList<>();
+        long total = 0;
+        for (Item item : items) {
+            boolean folder = item.isDirectory && !item.entry.attributes.isSymlink();
+            // A symlink to a folder is not followed.
+            if (item.isDirectory && !folder) continue;
+            downloads.add(new SftpTransfers.DownloadItem(item.path, item.entry.name, folder, item.entry.attributes.size));
+            total = folder || total < 0 ? -1 : total + item.entry.attributes.size;
+        }
+        if (downloads.isEmpty()) return;
+        String title = downloads.size() == 1 ? getString(R.string.sftp_downloading, downloads.get(0).name)
+            : getString(R.string.sftp_downloading_items, downloads.size());
+        enqueue(title, total, null, Collections.emptyList(), SftpTransfers.download(downloads));
+        mSelection.clear();
+        onSelectionChanged();
     }
 
     private void deleteItems(@NonNull List<Item> items) {
@@ -1133,48 +1071,6 @@ public class SftpBrowserActivity extends Activity {
         }
     }
 
-    /** A file or folder of a picked folder, with its path relative to the picked folder. */
-    private static final class TreeEntry {
-        final Uri uri;
-        final String relativePath;
-        final boolean isDirectory;
-        final long size;
-
-        TreeEntry(Uri uri, String relativePath, boolean isDirectory, long size) {
-            this.uri = uri;
-            this.relativePath = relativePath;
-            this.isDirectory = isDirectory;
-            this.size = size;
-        }
-    }
-
-    /** Add the files and folders under a document of a picked folder, folders before their contents. */
-    private void collectTree(@NonNull Uri treeUri, @NonNull String documentId, @NonNull String relativePath,
-                             @NonNull List<TreeEntry> entries, @NonNull AtomicBoolean cancelled) throws IOException {
-        Uri childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(treeUri, documentId);
-        String[] columns = {DocumentsContract.Document.COLUMN_DOCUMENT_ID, DocumentsContract.Document.COLUMN_DISPLAY_NAME,
-            DocumentsContract.Document.COLUMN_MIME_TYPE, DocumentsContract.Document.COLUMN_SIZE};
-        List<String[]> folders = new ArrayList<>();
-        try (Cursor cursor = getContentResolver().query(childrenUri, columns, null, null, null)) {
-            if (cursor == null) throw new IOException("Failed to list " + relativePath);
-            while (cursor.moveToNext()) {
-                if (cancelled.get()) throw new InterruptedIOException("Cancelled");
-                String id = cursor.getString(0);
-                String name = cursor.getString(1);
-                if (name == null || !SftpPaths.isValidName(name)) continue;
-                String path = relativePath + "/" + name;
-                if (DocumentsContract.Document.MIME_TYPE_DIR.equals(cursor.getString(2))) {
-                    entries.add(new TreeEntry(null, path, true, 0));
-                    folders.add(new String[]{id, path});
-                } else {
-                    long size = cursor.isNull(3) ? -1 : cursor.getLong(3);
-                    entries.add(new TreeEntry(DocumentsContract.buildDocumentUriUsingTree(treeUri, id), path, false, size));
-                }
-            }
-        }
-        for (String[] folder : folders) collectTree(treeUri, folder[0], folder[1], entries, cancelled);
-    }
-
     /** Upload a picked folder with its contents into a directory, merging with a folder of the same name there. */
     private void uploadFolder(@NonNull Uri treeUri, @NonNull String dir) {
         String rootId = DocumentsContract.getTreeDocumentId(treeUri);
@@ -1213,38 +1109,124 @@ public class SftpBrowserActivity extends Activity {
     }
 
     private void doUploadFolder(@NonNull Uri treeUri, @NonNull String rootId, @NonNull String folderName, @NonNull String target) {
-        runTransfer(getString(R.string.sftp_uploading, folderName), -1, (client, listener, cancelled) -> {
-            List<TreeEntry> entries = new ArrayList<>();
-            collectTree(treeUri, rootId, "", entries, cancelled);
-            long total = 0;
-            for (TreeEntry entry : entries) if (!entry.isDirectory) total += Math.max(0, entry.size);
-            final long totalSize = total;
-            mkdirIfMissing(client, target);
-            long done = 0;
-            for (TreeEntry entry : entries) {
-                if (cancelled.get()) throw new InterruptedIOException("Cancelled");
-                String path = target + entry.relativePath;
-                if (entry.isDirectory) {
-                    mkdirIfMissing(client, path);
-                    continue;
-                }
-                final long before = done;
-                try (InputStream in = getContentResolver().openInputStream(entry.uri)) {
-                    if (in == null) throw new IOException("Failed to open " + entry.relativePath);
-                    done += client.write(path, in, entry.size, 0644, false,
-                        (written, size) -> listener.onProgress(before + written, totalSize), cancelled);
-                }
-            }
-        }, () -> loadDirectory(mPath));
+        enqueue(getString(R.string.sftp_uploading, folderName), -1, SftpPaths.parent(target),
+            Collections.singletonList(treeUri), SftpTransfers.uploadFolder(treeUri, rootId, target));
     }
 
-    private static void mkdirIfMissing(@NonNull SftpClient client, @NonNull String path) throws IOException {
-        try {
-            client.mkdir(path);
-        } catch (SftpClient.SftpException e) {
-            // It may exist already, which servers report as a failure.
-            if (!client.stat(path).isDirectory()) throw e;
-        }
+    // Transfers
+
+    /** Tell about a finished transfer of this host, and show the changes of an upload to the shown folder. */
+    private void onTransferDone(@NonNull SftpTransfers.Transfer transfer) {
+        if (!transfer.hostName.equals(mHostName) || isFinishing()) return;
+        if (transfer.getState() == SftpTransfers.DONE && transfer.getMessage() != null)
+            Toast.makeText(this, transfer.getMessage(), Toast.LENGTH_LONG).show();
+        else if (transfer.getState() == SftpTransfers.FAILED)
+            Toast.makeText(this, transfer.describe(this), Toast.LENGTH_LONG).show();
+        if (transfer.remoteDir != null && transfer.remoteDir.equals(mPath) && mMode == MODE_BROWSER) loadDirectory(mPath);
+    }
+
+    /** Show the transfers of all hosts, to follow and cancel them. */
+    private void showTransfers() {
+        List<SftpTransfers.Transfer> shown = new ArrayList<>();
+        BaseAdapter adapter = new BaseAdapter() {
+            @Override
+            public int getCount() {
+                return shown.size();
+            }
+
+            @Override
+            public Object getItem(int position) {
+                return shown.get(position);
+            }
+
+            @Override
+            public long getItemId(int position) {
+                return shown.get(position).id;
+            }
+
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                LinearLayout layout = (LinearLayout) convertView;
+                if (layout == null) {
+                    layout = new LinearLayout(SftpBrowserActivity.this);
+                    layout.setOrientation(LinearLayout.VERTICAL);
+                    layout.setPadding(dp(20), dp(8), dp(20), dp(8));
+                    TextView title = new TextView(SftpBrowserActivity.this);
+                    title.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+                    title.setSingleLine();
+                    title.setEllipsize(TextUtils.TruncateAt.MIDDLE);
+                    layout.addView(title);
+                    ProgressBar progress = new ProgressBar(SftpBrowserActivity.this, null, android.R.attr.progressBarStyleHorizontal);
+                    progress.setMax(1000);
+                    layout.addView(progress);
+                    TextView status = new TextView(SftpBrowserActivity.this);
+                    status.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
+                    status.setAlpha(0.7f);
+                    layout.addView(status);
+                }
+                SftpTransfers.Transfer transfer = shown.get(position);
+                ((TextView) layout.getChildAt(0)).setText(transfer.title);
+                ProgressBar progress = (ProgressBar) layout.getChildAt(1);
+                progress.setVisibility(transfer.getState() == SftpTransfers.RUNNING ? View.VISIBLE : View.GONE);
+                progress.setIndeterminate(transfer.getTotal() <= 0);
+                if (transfer.getTotal() > 0) progress.setProgress((int) Math.min(1000, transfer.getDone() * 1000 / transfer.getTotal()));
+                ((TextView) layout.getChildAt(2)).setText(transfer.hostName + " · " + transfer.describe(SftpBrowserActivity.this));
+                return layout;
+            }
+        };
+        ListView list = new ListView(this);
+        list.setAdapter(adapter);
+        TextView empty = new TextView(this);
+        empty.setText(R.string.sftp_transfers_empty);
+        empty.setPadding(dp(20), dp(16), dp(20), dp(16));
+        FrameLayout frame = new FrameLayout(this);
+        frame.addView(list);
+        frame.addView(empty);
+        list.setEmptyView(empty);
+        Runnable update = () -> {
+            shown.clear();
+            // The newest first.
+            List<SftpTransfers.Transfer> transfers = mTransfers.getTransfers();
+            for (int i = transfers.size() - 1; i >= 0; i--) shown.add(transfers.get(i));
+            adapter.notifyDataSetChanged();
+        };
+        update.run();
+        SftpTransfers.Listener listener = update::run;
+        mTransfers.addListener(listener);
+        list.setOnItemClickListener((parent, view, position, id) -> {
+            SftpTransfers.Transfer transfer = shown.get(position);
+            if (!transfer.isFinished()) {
+                new AlertDialog.Builder(this)
+                    .setMessage(getString(R.string.sftp_transfer_cancel_confirm, transfer.title))
+                    .setPositiveButton(R.string.sftp_transfer_cancel, (d, which) -> mTransfers.cancel(transfer))
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .show();
+            } else if (transfer.getState() == SftpTransfers.FAILED) {
+                new AlertDialog.Builder(this)
+                    .setTitle(transfer.title)
+                    .setMessage(transfer.getMessage())
+                    .setPositiveButton(android.R.string.ok, null)
+                    .show();
+            }
+        });
+        AlertDialog dialog = new AlertDialog.Builder(this)
+            .setTitle(R.string.sftp_action_transfers)
+            .setView(frame)
+            .setPositiveButton(R.string.sftp_action_close, null)
+            .setNeutralButton(R.string.sftp_transfers_clear, null)
+            .setNegativeButton(R.string.sftp_transfers_cancel_all, null)
+            .setOnDismissListener(d -> mTransfers.removeListener(listener))
+            .show();
+        // Keep the dialog open for these.
+        dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(v -> mTransfers.clearFinished());
+        dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener(v -> {
+            if (mTransfers.getActiveCount() == 0) return;
+            new AlertDialog.Builder(this)
+                .setMessage(R.string.sftp_transfers_cancel_all_confirm)
+                .setPositiveButton(R.string.sftp_transfers_cancel_all, (d, which) -> mTransfers.cancelAll())
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+        });
     }
 
     // Bookmarks
@@ -1318,6 +1300,7 @@ public class SftpBrowserActivity extends Activity {
     private static final int MENU_SELECTION_DELETE = 34;
     private static final int MENU_SELECTION_PERMISSIONS = 35;
     private static final int MENU_SELECTION_CLEAR = 36;
+    private static final int MENU_TRANSFERS = 37;
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
@@ -1333,6 +1316,9 @@ public class SftpBrowserActivity extends Activity {
                     break;
                 }
                 menu.add(Menu.NONE, MENU_BOOKMARKS, Menu.NONE, R.string.sftp_action_bookmarks);
+                int active = mTransfers.getActiveCount();
+                menu.add(Menu.NONE, MENU_TRANSFERS, Menu.NONE, active > 0
+                    ? getString(R.string.sftp_action_transfers_count, active) : getString(R.string.sftp_action_transfers));
                 menu.add(Menu.NONE, MENU_REFRESH, Menu.NONE, R.string.sftp_action_refresh);
                 menu.add(Menu.NONE, MENU_GO_TO, Menu.NONE, R.string.sftp_action_go_to);
                 menu.add(Menu.NONE, MENU_NEW_FOLDER, Menu.NONE, R.string.sftp_action_new_folder);
@@ -1371,6 +1357,7 @@ public class SftpBrowserActivity extends Activity {
             case MENU_UPLOAD: startUpload(); return true;
             case MENU_UPLOAD_FOLDER: startUploadFolder(); return true;
             case MENU_BOOKMARKS: showBookmarks(); return true;
+            case MENU_TRANSFERS: showTransfers(); return true;
             case MENU_SELECT_ALL:
                 for (Item selected : mItems) mSelection.add(selected.path);
                 onSelectionChanged();

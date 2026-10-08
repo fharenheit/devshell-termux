@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sftp_transfer_queued">待機中</string>
+    <string name="sftp_transfer_done">完了</string>
+    <string name="sftp_transfer_failed">失敗: %1$s</string>
+    <string name="sftp_transfer_queued_toast">転送に追加しました: %1$s</string>
+    <string name="sftp_uploaded">%1$d 個のファイルを %2$s にアップロードしました</string>
+    <string name="sftp_transfers_channel">SFTP 転送</string>
+    <string name="sftp_transfers_waiting">転送を待機中</string>
+    <string name="sftp_transfers_cancel_all">すべてキャンセル</string>
+    <string name="sftp_transfers_finished">転送が完了しました</string>
+    <string name="sftp_transfers_summary">%1$d 件完了</string>
+    <string name="sftp_transfers_summary_failed">%1$d 件完了、%2$d 件失敗</string>
+    <string name="sftp_action_transfers">転送</string>
+    <string name="sftp_action_transfers_count">転送 (%1$d)</string>
+    <string name="sftp_transfers_empty">転送はありません</string>
+    <string name="sftp_transfer_cancel_confirm">%1$s を中止しますか?</string>
+    <string name="sftp_transfer_cancel">中止</string>
+    <string name="sftp_transfers_clear">完了分を消去</string>
+    <string name="sftp_transfers_cancel_all_confirm">待機中と実行中の転送をすべてキャンセルしますか?</string>
+    <plurals name="sftp_transfers_active">
+        <item quantity="other">転送 %1$d 件</item>
+    </plurals>
+</resources>

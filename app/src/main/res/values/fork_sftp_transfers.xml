@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sftp_transfer_queued">Waiting</string>
+    <string name="sftp_transfer_done">Done</string>
+    <string name="sftp_transfer_failed">Failed: %1$s</string>
+    <string name="sftp_transfer_queued_toast">Added to transfers: %1$s</string>
+    <string name="sftp_uploaded">Uploaded %1$d files to %2$s</string>
+    <string name="sftp_transfers_channel">SFTP transfers</string>
+    <string name="sftp_transfers_waiting">Waiting for transfers</string>
+    <string name="sftp_transfers_cancel_all">Cancel all</string>
+    <string name="sftp_transfers_finished">Transfers finished</string>
+    <string name="sftp_transfers_summary">%1$d done</string>
+    <string name="sftp_transfers_summary_failed">%1$d done, %2$d failed</string>
+    <string name="sftp_action_transfers">Transfers</string>
+    <string name="sftp_action_transfers_count">Transfers (%1$d)</string>
+    <string name="sftp_transfers_empty">No transfers</string>
+    <string name="sftp_transfer_cancel_confirm">Stop %1$s?</string>
+    <string name="sftp_transfer_cancel">Stop</string>
+    <string name="sftp_transfers_clear">Clear finished</string>
+    <string name="sftp_transfers_cancel_all_confirm">Cancel all queued and running transfers?</string>
+    <plurals name="sftp_transfers_active">
+        <item quantity="one">%1$d transfer</item>
+        <item quantity="other">%1$d transfers</item>
+    </plurals>
+</resources>
