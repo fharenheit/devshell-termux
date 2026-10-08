@@ -53,6 +53,12 @@
 |---|---|
 | 설정 내보내기/가져오기(⚙ 메뉴): `Download/termux-settings-*.zip`에 termux.properties, colors, SSH 호스트, 스니펫, 앱 설정, 글꼴 저장(SSH 비밀번호 제외). 가져올 때 기존 파일은 `~/.termux/backup/`에 백업 | `custom/patches/0012-*.patch` (`TermuxActivity.java`) + `app/.../terminal/backup/` |
 
+### 언어
+
+| 내용 | 위치 |
+|---|---|
+| 앱 언어 선택(설정 → Language, ⚙ 메뉴 → Language): 시스템 기본값, English, 한국어, 日本語, 中文(简体). 화면·서비스·앱의 기본 context를 고른 언어로 감싸고(`AppLocale.wrap`), 바꾸면 화면을 다시 만듦. 설정에서 바꾸면 터미널 화면은 돌아올 때 다시 만듦. 시스템 기본값이면 기기 언어를 따름(한국어 기기는 한국어). 번역은 `values-ko`, `values-ja`, `values-zh`(포크 전용 파일), 명령·경로·설정 이름·키 이름·제품 이름은 번역하지 않음. `TranslationsTest`가 번역마다 문자열과 `%1$s` 같은 자리 표시자가 영어와 같은지 확인 | `custom/patches/0023-*.patch` (각 Activity·`TermuxService`·`TermuxApplication`의 `attachBaseContext`, `TermuxActivity.onStart`, `root_preferences.xml`, `SettingsActivity.java`) + `termux-shared/.../locale/AppLocale.java`, `app/.../language/`, `values-ko`/`values-ja`/`values-zh` |
+
 ### 저장소와 빌드
 
 | 내용 | 위치 |
