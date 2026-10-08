@@ -131,6 +131,15 @@
   - 여러 줄 명령
   - 특정 SSH 호스트 탭에서만 보이기
 - `~/.termux/snippets.json`에 저장되고, 설정 내보내기에 포함됩니다.
+- **기본 스니펫**: 처음 열면 아래 스니펫이 들어 있습니다. 지워도 되고, 스니펫 창의 **기본** 버튼으로 묶음을 골라 다시 추가할 수 있습니다(이미 있는 명령은 건너뜀).
+
+  | 묶음 | 명령 |
+  |---|---|
+  | Git | `git status -sb`, `git log --oneline --graph --decorate -20`, `git diff --stat`, `git branch -vv`, `git pull --rebase`, `git push`, `git commit -am `(메시지 입력), `git stash list` |
+  | 시스템 상태 | `df -h`, `free -h`, 큰 폴더(`du -sh * \| sort -h \| tail -20`), CPU/메모리 상위 프로세스(`ps … --sort`), `top`, `ss -tulpn`, `uptime`, `uname -a` |
+  | Termux | `pkg update && pkg upgrade -y`, `termux-setup-storage`, `termux-change-repo`, `pkg install `(이름 입력) |
+  | tmux | `tmux new -A -s main`, `tmux ls` |
+
 
 ### 클립보드 기록 (⚙ → Clipboard history, Ctrl+Shift+H, ⎘ 위로 밀기, `CLIPBOARD` 키)
 - 최근 복사한 글 20개를 보관합니다. 앱 안팎에서 복사한 것 모두 해당합니다.

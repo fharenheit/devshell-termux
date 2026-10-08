@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="action_snippet_defaults">デフォルト</string>
+    <string name="title_snippet_defaults">デフォルトのスニペットを追加</string>
+    <string name="snippet_group_git">Git</string>
+    <string name="snippet_group_system">システム状態</string>
+    <string name="snippet_group_termux">Termux</string>
+    <string name="snippet_group_tmux">tmux</string>
+    <string name="snippet_git_status">Git ステータス</string>
+    <string name="snippet_git_log">Git ログ(グラフ)</string>
+    <string name="snippet_git_diff">Git 変更内容</string>
+    <string name="snippet_git_branches">Git ブランチ</string>
+    <string name="snippet_git_pull">Git プル</string>
+    <string name="snippet_git_push">Git プッシュ</string>
+    <string name="snippet_git_commit">Git コミット(メッセージ入力)</string>
+    <string name="snippet_git_stash">Git stash 一覧</string>
+    <string name="snippet_system_disk">ディスク使用量</string>
+    <string name="snippet_system_memory">メモリ</string>
+    <string name="snippet_system_big_folders">このフォルダの大きい項目</string>
+    <string name="snippet_system_top_cpu">CPU 使用率の高いプロセス</string>
+    <string name="snippet_system_top_memory">メモリ使用量の多いプロセス</string>
+    <string name="snippet_system_processes">プロセス(top)</string>
+    <string name="snippet_system_ports">待ち受けポート</string>
+    <string name="snippet_system_uptime">稼働時間と負荷</string>
+    <string name="snippet_system_info">システム情報</string>
+    <string name="snippet_termux_upgrade">パッケージ更新</string>
+    <string name="snippet_termux_storage">ストレージ権限</string>
+    <string name="snippet_termux_mirror">ミラー変更</string>
+    <string name="snippet_termux_install">パッケージをインストール(名前入力)</string>
+    <string name="snippet_tmux_attach">tmux に接続または新規作成</string>
+    <string name="snippet_tmux_list">tmux セッション一覧</string>
+    <plurals name="msg_snippet_defaults_added">
+        <item quantity="other">スニペットを %1$d 件追加しました</item>
+    </plurals>
+</resources>

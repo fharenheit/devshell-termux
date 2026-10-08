@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="action_snippet_defaults">Defaults</string>
+    <string name="title_snippet_defaults">Add default snippets</string>
+    <string name="snippet_group_git">Git</string>
+    <string name="snippet_group_system">System status</string>
+    <string name="snippet_group_termux">Termux</string>
+    <string name="snippet_group_tmux">tmux</string>
+    <string name="snippet_git_status">Git status</string>
+    <string name="snippet_git_log">Git log graph</string>
+    <string name="snippet_git_diff">Git changes</string>
+    <string name="snippet_git_branches">Git branches</string>
+    <string name="snippet_git_pull">Git pull</string>
+    <string name="snippet_git_push">Git push</string>
+    <string name="snippet_git_commit">Git commit (type message)</string>
+    <string name="snippet_git_stash">Git stash list</string>
+    <string name="snippet_system_disk">Disk usage</string>
+    <string name="snippet_system_memory">Memory</string>
+    <string name="snippet_system_big_folders">Largest folders here</string>
+    <string name="snippet_system_top_cpu">Top CPU processes</string>
+    <string name="snippet_system_top_memory">Top memory processes</string>
+    <string name="snippet_system_processes">Processes (top)</string>
+    <string name="snippet_system_ports">Listening ports</string>
+    <string name="snippet_system_uptime">Uptime and load</string>
+    <string name="snippet_system_info">System info</string>
+    <string name="snippet_termux_upgrade">Update packages</string>
+    <string name="snippet_termux_storage">Storage permission</string>
+    <string name="snippet_termux_mirror">Change mirror</string>
+    <string name="snippet_termux_install">Install package (type name)</string>
+    <string name="snippet_tmux_attach">tmux attach or new</string>
+    <string name="snippet_tmux_list">tmux sessions</string>
+    <plurals name="msg_snippet_defaults_added">
+        <item quantity="one">Added %1$d snippet</item>
+        <item quantity="other">Added %1$d snippets</item>
+    </plurals>
+</resources>

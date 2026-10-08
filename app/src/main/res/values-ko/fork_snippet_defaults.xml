@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="action_snippet_defaults">기본</string>
+    <string name="title_snippet_defaults">기본 스니펫 추가</string>
+    <string name="snippet_group_git">Git</string>
+    <string name="snippet_group_system">시스템 상태</string>
+    <string name="snippet_group_termux">Termux</string>
+    <string name="snippet_group_tmux">tmux</string>
+    <string name="snippet_git_status">Git 상태</string>
+    <string name="snippet_git_log">Git 로그 그래프</string>
+    <string name="snippet_git_diff">Git 변경 내용</string>
+    <string name="snippet_git_branches">Git 브랜치</string>
+    <string name="snippet_git_pull">Git 받기(pull)</string>
+    <string name="snippet_git_push">Git 올리기(push)</string>
+    <string name="snippet_git_commit">Git 커밋(메시지 입력)</string>
+    <string name="snippet_git_stash">Git stash 목록</string>
+    <string name="snippet_system_disk">디스크 사용량</string>
+    <string name="snippet_system_memory">메모리</string>
+    <string name="snippet_system_big_folders">이 폴더의 큰 항목</string>
+    <string name="snippet_system_top_cpu">CPU 많이 쓰는 프로세스</string>
+    <string name="snippet_system_top_memory">메모리 많이 쓰는 프로세스</string>
+    <string name="snippet_system_processes">프로세스(top)</string>
+    <string name="snippet_system_ports">열린 포트</string>
+    <string name="snippet_system_uptime">가동 시간과 부하</string>
+    <string name="snippet_system_info">시스템 정보</string>
+    <string name="snippet_termux_upgrade">패키지 업데이트</string>
+    <string name="snippet_termux_storage">저장소 권한</string>
+    <string name="snippet_termux_mirror">미러 변경</string>
+    <string name="snippet_termux_install">패키지 설치(이름 입력)</string>
+    <string name="snippet_tmux_attach">tmux 세션 붙기/만들기</string>
+    <string name="snippet_tmux_list">tmux 세션 목록</string>
+    <plurals name="msg_snippet_defaults_added">
+        <item quantity="other">스니펫 %1$d개를 추가했습니다</item>
+    </plurals>
+</resources>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="action_snippet_defaults">默认</string>
+    <string name="title_snippet_defaults">添加默认片段</string>
+    <string name="snippet_group_git">Git</string>
+    <string name="snippet_group_system">系统状态</string>
+    <string name="snippet_group_termux">Termux</string>
+    <string name="snippet_group_tmux">tmux</string>
+    <string name="snippet_git_status">Git 状态</string>
+    <string name="snippet_git_log">Git 日志图</string>
+    <string name="snippet_git_diff">Git 变更</string>
+    <string name="snippet_git_branches">Git 分支</string>
+    <string name="snippet_git_pull">Git 拉取</string>
+    <string name="snippet_git_push">Git 推送</string>
+    <string name="snippet_git_commit">Git 提交(输入说明)</string>
+    <string name="snippet_git_stash">Git stash 列表</string>
+    <string name="snippet_system_disk">磁盘用量</string>
+    <string name="snippet_system_memory">内存</string>
+    <string name="snippet_system_big_folders">此文件夹中的大项目</string>
+    <string name="snippet_system_top_cpu">CPU 占用最高的进程</string>
+    <string name="snippet_system_top_memory">内存占用最高的进程</string>
+    <string name="snippet_system_processes">进程(top)</string>
+    <string name="snippet_system_ports">监听端口</string>
+    <string name="snippet_system_uptime">运行时间和负载</string>
+    <string name="snippet_system_info">系统信息</string>
+    <string name="snippet_termux_upgrade">更新软件包</string>
+    <string name="snippet_termux_storage">存储权限</string>
+    <string name="snippet_termux_mirror">更换镜像</string>
+    <string name="snippet_termux_install">安装软件包(输入名称)</string>
+    <string name="snippet_tmux_attach">tmux 连接或新建</string>
+    <string name="snippet_tmux_list">tmux 会话列表</string>
+    <plurals name="msg_snippet_defaults_added">
+        <item quantity="other">已添加 %1$d 个片段</item>
+    </plurals>
+</resources>

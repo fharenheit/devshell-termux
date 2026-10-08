@@ -48,13 +48,21 @@ public final class SnippetsDialog {
     public static void show(@NonNull TermuxActivity activity) {
         TerminalSession session = activity.getCurrentSession();
         String hostName = SshConnector.getHostName(session);
-        List<Snippet> all = SnippetStore.load();
+        List<Snippet> all;
+        if (SnippetStore.SNIPPETS_FILE.exists()) {
+            all = SnippetStore.load();
+        } else {
+            // Start with the default snippets, saved so that deleting one keeps it deleted.
+            all = SnippetDefaults.create(activity);
+            save(activity, all);
+        }
         List<Snippet> items = SnippetStore.getFor(all, hostName);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(activity)
             .setTitle(hostName == null ? activity.getString(R.string.title_snippets)
                 : activity.getString(R.string.title_snippets_for_host, hostName))
             .setNeutralButton(R.string.action_snippet_add, (d, which) -> showEditDialog(activity, all, null))
+            .setPositiveButton(R.string.action_snippet_defaults, (d, which) -> showDefaultsDialog(activity, all))
             .setNegativeButton(R.string.action_snippets_close, null);
         if (items.isEmpty()) {
             builder.setMessage(R.string.msg_snippets_empty).show();
@@ -91,6 +99,32 @@ public final class SnippetsDialog {
                 return true;
             });
         }
+    }
+
+    /** Choose groups of default snippets to add, skipping the commands that are already saved. */
+    private static void showDefaultsDialog(@NonNull TermuxActivity activity, @NonNull List<Snippet> all) {
+        List<SnippetDefaults.Group> groups = SnippetDefaults.GROUPS;
+        CharSequence[] names = new CharSequence[groups.size()];
+        boolean[] checked = new boolean[groups.size()];
+        for (int i = 0; i < groups.size(); i++) {
+            SnippetDefaults.Group group = groups.get(i);
+            names[i] = activity.getString(group.nameId) + " (" + group.items.size() + ")";
+            checked[i] = true;
+        }
+        new AlertDialog.Builder(activity)
+            .setTitle(R.string.title_snippet_defaults)
+            .setMultiChoiceItems(names, checked, (d, which, isChecked) -> checked[which] = isChecked)
+            .setPositiveButton(R.string.action_snippet_add, (d, which) -> {
+                List<SnippetDefaults.Group> chosen = new ArrayList<>();
+                for (int i = 0; i < groups.size(); i++) if (checked[i]) chosen.add(groups.get(i));
+                int added = SnippetDefaults.addMissing(all, SnippetDefaults.create(activity, chosen));
+                if (added > 0 && !save(activity, all)) return;
+                Toast.makeText(activity, activity.getResources().getQuantityString(R.plurals.msg_snippet_defaults_added, added, added),
+                    Toast.LENGTH_SHORT).show();
+                show(activity);
+            })
+            .setNegativeButton(android.R.string.cancel, (d, which) -> show(activity))
+            .show();
     }
 
     /** Type a snippet into the current tab. */
