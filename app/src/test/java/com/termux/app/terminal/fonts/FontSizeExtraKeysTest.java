@@ -32,6 +32,7 @@ public class FontSizeExtraKeysTest {
         Assert.assertEquals("FONT_SMALLER", matrix[1][7].getKey());
         Assert.assertEquals("A−", matrix[1][7].getDisplay());
         Assert.assertEquals("PASTE", matrix[1][8].getKey());
+        Assert.assertEquals("CLIPBOARD", matrix[1][8].getPopup().getKey());
         Assert.assertEquals("⎘", matrix[1][8].getDisplay());
         Assert.assertEquals("KEYBOARD", matrix[1][9].getKey());
     }

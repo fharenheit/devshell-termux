@@ -9,6 +9,7 @@ import com.termux.R;
 import com.termux.app.TermuxActivity;
 import com.termux.app.terminal.TermuxTerminalSessionClient;
 import com.termux.app.terminal.TermuxTerminalViewClient;
+import com.termux.app.terminal.clipboard.ClipboardHistory;
 import com.termux.app.terminal.clipboard.TerminalClipboard;
 import com.termux.app.terminal.snippets.SnippetsDialog;
 import com.termux.terminal.TerminalSession;
@@ -27,6 +28,7 @@ import com.termux.terminal.TerminalSession;
  * Ctrl+0                      the current tab at the saved text size
  * Ctrl+Shift+F                find in the terminal output
  * Ctrl+Shift+S                snippets
+ * Ctrl+Shift+H                clipboard history
  * </pre>
  */
 public final class TerminalKeyboardShortcuts {
@@ -85,6 +87,9 @@ public final class TerminalKeyboardShortcuts {
             case KeyEvent.KEYCODE_F:
                 if (!repeat && activity.getTerminalTabsController() != null)
                     activity.getTerminalTabsController().getSearchBar().show();
+                return true;
+            case KeyEvent.KEYCODE_H:
+                if (!repeat) ClipboardHistory.show(activity);
                 return true;
             case KeyEvent.KEYCODE_S:
                 if (!repeat) SnippetsDialog.show(activity);

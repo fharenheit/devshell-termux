@@ -130,6 +130,7 @@ public class ExtraKeysConstants {
             put("SPECIAL_KEYS", "⊞"); // U+229E SQUARED PLUS, the panel of special keys
             put("COPY", "⧉"); // U+29C9 TWO JOINED SQUARES, copy the selection
             put("COPY_SCREEN", "⧉ all"); // Copy the screen
+            put("CLIPBOARD", "⎘ …"); // The clipboard history
         }};
 
         /**
@@ -189,6 +190,7 @@ public class ExtraKeysConstants {
             put("PASTE", "⎘\nPaste");
             put("COPY", "⧉\nCopy");
             put("COPY_SCREEN", "⧉\nScreen");
+            put("CLIPBOARD", "⎘\nHistory");
             put("FONT_LARGER", "A+\nFont");
             put("FONT_SMALLER", "A−\nFont");
             put("SNIPPETS", "⚡\nSnip");

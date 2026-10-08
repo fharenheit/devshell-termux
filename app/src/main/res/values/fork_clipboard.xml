@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Strings of the clipboard history. Kept out of upstream files to keep patches small. -->
+<resources>
+    <string name="title_clipboard_history">Clipboard history</string>
+    <string name="msg_clipboard_history_empty">Nothing copied yet. Text copied while Termux is open, or in another app before coming back, is listed here. It is kept only until the app is closed.</string>
+    <string name="action_clipboard_history_close">Close</string>
+    <string name="action_clipboard_history_clear">Clear</string>
+    <string name="clipboard_history_item_size">%1$d characters · %2$d lines</string>
+    <string name="action_clipboard_history_paste">Paste into the tab</string>
+    <string name="action_clipboard_history_copy">Copy to the clipboard</string>
+    <string name="action_clipboard_history_delete">Delete</string>
+    <string name="msg_clipboard_history_copied">Copied</string>
+</resources>

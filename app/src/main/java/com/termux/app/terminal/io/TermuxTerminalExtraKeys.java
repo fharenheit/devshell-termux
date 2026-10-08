@@ -9,6 +9,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.termux.app.terminal.TermuxTerminalSessionClient;
 import com.termux.app.terminal.TermuxTerminalViewClient;
+import com.termux.app.terminal.clipboard.ClipboardHistory;
 import com.termux.app.terminal.clipboard.TerminalClipboard;
 import com.termux.app.terminal.snippets.SnippetsDialog;
 import com.termux.app.terminal.specialkeys.SpecialKeysPanel;
@@ -44,6 +45,8 @@ public class TermuxTerminalExtraKeys extends TerminalExtraKeys {
         } else if ("FONT_LARGER".equals(key) || "FONT_SMALLER".equals(key)) {
             if (mTermuxTerminalViewClient != null)
                 mTermuxTerminalViewClient.changeFontSize("FONT_LARGER".equals(key));
+        } else if ("CLIPBOARD".equals(key)) {
+            if (mTermuxTerminalViewClient != null) ClipboardHistory.show(mTermuxTerminalViewClient.getActivity());
         } else if ("COPY".equals(key) || "COPY_SCREEN".equals(key)) {
             if (mTermuxTerminalViewClient != null) {
                 if ("COPY".equals(key)) TerminalClipboard.copySelection(mTermuxTerminalViewClient.getActivity());

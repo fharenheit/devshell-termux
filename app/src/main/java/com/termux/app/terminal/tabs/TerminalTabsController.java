@@ -32,6 +32,7 @@ import com.termux.app.terminal.fonts.TerminalFontDialog;
 import com.termux.app.terminal.fonts.TerminalFonts;
 import com.termux.app.terminal.sftp.SftpBrowserActivity;
 import com.termux.app.language.LanguageDialog;
+import com.termux.app.terminal.clipboard.ClipboardHistory;
 import com.termux.app.terminal.search.TerminalSearchBar;
 import com.termux.app.terminal.specialkeys.SpecialKeysPanel;
 import com.termux.app.terminal.snippets.SnippetsDialog;
@@ -84,6 +85,7 @@ public class TerminalTabsController {
     }
 
     public TerminalTabsController(@NonNull TermuxActivity activity) {
+        ClipboardHistory.attach(activity, activity.getTerminalView());
         mActivity = activity;
         mTabsBar = activity.findViewById(R.id.terminal_tabs_bar);
         mScrollView = activity.findViewById(R.id.terminal_tabs_scroll_view);
@@ -147,6 +149,7 @@ public class TerminalTabsController {
     private static final int MENU_SNIPPETS = 11;
     private static final int MENU_FIND = 12;
     private static final int MENU_LANGUAGE = 13;
+    private static final int MENU_CLIPBOARD_HISTORY = 14;
 
     /** Show the menu of the settings button of the tab bar. */
     private void showMenu(View anchor) {
@@ -155,6 +158,7 @@ public class TerminalTabsController {
         menu.add(Menu.NONE, MENU_SSH, Menu.NONE, R.string.action_terminal_tabs_menu_ssh);
         menu.add(Menu.NONE, MENU_SNIPPETS, Menu.NONE, R.string.title_snippets);
         menu.add(Menu.NONE, MENU_FIND, Menu.NONE, R.string.action_terminal_search);
+        menu.add(Menu.NONE, MENU_CLIPBOARD_HISTORY, Menu.NONE, R.string.title_clipboard_history);
         menu.add(Menu.NONE, MENU_SETTINGS, Menu.NONE, R.string.action_terminal_tabs_menu_settings);
         menu.add(Menu.NONE, MENU_SESSIONS, Menu.NONE, R.string.action_terminal_tabs_menu_sessions);
         menu.add(Menu.NONE, MENU_KEYBOARD, Menu.NONE, R.string.action_terminal_tabs_menu_keyboard);
@@ -187,6 +191,9 @@ public class TerminalTabsController {
                     LanguageDialog.show(mActivity, service != null ? service.getResources() : null);
                     return true;
                 }
+                case MENU_CLIPBOARD_HISTORY:
+                    ClipboardHistory.show(mActivity);
+                    return true;
                 case MENU_FIND:
                     getSearchBar().show();
                     return true;
