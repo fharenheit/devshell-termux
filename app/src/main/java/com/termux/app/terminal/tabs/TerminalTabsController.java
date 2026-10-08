@@ -27,6 +27,7 @@ import com.termux.app.TermuxActivity;
 import com.termux.app.TermuxService;
 import com.termux.app.activities.SettingsActivity;
 import com.termux.app.terminal.TermuxTerminalSessionClient;
+import com.termux.app.terminal.backup.SettingsBackup;
 import com.termux.app.terminal.fonts.TerminalFontDialog;
 import com.termux.app.terminal.fonts.TerminalFonts;
 import com.termux.app.terminal.ssh.SshConnector;
@@ -117,6 +118,8 @@ public class TerminalTabsController {
     private static final int MENU_RELOAD_SETTINGS = 5;
     private static final int MENU_FONT = 6;
     private static final int MENU_SSH = 7;
+    private static final int MENU_EXPORT_SETTINGS = 8;
+    private static final int MENU_IMPORT_SETTINGS = 9;
 
     /** Show the menu of the settings button of the tab bar. */
     private void showMenu(View anchor) {
@@ -129,6 +132,8 @@ public class TerminalTabsController {
         menu.add(Menu.NONE, MENU_FONT, Menu.NONE, R.string.action_terminal_tabs_menu_font);
         menu.add(Menu.NONE, MENU_EDIT_PROPERTIES, Menu.NONE, R.string.action_terminal_tabs_menu_edit_properties);
         menu.add(Menu.NONE, MENU_RELOAD_SETTINGS, Menu.NONE, R.string.action_terminal_tabs_menu_reload_settings);
+        menu.add(Menu.NONE, MENU_EXPORT_SETTINGS, Menu.NONE, R.string.action_terminal_tabs_menu_export_settings);
+        menu.add(Menu.NONE, MENU_IMPORT_SETTINGS, Menu.NONE, R.string.action_terminal_tabs_menu_import_settings);
         popupMenu.setOnMenuItemClickListener(item -> {
             switch (item.getItemId()) {
                 case MENU_SETTINGS:
@@ -139,6 +144,12 @@ public class TerminalTabsController {
                     return true;
                 case MENU_KEYBOARD:
                     mActivity.getTermuxTerminalViewClient().onToggleSoftKeyboardRequest();
+                    return true;
+                case MENU_EXPORT_SETTINGS:
+                    SettingsBackup.export(mActivity);
+                    return true;
+                case MENU_IMPORT_SETTINGS:
+                    SettingsBackup.startImport(mActivity);
                     return true;
                 case MENU_SSH:
                     SshHostsDialog.show(mActivity);

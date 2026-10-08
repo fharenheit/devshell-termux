@@ -41,6 +41,7 @@ import com.termux.app.activities.HelpActivity;
 import com.termux.app.activities.SettingsActivity;
 import com.termux.shared.settings.preferences.TermuxAppSharedPreferences;
 import com.termux.app.terminal.TermuxSessionsListViewController;
+import com.termux.app.terminal.backup.SettingsBackup;
 import com.termux.app.terminal.tabs.TerminalSessionNotifications;
 import com.termux.app.terminal.tabs.TerminalTabsController;
 import com.termux.app.terminal.io.TerminalToolbarViewPager;
@@ -262,6 +263,13 @@ public final class TermuxActivity extends Activity implements ServiceConnection 
         // Send the {@link TermuxConstants#BROADCAST_TERMUX_OPENED} broadcast to notify apps that Termux
         // app has been opened.
         TermuxUtils.sendTermuxOpenedBroadcast(this);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // The file picker of importing settings from the terminal tabs menu.
+        if (SettingsBackup.onActivityResult(this, requestCode, resultCode, data)) return;
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override

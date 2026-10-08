@@ -20,3 +20,6 @@ app/src/main/java/com/termux/app/terminal/fonts
 app/src/main/java/com/termux/app/terminal/ssh
 app/src/main/res/values/fork_ssh.xml
 app/src/test/java/com/termux/app/terminal/ssh
+app/src/main/java/com/termux/app/terminal/backup
+app/src/test/java/com/termux/app/terminal/backup
+app/src/test/java/com/termux/app/terminal/fonts
