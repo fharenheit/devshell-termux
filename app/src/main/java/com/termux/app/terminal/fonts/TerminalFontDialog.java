@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.graphics.Typeface;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.TextUtils;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,10 +37,14 @@ import java.util.concurrent.Executors;
 public final class TerminalFontDialog {
 
     /**
-     * Korean, Latin and code characters, and Japanese and Chinese on a second line, which are
-     * drawn with a system fallback font if the font does not have them.
+     * The preview lines: Korean, Latin and code characters, and Japanese and Chinese, which are
+     * drawn with a system fallback font if the font does not have them. Each line is a single
+     * line view, so that a long line can't push the next one out of the preview.
      */
-    private static final String PREVIEW_TEXT = "가나다 한글 abc ABC 0O 1lI {} -> != ==\n日本語 ひらがな カタカナ 中文 简体 繁體";
+    private static final String[] PREVIEW_LINES = {
+        "가나다 한글 abc ABC 0O 1lI {} -> != ==",
+        "日本語 ひらがな カタカナ 中文 简体 繁體"
+    };
 
     private static final String LOG_TAG = "TerminalFontDialog";
 
@@ -155,25 +160,28 @@ public final class TerminalFontDialog {
         @NonNull
         @Override
         public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-            // A single choice row with the name, and a preview below it for fonts.
+            // A single choice row with the name, and the preview lines below it for fonts.
             LinearLayout row;
             CheckedTextView nameView;
-            TextView previewView;
             if (convertView instanceof LinearLayout) {
                 row = (LinearLayout) convertView;
                 nameView = (CheckedTextView) row.getChildAt(0);
-                previewView = (TextView) row.getChildAt(1);
             } else {
                 row = new LinearLayout(mActivity);
                 row.setOrientation(LinearLayout.VERTICAL);
                 nameView = (CheckedTextView) super.getView(position, null, parent);
-                previewView = new TextView(mActivity);
-                previewView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
-                previewView.setMaxLines(2);
-                int padding = nameView.getPaddingStart();
-                previewView.setPadding(padding, 0, padding, Math.round(dp(8)));
                 row.addView(nameView);
-                row.addView(previewView);
+                int padding = nameView.getPaddingStart();
+                for (int i = 0; i < PREVIEW_LINES.length; i++) {
+                    TextView lineView = new TextView(mActivity);
+                    lineView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+                    lineView.setSingleLine();
+                    lineView.setEllipsize(TextUtils.TruncateAt.END);
+                    lineView.setText(PREVIEW_LINES[i]);
+                    boolean last = i == PREVIEW_LINES.length - 1;
+                    lineView.setPadding(padding, 0, padding, last ? Math.round(dp(8)) : 0);
+                    row.addView(lineView);
+                }
             }
 
             Object item = getItem(position);
@@ -184,18 +192,25 @@ public final class TerminalFontDialog {
                 if (!font.hasHangul) name += " " + mActivity.getString(R.string.terminal_font_english_only_suffix);
                 nameView.setText(name);
                 Typeface typeface = mTypefaces.get(font);
-                previewView.setTypeface(typeface != null ? typeface : Typeface.MONOSPACE);
-                previewView.setText(PREVIEW_TEXT);
-                previewView.setVisibility(View.VISIBLE);
+                setPreviewLines(row, typeface != null ? typeface : Typeface.MONOSPACE, View.VISIBLE);
             } else {
                 nameView.setText(String.valueOf(item));
-                previewView.setVisibility(View.GONE);
+                setPreviewLines(row, null, View.GONE);
             }
 
             // The ListView of the dialog sets the checked state on the row, so pass it to the name.
             nameView.setChecked(parent instanceof android.widget.ListView &&
                 ((android.widget.ListView) parent).isItemChecked(position));
             return row;
+        }
+
+        /** Set the typeface and visibility of the preview line views, which follow the name view. */
+        private void setPreviewLines(@NonNull LinearLayout row, @Nullable Typeface typeface, int visibility) {
+            for (int i = 1; i < row.getChildCount(); i++) {
+                TextView lineView = (TextView) row.getChildAt(i);
+                if (typeface != null) lineView.setTypeface(typeface);
+                lineView.setVisibility(visibility);
+            }
         }
 
         private float dp(float value) {
