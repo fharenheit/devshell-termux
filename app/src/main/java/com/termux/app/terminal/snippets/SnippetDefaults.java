@@ -60,12 +60,13 @@ public final class SnippetDefaults {
             run(R.string.snippet_git_branches, "git branch -vv"),
             run(R.string.snippet_git_pull, "git pull --rebase"),
             run(R.string.snippet_git_push, "git push"),
-            type(R.string.snippet_git_commit, "git commit -am "),
+            run(R.string.snippet_git_commit, "git commit -am \"<MESSAGE>\""),
             run(R.string.snippet_git_stash, "git stash list"),
             // Commands that throw away changes are typed without Enter, to run them on purpose.
             type(R.string.snippet_git_discard, "git reset --hard && git clean -fd"),
             type(R.string.snippet_git_force_pull, "git fetch origin && git reset --hard @{u}"),
-            type(R.string.snippet_git_reset_commit, "git reset --hard "))),
+            run(R.string.snippet_git_reset_commit, "git reset --hard <HASH>"),
+            run(R.string.snippet_git_revert, "git revert <HASH>"))),
         new Group(R.string.snippet_group_system, Arrays.asList(
             run(R.string.snippet_system_disk, "df -h"),
             run(R.string.snippet_system_memory, "free -h"),
@@ -76,18 +77,19 @@ public final class SnippetDefaults {
             run(R.string.snippet_system_ports, "ss -tulpn"),
             run(R.string.snippet_system_uptime, "uptime"),
             run(R.string.snippet_system_info, "uname -a"),
-            type(R.string.snippet_system_find_name, "find . -iname "),
-            run(R.string.snippet_system_my_processes, "ps -u \"$(id -u)\" -o pid,user,args"),
-            // Without root, ss and netstat show the PIDs of the own processes only.
-            run(R.string.snippet_system_my_ports,
-                "ss -tulpn 2>/dev/null | grep -E 'Netid|pid=' || netstat -tulpn 2>/dev/null | grep -E 'Proto|[0-9]+/'"))),
+            run(R.string.snippet_system_find_name, "find <DIR=.> -iname '<PATTERN>' 2>/dev/null"),
+            run(R.string.snippet_system_user_processes, "ps -u <USERNAME> -o pid,user,args"),
+            // lsof lists the ports with the command, PID and user, else ss is filtered by the PIDs of
+            // the user. Without root, only the PIDs of the own processes are shown.
+            run(R.string.snippet_system_user_ports, "lsof -nP -i -a -u <USERNAME> 2>/dev/null || "
+                + "ss -tulpn | grep -E \"Netid|pid=($(pgrep -d'|' -u <USERNAME>)),\""))),
         new Group(R.string.snippet_group_termux, Arrays.asList(
             run(R.string.snippet_termux_upgrade, "pkg update && pkg upgrade -y"),
             run(R.string.snippet_termux_storage, "termux-setup-storage"),
             run(R.string.snippet_termux_mirror, "termux-change-repo"),
-            type(R.string.snippet_termux_install, "pkg install "))),
+            run(R.string.snippet_termux_install, "pkg install <PACKAGE>"))),
         new Group(R.string.snippet_group_tmux, Arrays.asList(
-            run(R.string.snippet_tmux_attach, "tmux new -A -s main"),
+            run(R.string.snippet_tmux_attach, "tmux new -A -s <SESSION=main>"),
             run(R.string.snippet_tmux_list, "tmux ls")))));
 
     private SnippetDefaults() {}
@@ -112,6 +114,31 @@ public final class SnippetDefaults {
             }
         }
         return snippets;
+    }
+
+    /** The commands of earlier default snippets, and the commands that replace them. */
+    private static final String[][] REPLACED_COMMANDS = {
+        {"git commit -am ", "git commit -am \"<MESSAGE>\""},
+        {"pkg install ", "pkg install <PACKAGE>"},
+        {"tmux new -A -s main", "tmux new -A -s <SESSION=main>"},
+    };
+
+    /**
+     * Replace the commands of earlier default snippets that were not changed by the new ones, which
+     * ask for the values to fill in. Return whether a snippet was changed.
+     */
+    static boolean migrate(@NonNull List<Snippet> snippets) {
+        boolean changed = false;
+        for (Snippet snippet : snippets) {
+            for (String[] replaced : REPLACED_COMMANDS) {
+                if (snippet.command.equals(replaced[0])) {
+                    snippet.command = replaced[1];
+                    snippet.run = true;
+                    changed = true;
+                }
+            }
+        }
+        return changed;
     }
 
     /** Add snippets to a list, except the ones whose command is already in it. Return the number added. */

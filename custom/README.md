@@ -40,7 +40,7 @@
 | 터미널에서 URL을 길게 누르고 More → **Open URL**로 브라우저 열기(선택에 URL이 여러 개면 고르기). 길게 눌러 선택할 때 여러 줄로 넘어간 단어(긴 URL)도 한 번에 선택 | `custom/patches/0015-*.patch` (`TermuxActivity.java`, `TextSelectionCursorController.java`) + `app/.../terminal/links/`, `fork_links.xml` |
 | 키보드 단축키: Ctrl+Tab/Ctrl+Shift+Tab 탭 이동, Ctrl+Shift+T 새 탭, Ctrl+Shift+W 탭 닫기, Ctrl+Shift+C/V 복사/붙여넣기, Ctrl+Shift+F 찾기, Ctrl+Shift+S 스니펫, Ctrl+=/−/0 화면 글자 크기. ⚙ → Keyboard shortcuts에 목록, `terminal-keyboard-shortcuts = false`로 끔 | `custom/patches/0018-*.patch` (`TermuxTerminalViewClient.java`) + `app/.../terminal/tabs/TerminalKeyboardShortcuts.java` |
 | 터미널 출력에서 찾기(⚙ → Find, 길게 누르기 → More → Find, Ctrl+Shift+F): 스크롤된 기록까지 검색, 화면의 일치 강조, ▲/▼로 이전/다음, 개수 표시, 대문자가 없으면 대소문자 무시, 여러 줄로 넘어간 줄과 한글 폭 처리 | `custom/patches/0020-*.patch` (`TerminalView.java` 오버레이, `TermuxActivity.java` 메뉴) + `app/.../terminal/search/` |
-| 스니펫(⚙ → Snippets, Ctrl+Shift+S, `SNIPPETS` extra key): 자주 쓰는 명령을 저장하고 눌러서 현재 탭에 입력(Enter 여부, 여러 줄, SSH 호스트별). `~/.termux/snippets.json`, 설정 내보내기에 포함. 처음 열 때 기본 스니펫(Git, 시스템 상태, Termux, tmux)으로 시작하고, **기본** 버튼으로 묶음을 골라 다시 추가(이미 있는 명령은 건너뜀, 이름은 앱 언어로) | `custom/patches/0019-*.patch` (`TermuxTerminalExtraKeys.java`, `ExtraKeysConstants.java`) + `app/.../terminal/snippets/` |
+| 스니펫(⚙ → Snippets, Ctrl+Shift+S, `SNIPPETS` extra key): 자주 쓰는 명령을 저장하고 눌러서 현재 탭에 입력(Enter 여부, 여러 줄, SSH 호스트별). `~/.termux/snippets.json`, 설정 내보내기에 포함. 처음 열 때 기본 스니펫(Git, 시스템 상태, Termux, tmux)으로 시작하고, **기본** 버튼으로 묶음을 골라 다시 추가(이미 있는 명령은 건너뜀, 이름은 앱 언어로). 명령의 `<NAME>`, `<NAME=기본값>`은 누를 때 입력받고(보낼 명령 미리 보기, 실행/입력만, 이름별 마지막 값 기억) | `custom/patches/0019-*.patch` (`TermuxTerminalExtraKeys.java`, `ExtraKeysConstants.java`) + `app/.../terminal/snippets/` |
 
 ### SSH
 

@@ -131,19 +131,26 @@
   - Enter까지 누를지(실행) 또는 입력만 할지
   - 여러 줄 명령
   - 특정 SSH 호스트 탭에서만 보이기
+- **입력받는 값**: 명령에 `<NAME>`을 쓰면 누를 때 값을 묻는 창이 열립니다.
+  - `<NAME=기본값>`은 기본값을 채워 둡니다(예: `<DIR=.>`). 같은 이름이 여러 번 나오면 한 번만 묻습니다.
+  - 창에 보낼 명령이 미리 보이고, **실행**(Enter까지) 또는 **입력만**을 고릅니다.
+  - 이름별로 마지막에 쓴 값을 기억해서 다음에 채워 둡니다.
+  - `< file`, `<<EOF`, `<(cmd)`처럼 대문자 이름이 아닌 셸 문법은 그대로 입력됩니다.
 - `~/.termux/snippets.json`에 저장되고, 설정 내보내기에 포함됩니다.
 - **기본 스니펫**: 처음 열면 아래 스니펫이 들어 있습니다.
   - 지워도 되고, 스니펫 창의 **기본** 버튼으로 묶음을 골라 다시 추가할 수 있습니다(이미 있는 명령은 건너뜀).
   - 이미 스니펫을 저장해 쓰던 경우에는 자동으로 들어가지 않으니 **기본** 버튼으로 추가합니다.
   - 이름은 추가할 때의 앱 언어로 저장됩니다.
-  - 커밋, 패키지 설치처럼 뒤에 입력할 것이 있는 명령과 강제로 되돌리는 Git 명령은 Enter 없이 입력만 합니다. 확인하고 Enter를 누르면 실행됩니다.
+  - 커밋 메시지, 커밋 해시, 사용자 이름처럼 필요한 값은 `<MESSAGE>`, `<HASH>`, `<USERNAME>` 등으로 표시되어 누를 때 입력받습니다.
+  - 입력할 값이 없는 강제 되돌리기/강제 pull은 Enter 없이 입력만 합니다. 확인하고 Enter를 누르면 실행됩니다.
+  - 예전 기본 스니펫(`git commit -am `, `pkg install `, `tmux new -A -s main`)은 고치지 않았으면 새 명령으로 바뀝니다.
 
   | 묶음 | 명령 |
   |---|---|
-  | Git | `git status -sb`, `git log --oneline --graph --decorate -20`, `git diff --stat`, `git branch -vv`, `git pull --rebase`, `git push`, `git commit -am `(메시지 입력), `git stash list`, 모든 수정 사항 강제로 되돌리기 `git reset --hard && git clean -fd`, 최신 코드로 강제 pull `git fetch origin && git reset --hard @{u}`, 특정 커밋으로 강제로 되돌리기 `git reset --hard `(해시 입력) |
-  | 시스템 상태 | `df -h`, `free -h`, 큰 폴더(`du -sh * \| sort -h \| tail -20`), CPU/메모리 상위 프로세스(`ps … --sort`), `top`, `ss -tulpn`, `uptime`, `uname -a`, 이름으로 찾기 `find . -iname `(패턴 입력), 내 프로세스 `ps -u "$(id -u)" -o pid,user,args`, 내가 연 포트와 PID(`ss -tulpn` 또는 `netstat -tulpn`에서 PID가 보이는 줄) |
-  | Termux | `pkg update && pkg upgrade -y`, `termux-setup-storage`, `termux-change-repo`, `pkg install `(이름 입력) |
-  | tmux | `tmux new -A -s main`, `tmux ls` |
+  | Git | `git status -sb`, `git log --oneline --graph --decorate -20`, `git diff --stat`, `git branch -vv`, `git pull --rebase`, `git push`, `git commit -am "<MESSAGE>"`, `git stash list`, 모든 수정 사항 강제로 되돌리기 `git reset --hard && git clean -fd`, 최신 코드로 강제 pull `git fetch origin && git reset --hard @{u}`, 특정 커밋으로 강제로 되돌리기 `git reset --hard <HASH>`, 커밋 되돌리기 `git revert <HASH>` |
+  | 시스템 상태 | `df -h`, `free -h`, 큰 폴더(`du -sh * \| sort -h \| tail -20`), CPU/메모리 상위 프로세스(`ps … --sort`), `top`, `ss -tulpn`, `uptime`, `uname -a`, 이름으로 찾기 `find <DIR=.> -iname '<PATTERN>'`, 사용자의 프로세스 `ps -u <USERNAME> -o pid,user,args`, 사용자가 연 포트와 PID(`lsof -nP -i -a -u <USERNAME>`, 없으면 `ss -tulpn`을 그 사용자의 PID로 거름) |
+  | Termux | `pkg update && pkg upgrade -y`, `termux-setup-storage`, `termux-change-repo`, `pkg install <PACKAGE>` |
+  | tmux | `tmux new -A -s <SESSION=main>`, `tmux ls` |
 
 ### 클립보드 기록 (⚙ → Clipboard history, Ctrl+Shift+H, ⎘ 위로 밀기, `CLIPBOARD` 키)
 - 최근 복사한 글 20개를 보관합니다. 앱 안팎에서 복사한 것 모두 해당합니다.

@@ -12,7 +12,7 @@
     <string name="snippet_git_branches">Git branches</string>
     <string name="snippet_git_pull">Git pull</string>
     <string name="snippet_git_push">Git push</string>
-    <string name="snippet_git_commit">Git commit (type message)</string>
+    <string name="snippet_git_commit">Git commit</string>
     <string name="snippet_git_stash">Git stash list</string>
     <string name="snippet_system_disk">Disk usage</string>
     <string name="snippet_system_memory">Memory</string>
@@ -26,15 +26,20 @@
     <string name="snippet_termux_upgrade">Update packages</string>
     <string name="snippet_termux_storage">Storage permission</string>
     <string name="snippet_termux_mirror">Change mirror</string>
-    <string name="snippet_termux_install">Install package (type name)</string>
+    <string name="snippet_termux_install">Install package</string>
     <string name="snippet_tmux_attach">tmux attach or new</string>
     <string name="snippet_tmux_list">tmux sessions</string>
     <string name="snippet_git_discard">Git discard all changes (reset --hard, clean)</string>
     <string name="snippet_git_force_pull">Git force pull latest (reset to upstream)</string>
-    <string name="snippet_git_reset_commit">Git force reset to a commit (type hash)</string>
-    <string name="snippet_system_find_name">Find files and folders by name (type pattern like \'*log*\')</string>
-    <string name="snippet_system_my_processes">My processes (PID, user, command)</string>
-    <string name="snippet_system_my_ports">My open ports and their PIDs</string>
+    <string name="snippet_git_reset_commit">Git force reset to a commit</string>
+    <string name="snippet_system_find_name">Find files and folders by name</string>
+    <string name="snippet_git_revert">Git revert a commit (new commit undoing it)</string>
+    <string name="snippet_system_user_processes">Processes of a user (PID, user, command)</string>
+    <string name="snippet_system_user_ports">Ports opened by a user, with PIDs</string>
+    <string name="snippet_preview">Command to send</string>
+    <string name="action_snippet_run">Run</string>
+    <string name="action_snippet_type_only">Type only</string>
+    <string name="snippet_placeholder_help">Write &lt;NAME&gt; for a value to ask for when typing the snippet, or &lt;NAME=default&gt; with a default, like &lt;HASH&gt; or &lt;DIR=.&gt;.</string>
     <plurals name="msg_snippet_defaults_added">
         <item quantity="one">Added %1$d snippet</item>
         <item quantity="other">Added %1$d snippets</item>

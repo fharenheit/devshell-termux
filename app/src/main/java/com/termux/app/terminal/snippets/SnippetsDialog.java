@@ -3,11 +3,14 @@ package com.termux.app.terminal.snippets;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Typeface;
+import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -32,7 +35,9 @@ import com.termux.terminal.TerminalSession;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * The snippets of the current tab: tapping one types it into the tab. Snippets of an SSH host are
@@ -51,6 +56,7 @@ public final class SnippetsDialog {
         List<Snippet> all;
         if (SnippetStore.SNIPPETS_FILE.exists()) {
             all = SnippetStore.load();
+            if (SnippetDefaults.migrate(all)) save(activity, all);
         } else {
             // Start with the default snippets, saved so that deleting one keeps it deleted.
             all = SnippetDefaults.create(activity);
@@ -127,8 +133,103 @@ public final class SnippetsDialog {
             .show();
     }
 
-    /** Type a snippet into the current tab. */
+    /** Type a snippet into the current tab, asking for the values of its placeholders first if it has any. */
     private static void type(@NonNull TermuxActivity activity, @NonNull Snippet snippet) {
+        List<SnippetPlaceholders.Placeholder> placeholders = SnippetPlaceholders.find(snippet.command);
+        if (placeholders.isEmpty()) write(activity, snippet);
+        else showValuesDialog(activity, snippet, placeholders);
+    }
+
+    /**
+     * Ask for the values of the placeholders of a snippet, showing the command as it will be sent,
+     * then type it, or run it.
+     */
+    private static void showValuesDialog(@NonNull TermuxActivity activity, @NonNull Snippet snippet,
+                                         @NonNull List<SnippetPlaceholders.Placeholder> placeholders) {
+        Context context = activity;
+        LinearLayout form = new LinearLayout(context);
+        form.setOrientation(LinearLayout.VERTICAL);
+        int padding = dp(context, 20);
+        form.setPadding(padding, dp(context, 8), padding, 0);
+
+        TextView template = new TextView(context);
+        template.setText(snippet.command.trim());
+        template.setTypeface(Typeface.MONOSPACE);
+        template.setAlpha(0.6f);
+        template.setTextIsSelectable(true);
+        form.addView(template);
+
+        Map<String, EditText> inputs = new LinkedHashMap<>();
+        for (SnippetPlaceholders.Placeholder placeholder : placeholders) {
+            String last = SnippetPlaceholders.getLastValue(context, placeholder.name);
+            EditText input = addField(form, 0, last != null ? last : placeholder.defaultValue, null);
+            ((TextView) form.getChildAt(form.getChildCount() - 2)).setText(placeholder.name);
+            input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+            input.setTypeface(Typeface.MONOSPACE);
+            input.setSelectAllOnFocus(true);
+            inputs.put(placeholder.name, input);
+        }
+
+        TextView previewLabel = new TextView(context);
+        previewLabel.setText(R.string.snippet_preview);
+        previewLabel.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
+        previewLabel.setPadding(0, dp(context, 12), 0, 0);
+        form.addView(previewLabel);
+        TextView preview = new TextView(context);
+        preview.setTypeface(Typeface.MONOSPACE);
+        preview.setTextIsSelectable(true);
+        form.addView(preview);
+
+        Runnable update = () -> preview.setText(SnippetPlaceholders.fill(snippet.command, getValues(inputs)).trim());
+        update.run();
+        TextWatcher watcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                update.run();
+            }
+        };
+        for (EditText input : inputs.values()) input.addTextChangedListener(watcher);
+
+        ScrollView scroll = new ScrollView(context);
+        scroll.addView(form);
+        AlertDialog dialog = new AlertDialog.Builder(context)
+            .setTitle(snippet.getTitle())
+            .setView(scroll)
+            .setPositiveButton(R.string.action_snippet_run, (d, which) -> writeFilled(activity, snippet, inputs, true))
+            .setNeutralButton(R.string.action_snippet_type_only, (d, which) -> writeFilled(activity, snippet, inputs, false))
+            .setNegativeButton(android.R.string.cancel, null)
+            .create();
+        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+        dialog.show();
+        EditText first = inputs.values().iterator().next();
+        first.requestFocus();
+    }
+
+    @NonNull
+    private static Map<String, String> getValues(@NonNull Map<String, EditText> inputs) {
+        Map<String, String> values = new LinkedHashMap<>();
+        for (Map.Entry<String, EditText> entry : inputs.entrySet()) values.put(entry.getKey(), entry.getValue().getText().toString());
+        return values;
+    }
+
+    private static void writeFilled(@NonNull TermuxActivity activity, @NonNull Snippet snippet,
+                                    @NonNull Map<String, EditText> inputs, boolean run) {
+        Map<String, String> values = getValues(inputs);
+        SnippetPlaceholders.saveValues(activity, values);
+        Snippet filled = new Snippet();
+        filled.command = SnippetPlaceholders.fill(snippet.command, values);
+        filled.run = run;
+        write(activity, filled);
+    }
+
+    /** Write a snippet to the current tab. */
+    private static void write(@NonNull TermuxActivity activity, @NonNull Snippet snippet) {
         TerminalSession session = activity.getCurrentSession();
         if (session == null || !session.isRunning()) {
             Toast.makeText(activity, R.string.msg_snippet_no_session, Toast.LENGTH_SHORT).show();
@@ -192,6 +293,12 @@ public final class SnippetsDialog {
         command.setSingleLine(false);
         command.setMinLines(3);
         command.setTypeface(Typeface.MONOSPACE);
+
+        TextView placeholderHelp = new TextView(context);
+        placeholderHelp.setText(R.string.snippet_placeholder_help);
+        placeholderHelp.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
+        placeholderHelp.setAlpha(0.7f);
+        form.addView(placeholderHelp);
 
         CheckBox run = new CheckBox(context);
         run.setText(R.string.snippet_run);
@@ -260,7 +367,7 @@ public final class SnippetsDialog {
     private static EditText addField(@NonNull LinearLayout form, int labelId, @Nullable String value, @Nullable String hint) {
         Context context = form.getContext();
         TextView label = new TextView(context);
-        label.setText(labelId);
+        if (labelId != 0) label.setText(labelId);
         label.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
         label.setPadding(0, dp(context, 8), 0, 0);
         form.addView(label);

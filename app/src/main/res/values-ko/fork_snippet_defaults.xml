@@ -12,7 +12,7 @@
     <string name="snippet_git_branches">Git 브랜치</string>
     <string name="snippet_git_pull">Git 받기(pull)</string>
     <string name="snippet_git_push">Git 올리기(push)</string>
-    <string name="snippet_git_commit">Git 커밋(메시지 입력)</string>
+    <string name="snippet_git_commit">Git 커밋</string>
     <string name="snippet_git_stash">Git stash 목록</string>
     <string name="snippet_system_disk">디스크 사용량</string>
     <string name="snippet_system_memory">메모리</string>
@@ -26,15 +26,20 @@
     <string name="snippet_termux_upgrade">패키지 업데이트</string>
     <string name="snippet_termux_storage">저장소 권한</string>
     <string name="snippet_termux_mirror">미러 변경</string>
-    <string name="snippet_termux_install">패키지 설치(이름 입력)</string>
+    <string name="snippet_termux_install">패키지 설치</string>
     <string name="snippet_tmux_attach">tmux 세션 붙기/만들기</string>
     <string name="snippet_tmux_list">tmux 세션 목록</string>
     <string name="snippet_git_discard">Git 모든 수정 사항 강제로 되돌리기</string>
     <string name="snippet_git_force_pull">Git 최신 코드로 강제 pull</string>
-    <string name="snippet_git_reset_commit">Git 특정 커밋으로 강제로 되돌리기(해시 입력)</string>
-    <string name="snippet_system_find_name">이름으로 파일·폴더 찾기(패턴 입력, 예: \'*log*\')</string>
-    <string name="snippet_system_my_processes">내 프로세스 전체(PID, 사용자, 명령)</string>
-    <string name="snippet_system_my_ports">내가 연 포트와 PID</string>
+    <string name="snippet_git_reset_commit">Git 특정 커밋으로 강제로 되돌리기</string>
+    <string name="snippet_system_find_name">이름으로 파일·폴더 찾기</string>
+    <string name="snippet_git_revert">Git 커밋 되돌리기(되돌림 커밋 만들기)</string>
+    <string name="snippet_system_user_processes">사용자의 프로세스(PID, 사용자, 명령)</string>
+    <string name="snippet_system_user_ports">사용자가 연 포트와 PID</string>
+    <string name="snippet_preview">보낼 명령</string>
+    <string name="action_snippet_run">실행</string>
+    <string name="action_snippet_type_only">입력만</string>
+    <string name="snippet_placeholder_help">&lt;NAME&gt;으로 쓰면 스니펫을 누를 때 그 값을 입력받습니다. &lt;NAME=기본값&gt;은 기본값을 채워 둡니다. 예: &lt;HASH&gt;, &lt;DIR=.&gt;</string>
     <plurals name="msg_snippet_defaults_added">
         <item quantity="other">스니펫 %1$d개를 추가했습니다</item>
     </plurals>

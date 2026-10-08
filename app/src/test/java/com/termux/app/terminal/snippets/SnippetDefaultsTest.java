@@ -28,9 +28,27 @@ public class SnippetDefaultsTest {
         }
         Assert.assertTrue(commands.contains("git status -sb"));
         Assert.assertTrue(commands.contains("df -h"));
-        // A command to finish types the text without running it.
+        Assert.assertTrue(commands.contains("git reset --hard <HASH>"));
+        // Commands that throw changes away are typed without running them.
         for (Snippet snippet : defaults)
-            if (snippet.command.equals("git commit -am ")) Assert.assertEquals("git commit -am ", snippet.getInput());
+            if (snippet.command.startsWith("git reset --hard &&")) Assert.assertFalse(snippet.run);
+    }
+
+    @Test
+    public void testMigrate() {
+        List<Snippet> snippets = new ArrayList<>();
+        Snippet old = new Snippet();
+        old.command = "git commit -am ";
+        old.run = false;
+        snippets.add(old);
+        Snippet changed = new Snippet();
+        changed.command = "git commit -am 'fix'";
+        snippets.add(changed);
+        Assert.assertTrue(SnippetDefaults.migrate(snippets));
+        Assert.assertEquals("git commit -am \"<MESSAGE>\"", old.command);
+        Assert.assertTrue(old.run);
+        Assert.assertEquals("git commit -am 'fix'", changed.command);
+        Assert.assertFalse(SnippetDefaults.migrate(snippets));
     }
 
     @Test
