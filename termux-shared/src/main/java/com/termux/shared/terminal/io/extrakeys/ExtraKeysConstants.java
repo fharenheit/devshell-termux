@@ -163,6 +163,37 @@ public class ExtraKeysConstants {
         }};
 
         /**
+         * Keys drawn as keycaps, with an icon and a small name below it, or a short name. A second
+         * line after a line feed is drawn small by {@link ExtraKeysView}. Used by the `keycaps` style.
+         */
+        public static final ExtraKeyDisplayMap KEYCAPS_CHAR_DISPLAY = new ExtraKeyDisplayMap() {{
+            putAll(CLASSIC_ARROWS_DISPLAY);
+            putAll(NICER_LOOKING_DISPLAY);
+            put("ESC", "Esc");
+            put("CTRL", "Ctrl");
+            put("ALT", "Alt");
+            put("SHIFT", "Shift");
+            put("FN", "Fn");
+            put("HOME", "⇤\nHome");
+            put("END", "⇥\nEnd");
+            put("PGUP", "⇞\nPgUp");
+            put("PGDN", "⇟\nPgDn");
+            put("ENTER", "↲\nEnter");
+            put("TAB", "↹\nTab");
+            put("BKSP", "⌫\nBksp");
+            put("DEL", "⌦\nDel");
+            put("INS", "Ins");
+            put("KEYBOARD", "⌨\nKbd");
+            put("DRAWER", "☰\nTabs");
+            put("PASTE", "⎘\nPaste");
+            put("COPY", "⧉\nCopy");
+            put("COPY_SCREEN", "⧉\nScreen");
+            put("FONT_LARGER", "A+\nFont");
+            put("FONT_SMALLER", "A−\nFont");
+            put("SNIPPETS", "⚡\nSnip");
+        }};
+
+        /**
          * Some classic symbols everybody knows
          */
         public static final ExtraKeyDisplayMap DEFAULT_CHAR_DISPLAY = new ExtraKeyDisplayMap() {{

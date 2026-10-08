@@ -371,6 +371,7 @@ public final class ExtraKeysView extends GridLayout {
 
         removeAllViews();
 
+        mKeycaps = extraKeysInfo.isKeycaps();
         ExtraKeyButton[][] buttons = extraKeysInfo.getMatrix();
 
         setRowCount(buttons.length);
@@ -388,10 +389,14 @@ public final class ExtraKeysView extends GridLayout {
                     button = new Button(getContext(), null, android.R.attr.buttonBarButtonStyle);
                 }
 
-                button.setText(buttonInfo.getDisplay());
                 button.setTextColor(mButtonTextColor);
-                button.setAllCaps(mButtonTextAllCaps);
+                setButtonLabel(button, buttonInfo.getDisplay());
                 button.setPadding(0, 0, 0, 0);
+                if (mKeycaps) setButtonBackground(button, false);
+                if (isSpecialButton(buttonInfo)) {
+                    SpecialButtonState state = mSpecialButtons.get(SpecialButton.valueOf(buttonInfo.getKey()));
+                    if (state != null) updateSpecialButton(button, state.isActive);
+                }
 
                 button.setOnClickListener(view -> {
                     performExtraKeyButtonHapticFeedback(view, buttonInfo, button);
@@ -401,7 +406,7 @@ public final class ExtraKeysView extends GridLayout {
                 button.setOnTouchListener((view, event) -> {
                     switch (event.getAction()) {
                         case MotionEvent.ACTION_DOWN:
-                            view.setBackgroundColor(mButtonActiveBackgroundColor);
+                            setButtonBackground(view, true);
                             // Start long press scheduled executors which will be stopped in next MotionEvent
                             startScheduledExecutors(view, buttonInfo, button);
                             return true;
@@ -411,23 +416,23 @@ public final class ExtraKeysView extends GridLayout {
                                 // Show popup on swipe up
                                 if (mPopupWindow == null && event.getY() < 0) {
                                     stopScheduledExecutors();
-                                    view.setBackgroundColor(mButtonBackgroundColor);
+                                    setButtonBackground(view, false);
                                     showPopup(view, buttonInfo.getPopup());
                                 }
                                 if (mPopupWindow != null && event.getY() > 0) {
-                                    view.setBackgroundColor(mButtonActiveBackgroundColor);
+                                    setButtonBackground(view, true);
                                     dismissPopup();
                                 }
                             }
                             return true;
 
                         case MotionEvent.ACTION_CANCEL:
-                            view.setBackgroundColor(mButtonBackgroundColor);
+                            setButtonBackground(view, false);
                             stopScheduledExecutors();
                             return true;
 
                         case MotionEvent.ACTION_UP:
-                            view.setBackgroundColor(mButtonBackgroundColor);
+                            setButtonBackground(view, false);
                             stopScheduledExecutors();
                             // If ACTION_UP up was not from a repetitive key or was with a key with a popup button
                             if (mLongPressCount == 0 || mPopupWindow != null) {
@@ -572,8 +577,7 @@ public final class ExtraKeysView extends GridLayout {
             button = new Button(getContext(), null, android.R.attr.buttonBarButtonStyle);
             button.setTextColor(mButtonTextColor);
         }
-        button.setText(extraButton.getDisplay());
-        button.setAllCaps(mButtonTextAllCaps);
+        setButtonLabel(button, extraButton.getDisplay());
         button.setPadding(0, 0, 0, 0);
         button.setMinHeight(0);
         button.setMinWidth(0);
@@ -581,7 +585,7 @@ public final class ExtraKeysView extends GridLayout {
         button.setMinimumHeight(0);
         button.setWidth(width);
         button.setHeight(height);
-        button.setBackgroundColor(mButtonActiveBackgroundColor);
+        setButtonBackground(button, true);
         mPopupWindow = new PopupWindow(this);
         mPopupWindow.setWidth(LayoutParams.WRAP_CONTENT);
         mPopupWindow.setHeight(LayoutParams.WRAP_CONTENT);
@@ -627,6 +631,72 @@ public final class ExtraKeysView extends GridLayout {
             state.setIsActive(false);
 
         return true;
+    }
+
+    /** Whether the keys are drawn as keycaps, see {@link ExtraKeysInfo#isKeycaps()}. */
+    private boolean mKeycaps;
+
+    private static final int KEYCAP_COLOR = 0xFF262626;
+    private static final int KEYCAP_BORDER_COLOR = 0xFF4A4A4A;
+    private static final int KEYCAP_ACTIVE_COLOR = 0xFF4FC3F7;
+    private static final int KEYCAP_ACTIVE_TEXT_COLOR = 0xFF000000;
+    private static final int KEYCAP_CAPTION_COLOR = 0xFFA0A0A0;
+
+    private int dp(float value) {
+        return Math.round(value * getResources().getDisplayMetrics().density);
+    }
+
+    /**
+     * Set the text of a button. With keycaps, a second line after a line feed is a small caption
+     * below an icon, and the text is not made upper case, so that names like `Ctrl` keep their case.
+     */
+    private void setButtonLabel(Button button, String display) {
+        if (!mKeycaps) {
+            button.setText(display);
+            button.setAllCaps(mButtonTextAllCaps);
+            return;
+        }
+        button.setAllCaps(false);
+        int newline = display.indexOf('\n');
+        if (newline < 0) {
+            button.setText(display);
+            return;
+        }
+        android.text.SpannableString text = new android.text.SpannableString(display);
+        text.setSpan(new android.text.style.RelativeSizeSpan(0.62f), newline + 1, display.length(), android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        text.setSpan(new android.text.style.ForegroundColorSpan(KEYCAP_CAPTION_COLOR), newline + 1, display.length(), android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        button.setLineSpacing(0, 0.85f);
+        button.setText(text);
+    }
+
+    /** Set the background of a button, pressed or not, as a flat color or a keycap. */
+    private void setButtonBackground(View view, boolean pressed) {
+        if (!mKeycaps) {
+            view.setBackgroundColor(pressed ? mButtonActiveBackgroundColor : mButtonBackgroundColor);
+            return;
+        }
+        int color = pressed ? mButtonActiveBackgroundColor : isActiveSpecialButton(view) ? KEYCAP_ACTIVE_COLOR : KEYCAP_COLOR;
+        android.graphics.drawable.GradientDrawable keycap = new android.graphics.drawable.GradientDrawable();
+        keycap.setColor(color);
+        keycap.setCornerRadius(dp(6));
+        keycap.setStroke(Math.max(1, dp(1)), KEYCAP_BORDER_COLOR);
+        view.setBackground(new android.graphics.drawable.InsetDrawable(keycap, dp(2)));
+    }
+
+    private boolean isActiveSpecialButton(View view) {
+        for (SpecialButtonState state : mSpecialButtons.values())
+            if (state.isActive && state.buttons.contains(view)) return true;
+        return false;
+    }
+
+    /** Show whether a special button like CTRL is active: its text color, and with keycaps its fill. */
+    void updateSpecialButton(Button button, boolean active) {
+        if (mKeycaps) {
+            button.setTextColor(active ? KEYCAP_ACTIVE_TEXT_COLOR : mButtonTextColor);
+            setButtonBackground(button, false);
+        } else {
+            button.setTextColor(active ? mButtonActiveTextColor : mButtonTextColor);
+        }
     }
 
     private Button createSpecialButton(String buttonKey, boolean needUpdate) {

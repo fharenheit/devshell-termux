@@ -107,6 +107,17 @@ public class ExtraKeysInfo {
     public ExtraKeysInfo(@NonNull String propertiesInfo, String style,
                          @NonNull ExtraKeysConstants.ExtraKeyDisplayMap extraKeyAliasMap) throws JSONException {
         mButtons = initExtraKeysInfo(propertiesInfo, getCharDisplayMapForStyle(style), extraKeyAliasMap);
+        mKeycaps = STYLE_KEYCAPS.equals(style);
+    }
+
+    /** The style that draws keys as keycaps, see {@link ExtraKeysConstants.EXTRA_KEY_DISPLAY_MAPS#KEYCAPS_CHAR_DISPLAY}. */
+    public static final String STYLE_KEYCAPS = "keycaps";
+
+    private boolean mKeycaps;
+
+    /** Whether the keys are drawn as keycaps. */
+    public boolean isKeycaps() {
+        return mKeycaps;
     }
 
     /**
@@ -203,6 +214,8 @@ public class ExtraKeysInfo {
                 return EXTRA_KEY_DISPLAY_MAPS.FULL_ISO_CHAR_DISPLAY;
             case "none":
                 return new ExtraKeysConstants.ExtraKeyDisplayMap();
+            case STYLE_KEYCAPS:
+                return EXTRA_KEY_DISPLAY_MAPS.KEYCAPS_CHAR_DISPLAY;
             default:
                 return EXTRA_KEY_DISPLAY_MAPS.DEFAULT_CHAR_DISPLAY;
         }
