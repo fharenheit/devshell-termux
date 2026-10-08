@@ -7,6 +7,15 @@
 - **Added**: 새 기능, **Changed**: 동작·문서·패치 변경, **Fixed**: 버그 수정
 - "패치 갱신" 커밋은 업스트림 파일을 고친 커밋 뒤에 `custom/update-patches.sh`로 `custom/patches/`를 다시 만든 것입니다.
 
+## v0.118.3-ko.24 (2026-10-08)
+
+| 커밋 | 내용 |
+|---|---|
+| [`5edd8e7`](https://github.com/fharenheit/termux-app/commit/5edd8e7) | Changed: FEATURES.md에 특수 키 설명과 기본 스니펫 반영 |
+| [`cda7f90`](https://github.com/fharenheit/termux-app/commit/cda7f90) | Fixed: "접속 후 실행할 명령"이 있는 호스트에서 호스트 키 확인과 공개 키 설치가 `Cannot execute command-line and remote command`로 실패하던 문제(RemoteCommand 끄고 실행) |
+| [`258e9bb`](https://github.com/fharenheit/termux-app/commit/258e9bb) | Added: 화면과 함께 보는 사용 설명서(`custom/docs/manual`, 한국어/English)와 스크린샷을 다시 찍는 스크립트 |
+| (이 릴리즈 커밋) | Added: v0.118.3-ko.24 릴리즈 노트와 이력 |
+
 ## v0.118.3-ko.23 (2026-10-08)
 
 | 커밋 | 내용 |
