@@ -1,0 +1,43 @@
+From 5db7a0ca31b31fc2c951e99e4834e00d61b52951 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Thu, 8 Oct 2026 03:19:13 +0000
+Subject: [PATCH] Added: Add desktop terminal keyboard shortcuts
+
+Ctrl+Tab and Ctrl+Shift+Tab switch tabs, Ctrl+Shift+T opens and
+Ctrl+Shift+W closes a tab, Ctrl+Shift+C and Ctrl+Shift+V copy and
+paste, and Ctrl+=, Ctrl+- and Ctrl+0 change the text size on the
+screen. Ctrl+Shift+F and Ctrl+Shift+S are reserved for find and
+snippets. The shortcuts are listed in the tab bar settings menu and can
+be turned off with terminal-keyboard-shortcuts = false.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01GLNsTPnn2xKUQ4uFcevT6G
+---
+ .../com/termux/app/terminal/TermuxTerminalViewClient.java     | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/app/src/main/java/com/termux/app/terminal/TermuxTerminalViewClient.java b/app/src/main/java/com/termux/app/terminal/TermuxTerminalViewClient.java
+index 9a3f3ff..c32eb61 100644
+--- a/app/src/main/java/com/termux/app/terminal/TermuxTerminalViewClient.java
++++ b/app/src/main/java/com/termux/app/terminal/TermuxTerminalViewClient.java
+@@ -34,6 +34,7 @@ import com.termux.shared.activities.ReportActivity;
+ import com.termux.shared.models.ReportInfo;
+ import com.termux.app.models.UserAction;
+ import com.termux.app.terminal.io.KeyboardShortcut;
++import com.termux.app.terminal.tabs.TerminalKeyboardShortcuts;
+ import com.termux.shared.settings.preferences.TermuxAppSharedPreferences;
+ import com.termux.shared.settings.properties.TermuxPropertyConstants;
+ import com.termux.shared.data.DataUtils;
+@@ -241,6 +242,9 @@ public class TermuxTerminalViewClient extends TermuxTerminalViewClientBase {
+         if (keyCode == KeyEvent.KEYCODE_ENTER && !currentSession.isRunning()) {
+             mTermuxTerminalSessionClient.removeFinishedSession(currentSession);
+             return true;
++        } else if (!mActivity.getProperties().areHardwareKeyboardShortcutsDisabled() &&
++            TerminalKeyboardShortcuts.onKeyDown(mActivity, this, mTermuxTerminalSessionClient, keyCode, e, currentSession)) {
++            return true;
+         } else if (!mActivity.getProperties().areHardwareKeyboardShortcutsDisabled() &&
+             e.isCtrlPressed() && e.isAltPressed()) {
+             // Get the unmodified code point:
+-- 
+2.43.0
+

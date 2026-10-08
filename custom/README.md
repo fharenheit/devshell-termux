@@ -34,19 +34,22 @@
 |---|---|
 | 기본 extra keys에 ENTER(PGUP 오른쪽), KEYBOARD(PGDN 오른쪽, 키보드 표시/숨기기) 버튼 추가 | `custom/patches/0006-*.patch` (`TermuxPropertyConstants.java`) |
 | 터미널에서 URL을 길게 누르고 More → **Open URL**로 브라우저 열기(선택에 URL이 여러 개면 고르기). 길게 눌러 선택할 때 여러 줄로 넘어간 단어(긴 URL)도 한 번에 선택 | `custom/patches/0015-*.patch` (`TermuxActivity.java`, `TextSelectionCursorController.java`) + `app/.../terminal/links/`, `fork_links.xml` |
+| 키보드 단축키: Ctrl+Tab/Ctrl+Shift+Tab 탭 이동, Ctrl+Shift+T 새 탭, Ctrl+Shift+W 탭 닫기, Ctrl+Shift+C/V 복사/붙여넣기, Ctrl+Shift+F 찾기, Ctrl+Shift+S 스니펫, Ctrl+=/−/0 화면 글자 크기. ⚙ → Keyboard shortcuts에 목록, `terminal-keyboard-shortcuts = false`로 끔 | `custom/patches/0018-*.patch` (`TermuxTerminalViewClient.java`) + `app/.../terminal/tabs/TerminalKeyboardShortcuts.java` |
+| 터미널 출력에서 찾기(⚙ → Find, 길게 누르기 → More → Find, Ctrl+Shift+F): 스크롤된 기록까지 검색, 화면의 일치 강조, ▲/▼로 이전/다음, 개수 표시, 대문자가 없으면 대소문자 무시, 여러 줄로 넘어간 줄과 한글 폭 처리 | `custom/patches/0020-*.patch` (`TerminalView.java` 오버레이, `TermuxActivity.java` 메뉴) + `app/.../terminal/search/` |
+| 스니펫(⚙ → Snippets, Ctrl+Shift+S, `SNIPPETS` extra key): 자주 쓰는 명령을 저장하고 눌러서 현재 탭에 입력(Enter 여부, 여러 줄, SSH 호스트별). `~/.termux/snippets.json`, 설정 내보내기에 포함 | `custom/patches/0019-*.patch` (`TermuxTerminalExtraKeys.java`, `ExtraKeysConstants.java`) + `app/.../terminal/snippets/` |
 
 ### SSH
 
 | 내용 | 위치 |
 |---|---|
 | SSH 접속 관리(⚙ 메뉴 → SSH): 호스트 등록/수정/삭제, 탭으로 접속, Disconnect/Reconnect, 비밀번호 암호화 저장, 키 생성/복사, `ssh-copy-id`, 점프 호스트, 포트 포워딩, 자동 재접속, mosh. 자세한 내용은 `custom/docs/ssh.md` | 포크 전용 파일만 (`app/.../terminal/ssh/`, `fork_ssh.xml`, `TerminalTabsController.java`) |
-| SSH 파일 탐색(SSH 탭 또는 호스트 메뉴 → Browse files): SFTP로 파일 목록, 이미지 보기, 텍스트 보기/편집/저장(문법 강조, 툴바: Undo/Redo, 자동 줄 바꿈, 글꼴 크기, 인코딩, 줄 끝, 16진수 보기, 충돌 확인, 안전한 저장), 업로드/다운로드, 이름 바꾸기, 삭제, 새 폴더/파일, 속성. ssh 탭의 연결을 공유. 자세한 내용은 `custom/docs/sftp.md` | `custom/patches/0013-*.patch` (`AndroidManifest.xml`) + `app/.../terminal/sftp/`, `fork_sftp.xml` |
+| SSH 파일 탐색(SSH 탭 또는 호스트 메뉴 → Browse files): SFTP로 파일 목록, 이미지 보기, 텍스트 보기/편집/저장(문법 강조, 툴바: Undo/Redo, 자동 줄 바꿈, 글꼴 크기, 인코딩, 줄 끝, 16진수 보기, 충돌 확인, 안전한 저장), 업로드/다운로드(여러 개 선택, 폴더 통째로), 이름 바꾸기, 삭제, 권한(chmod), 즐겨찾기, 새 폴더/파일, 속성. ssh 탭의 연결을 공유. 자세한 내용은 `custom/docs/sftp.md` | `custom/patches/0013-*.patch` (`AndroidManifest.xml`) + `app/.../terminal/sftp/`, `fork_sftp.xml` |
 
 ### 설정
 
 | 내용 | 위치 |
 |---|---|
-| 설정 내보내기/가져오기(⚙ 메뉴): `Download/termux-settings-*.zip`에 termux.properties, colors, SSH 호스트, 앱 설정, 글꼴 저장(SSH 비밀번호 제외). 가져올 때 기존 파일은 `~/.termux/backup/`에 백업 | `custom/patches/0012-*.patch` (`TermuxActivity.java`) + `app/.../terminal/backup/` |
+| 설정 내보내기/가져오기(⚙ 메뉴): `Download/termux-settings-*.zip`에 termux.properties, colors, SSH 호스트, 스니펫, 앱 설정, 글꼴 저장(SSH 비밀번호 제외). 가져올 때 기존 파일은 `~/.termux/backup/`에 백업 | `custom/patches/0012-*.patch` (`TermuxActivity.java`) + `app/.../terminal/backup/` |
 
 ### 저장소와 빌드
 

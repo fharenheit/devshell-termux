@@ -178,6 +178,7 @@ terminal-tabs = top              # top | bottom | off   (기본 top)
 terminal-tabs-show-close = true  # 탭의 × 버튼 표시 (기본 true)
 max-sessions = 8                 # 1..32 (기본 8, 업스트림의 MAX_SESSIONS와 같음)
 terminal-session-notifications = all  # all | exit | bell | off (4단계)
+terminal-keyboard-shortcuts = true     # Ctrl+Tab 등 데스크톱 터미널 단축키 (TerminalKeyboardShortcuts)
 terminal-tab-auto-title = process     # process | cwd | off (5.1)
 ```
 

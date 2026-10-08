@@ -26,8 +26,9 @@ SSH 호스트의 파일과 디렉터리를 탐색하고, 이미지를 보고, �
 | 화면 | 기능 |
 |---|---|
 | 파일 목록 | 폴더 먼저, 이름/크기/수정 시간 정렬, 숨김 파일 보기, 경로로 이동, 새로고침. 누르면 폴더는 들어가고 이미지는 뷰어, 그 외는 편집기. 뒤로 가기는 상위 폴더 |
-| 항목 메뉴(길게 누름) | Open, Open as text, Download, Rename, Delete(폴더는 안의 내용까지), Properties(경로, 크기, 권한, uid:gid, 수정 시간) |
-| 목록 메뉴 | New folder, New file, Upload(여러 파일 선택, 같은 이름이 있으면 Replace/Skip existing 선택) |
+| 항목 메뉴(길게 누름) | Open, Select, Open as text, Download(폴더는 Download the folder), Bookmark(폴더), Rename, Permissions, Delete(폴더는 안의 내용까지), Properties(경로, 크기, 권한, uid:gid, 수정 시간) |
+| 여러 개 선택 | 항목 메뉴의 Select 또는 목록 메뉴의 Select all로 시작. 누를 때마다 선택/해제, 제목에 선택 개수. 메뉴: Download, Delete, Permissions, Select all, Clear the selection. Back으로 선택 해제. 폴더를 바꾸면 해제 |
+| 목록 메뉴 | Bookmarks, Refresh, Go to path, New folder, New file, Upload(여러 파일 선택, 같은 이름이 있으면 Replace/Skip existing 선택), Upload a folder, Select all, Show hidden files, Sort by |
 | 이미지 뷰어 | jpg/png/gif/webp/bmp/heic, 32MB까지. 두 손가락 확대, 끌기, 두 번 눌러 확대/원래대로, ◀ ▶로 같은 폴더의 이전/다음 이미지 |
 | 편집기 | 터미널 글꼴(`~/.termux/font.ttf`), 줄 번호, 문법 강조. 툴바: ↶ Undo, ↷ Redo, Find, Ln(줄로 이동), Wrap(자동 줄 바꿈), A− 14 A+(글꼴 크기), 인코딩, 줄 끝(LF/CRLF), HEX. 메뉴: Save, Find/Find next, Go to line, Syntax highlighting, Reload |
 
@@ -66,6 +67,15 @@ SSH 호스트의 파일과 디렉터리를 탐색하고, 이미지를 보고, �
 - 화면에 보이는 줄과 위아래 60줄만 색칠하고, 스크롤(0.1초)이나 편집(0.2초)이 멈추면 다시 칠함. 여러 줄 주석/문자열을 알기 위해 파일
   처음부터 훑되, 큰 파일은 256KB 앞에서부터 훑음
 - 색은 VS Code Dark+ 계열. 편집기 안에서 붙여 넣을 때는 색 없이 글자만 붙여 넣음
+
+## 여러 개 다운로드, 폴더 올리기, 권한, 즐겨찾기
+
+- **폴더 다운로드**: 선택한 폴더는 안의 파일까지 `Download/<폴더 이름>/...`에 같은 구조로 받음. 폴더를 가리키는 심볼릭 링크는 따라가지 않음(순환 방지).
+  진행률은 전체 크기 기준, 취소하면 받던 파일을 지움
+- **폴더 올리기**: 기기의 폴더를 골라(Android 폴더 선택 화면) 안의 파일과 하위 폴더를 현재 폴더 아래 같은 이름으로 올림. 같은 이름의 폴더가 있으면 물어보고
+  그 안에 합침(같은 이름 파일은 바꿈). 같은 이름의 파일이 있으면 올리지 않음
+- **권한**: 주인/그룹/다른 사용자의 읽기·쓰기·실행 체크박스와 8진수(`644`, `755`, setuid 등 4자리 포함)가 서로 맞춰짐. 여러 개를 선택하면 첫 항목의 권한에서 시작해 모두에 적용
+- **즐겨찾기**: 호스트마다 폴더를 저장(앱 설정에 저장). Bookmarks 메뉴에 현재 폴더 추가, 홈, `/`, 저장한 폴더. 길게 눌러 삭제
 
 ## 다운로드
 

@@ -1,0 +1,95 @@
+From 5588fed204a64fca65ccc4bcf1751bbbe6f3f165 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Thu, 8 Oct 2026 03:26:15 +0000
+Subject: [PATCH] Added: Find text in the terminal output
+
+A find bar above the terminal searches the screen and the rows scrolled
+above it, with lines that wrap over rows searched as one line and wide
+characters like Korean taking their two columns. The matches on the
+screen are highlighted, the current one more, and up and down go to
+older and newer matches, scrolling to them, with their count shown.
+The search ignores case unless the query has capitals.
+
+It is opened from the tab bar settings menu, the terminal context menu
+or Ctrl+Shift+F, and closed with its close button, Escape or Back.
+TerminalView gets an overlay hook to draw the highlights.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01GLNsTPnn2xKUQ4uFcevT6G
+---
+ .../java/com/termux/app/TermuxActivity.java   |  5 +++++
+ .../java/com/termux/view/TerminalView.java    | 21 +++++++++++++++++++
+ 2 files changed, 26 insertions(+)
+
+diff --git a/app/src/main/java/com/termux/app/TermuxActivity.java b/app/src/main/java/com/termux/app/TermuxActivity.java
+index d3d7b0e..4d9fa9a 100644
+--- a/app/src/main/java/com/termux/app/TermuxActivity.java
++++ b/app/src/main/java/com/termux/app/TermuxActivity.java
+@@ -181,6 +181,7 @@ public final class TermuxActivity extends Activity implements ServiceConnection
+     private static final int CONTEXT_MENU_SETTINGS_ID = 8;
+     private static final int CONTEXT_MENU_REPORT_ID = 9;
+     private static final int CONTEXT_MENU_OPEN_URL_ID = 12;
++    private static final int CONTEXT_MENU_FIND_ID = 13;
+ 
+     private static final String ARG_TERMINAL_TOOLBAR_TEXT_INPUT = "terminal_toolbar_text_input";
+ 
+@@ -627,6 +628,7 @@ public final class TermuxActivity extends Activity implements ServiceConnection
+ 
+         if (!TerminalLinks.findUrls(mTerminalView.getStoredSelectedText()).isEmpty())
+             menu.add(Menu.NONE, CONTEXT_MENU_OPEN_URL_ID, Menu.NONE, R.string.action_open_url);
++        menu.add(Menu.NONE, CONTEXT_MENU_FIND_ID, Menu.NONE, R.string.action_terminal_search);
+         menu.add(Menu.NONE, CONTEXT_MENU_SELECT_URL_ID, Menu.NONE, R.string.action_select_url);
+         menu.add(Menu.NONE, CONTEXT_MENU_SHARE_TRANSCRIPT_ID, Menu.NONE, R.string.action_share_transcript);
+         if (!DataUtils.isNullOrEmpty(mTerminalView.getStoredSelectedText()))
+@@ -659,6 +661,9 @@ public final class TermuxActivity extends Activity implements ServiceConnection
+             case CONTEXT_MENU_OPEN_URL_ID:
+                 TerminalLinks.open(this, TerminalLinks.findUrls(mTerminalView.getStoredSelectedText()));
+                 return true;
++            case CONTEXT_MENU_FIND_ID:
++                if (mTerminalTabsController != null) mTerminalTabsController.getSearchBar().show();
++                return true;
+             case CONTEXT_MENU_SELECT_URL_ID:
+                 mTermuxTerminalViewClient.showUrlSelection();
+                 return true;
+diff --git a/terminal-view/src/main/java/com/termux/view/TerminalView.java b/terminal-view/src/main/java/com/termux/view/TerminalView.java
+index 012d965..e34907e 100644
+--- a/terminal-view/src/main/java/com/termux/view/TerminalView.java
++++ b/terminal-view/src/main/java/com/termux/view/TerminalView.java
+@@ -1091,6 +1091,10 @@ public final class TerminalView extends View {
+ 
+             mRenderer.render(mEmulator, canvas, mTopRow, sel[0], sel[1], sel[2], sel[3]);
+ 
++            // Draw over the text, like the matches of a search.
++            if (mOverlay != null)
++                mOverlay.draw(canvas, mEmulator, mTopRow, mRenderer.mFontWidth, mRenderer.mFontLineSpacing, mRenderer.mFontLineSpacingAndAscent);
++
+             // render the text being composed by the IME at the cursor
+             mRenderer.renderComposingText(mEmulator, canvas, mTopRow, mComposingText);
+ 
+@@ -1126,6 +1130,23 @@ public final class TerminalView extends View {
+         return Math.round((cy - mTopRow) * mRenderer.mFontLineSpacing);
+     }
+ 
++    /** Draws over the terminal text, like the matches of a search. */
++    public interface Overlay {
++        /**
++         * Draw over the rows from {@code topRow}. A column is {@code columnWidth} wide, and row
++         * {@code topRow + i} spans from {@code firstRowTop + i * rowHeight} for {@code rowHeight}.
++         */
++        void draw(Canvas canvas, TerminalEmulator emulator, int topRow, float columnWidth, int rowHeight, int firstRowTop);
++    }
++
++    private Overlay mOverlay;
++
++    /** Set what to draw over the terminal text, or {@code null} for nothing. */
++    public void setOverlay(@Nullable Overlay overlay) {
++        mOverlay = overlay;
++        invalidate();
++    }
++
+     public int getTopRow() {
+         return mTopRow;
+     }
+-- 
+2.43.0
+

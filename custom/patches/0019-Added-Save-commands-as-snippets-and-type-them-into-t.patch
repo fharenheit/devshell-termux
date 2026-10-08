@@ -1,0 +1,56 @@
+From e331bafbf206ace12f56451134bdf6b8d51ce8e6 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Thu, 8 Oct 2026 03:21:54 +0000
+Subject: [PATCH] Added: Save commands as snippets and type them into tabs
+
+Snippets are saved commands, with a name, one or more lines, whether
+Enter is pressed after them, and optionally the SSH host whose tabs they
+are for. Tapping one types it into the current tab. They are opened
+from the tab bar settings menu, Ctrl+Shift+S or a SNIPPETS extra key,
+edited, reordered and deleted with a long press, saved in
+~/.termux/snippets.json, and included in the settings export.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01GLNsTPnn2xKUQ4uFcevT6G
+---
+ .../com/termux/app/terminal/io/TermuxTerminalExtraKeys.java   | 4 ++++
+ .../shared/terminal/io/extrakeys/ExtraKeysConstants.java      | 1 +
+ 2 files changed, 5 insertions(+)
+
+diff --git a/app/src/main/java/com/termux/app/terminal/io/TermuxTerminalExtraKeys.java b/app/src/main/java/com/termux/app/terminal/io/TermuxTerminalExtraKeys.java
+index cd042c4..56ccbf9 100644
+--- a/app/src/main/java/com/termux/app/terminal/io/TermuxTerminalExtraKeys.java
++++ b/app/src/main/java/com/termux/app/terminal/io/TermuxTerminalExtraKeys.java
+@@ -9,6 +9,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
+ 
+ import com.termux.app.terminal.TermuxTerminalSessionClient;
+ import com.termux.app.terminal.TermuxTerminalViewClient;
++import com.termux.app.terminal.snippets.SnippetsDialog;
+ import com.termux.shared.terminal.io.TerminalExtraKeys;
+ import com.termux.view.TerminalView;
+ 
+@@ -41,6 +42,9 @@ public class TermuxTerminalExtraKeys extends TerminalExtraKeys {
+         } else if ("FONT_LARGER".equals(key) || "FONT_SMALLER".equals(key)) {
+             if (mTermuxTerminalViewClient != null)
+                 mTermuxTerminalViewClient.changeFontSize("FONT_LARGER".equals(key));
++        } else if ("SNIPPETS".equals(key)) {
++            if (mTermuxTerminalViewClient != null)
++                SnippetsDialog.show(mTermuxTerminalViewClient.getActivity());
+         } else if ("PASTE".equals(key)) {
+             if(mTermuxTerminalSessionClient != null)
+                 mTermuxTerminalSessionClient.onPasteTextFromClipboard(null);
+diff --git a/termux-shared/src/main/java/com/termux/shared/terminal/io/extrakeys/ExtraKeysConstants.java b/termux-shared/src/main/java/com/termux/shared/terminal/io/extrakeys/ExtraKeysConstants.java
+index 7eb3492..ffc431f 100644
+--- a/termux-shared/src/main/java/com/termux/shared/terminal/io/extrakeys/ExtraKeysConstants.java
++++ b/termux-shared/src/main/java/com/termux/shared/terminal/io/extrakeys/ExtraKeysConstants.java
+@@ -126,6 +126,7 @@ public class ExtraKeysConstants {
+             // Make the terminal text larger or smaller until the app is opened again.
+             put("FONT_LARGER", "A+");
+             put("FONT_SMALLER", "A−"); // U+2212 − MINUS SIGN
++            put("SNIPPETS", "⚡"); // Saved commands
+         }};
+ 
+         /**
+-- 
+2.43.0
+
