@@ -1,6 +1,14 @@
 # Termux application
 
-*이 Termux는 Android에서 블루투스 키보드 등으로 한글입력이 안되는 문제를 수정한 Termux입니다. APK 파일을 수동 설치하시고 사용하세요.*
+> **이 저장소는 한국어 사용자를 위해 기능을 더한 Termux 포크입니다.** [릴리즈](https://github.com/fharenheit/termux-app/releases)에서 APK를 받아 수동으로 설치하세요(대부분의 기기는 `*_arm64-v8a.apk`). Play 스토어/F-Droid 버전 위에는 덮어 설치할 수 없습니다.
+>
+> - 블루투스/하드웨어 키보드 한글 입력, D2Coding 기본 글꼴, 글꼴 목록(미리보기, 큰 글꼴 내려받기), 저장되는 글자 크기 설정과 화면용 A+/A− 키
+> - 세션 탭(새 출력·벨 표시, 이름 바꾸기, 자동 제목, 위/아래 배치), 백그라운드 세션 종료·벨 알림, 탭 바의 ⚙ 메뉴
+> - SSH 접속 관리(비밀번호 암호화 저장, 키 관리, 점프 호스트, 포트 포워딩, 자동 재접속, mosh)
+> - SSH 파일 탐색(SFTP): 이미지 보기, 텍스트 편집(문법 강조, Undo/Redo, 인코딩, 16진수 보기), 업로드/다운로드
+> - 터미널의 URL 열기, 설정 내보내기/가져오기, extra keys의 ENTER·KEYBOARD 버튼
+>
+> 기능별 설명은 [custom/README.md](custom/README.md), 변경 이력은 [history.md](history.md)에 있습니다.
 
 [![Build status](https://github.com/termux/termux-app/workflows/Build/badge.svg)](https://github.com/termux/termux-app/actions)
 [![Testing status](https://github.com/termux/termux-app/workflows/Unit%20tests/badge.svg)](https://github.com/termux/termux-app/actions)

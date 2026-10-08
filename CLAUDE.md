@@ -9,4 +9,5 @@ See `custom/README.md` for the customizations and how they are kept.
 - After committing a change to a file that also exists upstream, run `custom/update-patches.sh`
   and commit the regenerated patches. Add new fork-only files to `custom/fork-files.txt`.
 - Pushing to `master` builds APKs in the `Build` workflow. Publish a release from that build by
-  adding `.github/release-notes/<tag>.md` and pushing a `release/<tag>` branch on the same commit.
+  adding `.github/release-notes/<tag>.md`, adding the release's commits to `history.md`, and pushing a
+  `release/<tag>` branch on the same commit.
