@@ -34,3 +34,4 @@ app/src/main/java/com/termux/app/terminal/snippets
 app/src/test/java/com/termux/app/terminal/snippets
 app/src/main/java/com/termux/app/terminal/search
 app/src/test/java/com/termux/app/terminal/search
+app/src/main/java/com/termux/app/terminal/clipboard

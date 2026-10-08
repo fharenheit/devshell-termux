@@ -119,4 +119,18 @@ public class EditHistoryTest {
         Assert.assertTrue(mHistory.isAtSaved());
     }
 
+    @Test
+    public void testNewStep() {
+        Editable text = mEditText.getText();
+        text.insert(0, "a");
+        mHistory.startNewStep();
+        text.insert(1, "pasted");
+        mHistory.startNewStep();
+        text.insert(7, "b");
+        mHistory.undo();
+        Assert.assertEquals("apastedstart\n", text());
+        mHistory.undo();
+        Assert.assertEquals("astart\n", text());
+    }
+
 }

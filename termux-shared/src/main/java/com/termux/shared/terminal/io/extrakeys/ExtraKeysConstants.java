@@ -127,6 +127,8 @@ public class ExtraKeysConstants {
             put("FONT_LARGER", "A+");
             put("FONT_SMALLER", "A−"); // U+2212 − MINUS SIGN
             put("SNIPPETS", "⚡"); // Saved commands
+            put("COPY", "⧉"); // U+29C9 TWO JOINED SQUARES, copy the selection
+            put("COPY_SCREEN", "⧉ all"); // Copy the screen
         }};
 
         /**

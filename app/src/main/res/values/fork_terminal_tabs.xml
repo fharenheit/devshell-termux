@@ -41,6 +41,9 @@
     <string name="msg_settings_import_failed">Failed to import the settings: %1$s</string>
     <string name="msg_settings_imported">Settings imported. The previous ones were copied to %1$s</string>
 
+    <string name="msg_terminal_copy_select_first">Long press the text to select it, then tap ⧉ to copy it. Swipe up on ⧉ to copy the screen.</string>
+    <string name="msg_terminal_copied_selection">Copied the selection</string>
+    <string name="msg_terminal_copied_screen">Copied the screen</string>
     <string name="action_terminal_search">Find</string>
     <string name="hint_terminal_search">Find in the output</string>
     <string name="action_terminal_search_older">Older match</string>

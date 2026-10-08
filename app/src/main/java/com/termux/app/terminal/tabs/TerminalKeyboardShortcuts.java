@@ -9,9 +9,9 @@ import com.termux.R;
 import com.termux.app.TermuxActivity;
 import com.termux.app.terminal.TermuxTerminalSessionClient;
 import com.termux.app.terminal.TermuxTerminalViewClient;
+import com.termux.app.terminal.clipboard.TerminalClipboard;
 import com.termux.app.terminal.snippets.SnippetsDialog;
 import com.termux.terminal.TerminalSession;
-import com.termux.view.TerminalView;
 
 /**
  * Hardware keyboard shortcuts like the ones of desktop terminals, in addition to the upstream
@@ -77,12 +77,7 @@ public final class TerminalKeyboardShortcuts {
                     activity.getTerminalTabsController().closeSession(session);
                 return true;
             case KeyEvent.KEYCODE_C:
-                TerminalView terminalView = activity.getTerminalView();
-                if (terminalView.isSelectingText()) {
-                    String text = terminalView.getSelectedText();
-                    terminalView.stopTextSelectionMode();
-                    if (text != null) sessionClient.onCopyTextToClipboard(session, text);
-                }
+                if (!repeat) TerminalClipboard.copySelection(activity);
                 return true;
             case KeyEvent.KEYCODE_V:
                 if (!repeat) sessionClient.onPasteTextFromClipboard(session);

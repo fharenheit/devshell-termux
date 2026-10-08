@@ -1,6 +1,8 @@
 package com.termux.app.terminal.sftp;
 
 import android.app.AlertDialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -62,6 +64,10 @@ public class SftpEditorView extends LinearLayout {
 
     private final Button mUndoButton;
     private final Button mRedoButton;
+    private final Button mCutButton;
+    private final Button mCopyButton;
+    private final Button mPasteButton;
+    private final Button mSelectAllButton;
     private final Button mFindButton;
     private final Button mGoToButton;
     private final Button mWrapButton;
@@ -106,6 +112,12 @@ public class SftpEditorView extends LinearLayout {
         addView(toolbarScroll, new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         mUndoButton = addToolbarButton(toolbar, "↶", R.string.sftp_action_undo, v -> undo());
         mRedoButton = addToolbarButton(toolbar, "↷", R.string.sftp_action_redo, v -> redo());
+        addToolbarSeparator(toolbar);
+        mCutButton = addToolbarButton(toolbar, "✂", R.string.sftp_action_cut, v -> cut());
+        mCopyButton = addToolbarButton(toolbar, "⧉", R.string.sftp_action_copy, v -> copy());
+        mPasteButton = addToolbarButton(toolbar, "⎘", R.string.sftp_action_paste, v -> paste());
+        mSelectAllButton = addToolbarButton(toolbar, "⬚", R.string.sftp_action_select_all_text, v -> selectAll());
+        addToolbarSeparator(toolbar);
         mFindButton = addToolbarButton(toolbar, getContext().getString(R.string.sftp_action_find), R.string.sftp_action_find, v -> showFindDialog());
         mGoToButton = addToolbarButton(toolbar, getContext().getString(R.string.sftp_toolbar_go_to_line), R.string.sftp_action_go_to_line, v -> showGoToLineDialog());
         mWrapButton = addToolbarButton(toolbar, getContext().getString(R.string.sftp_toolbar_word_wrap), R.string.sftp_action_word_wrap, v -> toggleWordWrap());
@@ -296,6 +308,10 @@ public class SftpEditorView extends LinearLayout {
         boolean editable = text && !mReadOnly;
         setEnabled(mUndoButton, editable && mHistory.canUndo());
         setEnabled(mRedoButton, editable && mHistory.canRedo());
+        setEnabled(mCutButton, editable);
+        setEnabled(mCopyButton, true);
+        setEnabled(mPasteButton, editable);
+        setEnabled(mSelectAllButton, text);
         setEnabled(mFindButton, text);
         setEnabled(mGoToButton, text);
         setEnabled(mWrapButton, text);
@@ -322,6 +338,95 @@ public class SftpEditorView extends LinearLayout {
 
     private void undo() {
         mHistory.undo();
+    }
+
+    private void addToolbarSeparator(LinearLayout toolbar) {
+        View separator = new View(getContext());
+        separator.setBackgroundColor(0xFF555555);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(dp(1), dp(24));
+        params.setMargins(dp(2), 0, dp(2), 0);
+        toolbar.addView(separator, params);
+    }
+
+    // Clipboard
+
+    /** The most hex dump that is copied, since the clipboard can't hold much more. */
+    private static final int MAX_HEX_COPY_BYTES = 64 * 1024;
+
+    private void setClipboard(@NonNull CharSequence text, int messageId) {
+        ClipboardManager clipboard = (ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
+        if (clipboard == null) return;
+        clipboard.setPrimaryClip(ClipData.newPlainText(null, text));
+        Toast.makeText(getContext(), messageId, Toast.LENGTH_SHORT).show();
+    }
+
+    /**
+     * The range to cut or copy: the selection, or the line of the cursor with its line feed if
+     * nothing is selected, like in code editors.
+     */
+    @NonNull
+    private int[] getSelectionOrLine() {
+        CharSequence text = mText.getText();
+        int start = Math.max(0, Math.min(mText.getSelectionStart(), mText.getSelectionEnd()));
+        int end = Math.max(0, Math.max(mText.getSelectionStart(), mText.getSelectionEnd()));
+        if (start != end) return new int[]{start, end};
+        while (start > 0 && text.charAt(start - 1) != '\n') start--;
+        while (end < text.length() && text.charAt(end) != '\n') end++;
+        if (end < text.length()) end++;
+        return new int[]{start, end};
+    }
+
+    private void cut() {
+        if (mHex || mReadOnly) return;
+        int[] range = getSelectionOrLine();
+        if (range[0] == range[1]) return;
+        setClipboard(mText.getText().subSequence(range[0], range[1]).toString(), R.string.sftp_cut);
+        mHistory.startNewStep();
+        mText.getText().delete(range[0], range[1]);
+        mHistory.startNewStep();
+    }
+
+    private void copy() {
+        if (mHex) {
+            int count = Math.min(mHexByteCount, MAX_HEX_COPY_BYTES);
+            StringBuilder dump = new StringBuilder();
+            for (int offset = 0; offset < count; offset += 16)
+                dump.append(SftpText.formatHexLine(mHexBytes, count, offset, 16)).append('\n');
+            setClipboard(dump, mHexByteCount > count ? R.string.sftp_copied_hex_start : R.string.sftp_copied);
+            return;
+        }
+        int[] range = getSelectionOrLine();
+        if (range[0] == range[1]) return;
+        setClipboard(mText.getText().subSequence(range[0], range[1]).toString(), R.string.sftp_copied);
+    }
+
+    /** Paste the clipboard text at the cursor, replacing the selection, without colors or styles. */
+    private void paste() {
+        if (mHex || mReadOnly) return;
+        ClipboardManager clipboard = (ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clip = clipboard == null ? null : clipboard.getPrimaryClip();
+        if (clip == null || clip.getItemCount() == 0) {
+            Toast.makeText(getContext(), R.string.sftp_clipboard_empty, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        CharSequence pasted = clip.getItemAt(0).coerceToText(getContext());
+        if (pasted == null || pasted.length() == 0) return;
+        String text = pasted.toString();
+        // CRLF files keep LF in the editor and get their CRs back when saved.
+        if (mCrlf) text = text.replace("\r\n", "\n");
+        int start = Math.max(0, Math.min(mText.getSelectionStart(), mText.getSelectionEnd()));
+        int end = Math.max(0, Math.max(mText.getSelectionStart(), mText.getSelectionEnd()));
+        mText.requestFocus();
+        mHistory.startNewStep();
+        mText.getText().replace(start, end, text);
+        mHistory.startNewStep();
+        mText.setSelection(Math.min(mText.length(), start + text.length()));
+    }
+
+    private void selectAll() {
+        if (mHex) return;
+        mText.requestFocus();
+        mText.selectAll();
     }
 
     private void redo() {

@@ -36,6 +36,14 @@
     <string name="sftp_action_reload">Reload</string>
     <string name="sftp_action_syntax">Syntax highlighting</string>
     <string name="sftp_syntax_plain_text">Plain text</string>
+    <string name="sftp_action_cut">Cut (the line if nothing is selected)</string>
+    <string name="sftp_action_copy">Copy (the line if nothing is selected)</string>
+    <string name="sftp_action_paste">Paste</string>
+    <string name="sftp_action_select_all_text">Select all</string>
+    <string name="sftp_cut">Cut</string>
+    <string name="sftp_copied">Copied</string>
+    <string name="sftp_copied_hex_start">Copied the hex of the first 64 KB</string>
+    <string name="sftp_clipboard_empty">The clipboard is empty</string>
     <string name="sftp_action_undo">Undo</string>
     <string name="sftp_action_redo">Redo</string>
     <string name="sftp_action_go_to_line">Go to line</string>

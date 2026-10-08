@@ -90,4 +90,38 @@ public class SftpEditorViewTest {
         Assert.assertEquals(20, next.getFontSize());
     }
 
+    @Test
+    public void testCutCopyPaste() throws Exception {
+        load("one\ntwo\nthree\n".getBytes(StandardCharsets.UTF_8), false);
+        android.content.ClipboardManager clipboard = (android.content.ClipboardManager)
+            mEditor.getContext().getSystemService(android.content.Context.CLIPBOARD_SERVICE);
+        LineNumberEditText text = mEditor.getTextView();
+
+        // Copy without a selection copies the line of the cursor.
+        text.setSelection(5);
+        invoke("copy");
+        Assert.assertEquals("two\n", clipboard.getPrimaryClip().getItemAt(0).getText().toString());
+
+        // Cut the selection, then paste it back, each a step of its own.
+        text.setSelection(0, 3);
+        invoke("cut");
+        Assert.assertEquals("one", clipboard.getPrimaryClip().getItemAt(0).getText().toString());
+        Assert.assertEquals("\ntwo\nthree\n", text.getText().toString());
+        text.setSelection(text.length());
+        invoke("paste");
+        Assert.assertEquals("\ntwo\nthree\none", text.getText().toString());
+        Assert.assertTrue(mEditor.isDirty());
+        invoke("undo");
+        Assert.assertEquals("\ntwo\nthree\n", text.getText().toString());
+        invoke("undo");
+        Assert.assertEquals("one\ntwo\nthree\n", text.getText().toString());
+        Assert.assertFalse(mEditor.isDirty());
+    }
+
+    private void invoke(String method) throws Exception {
+        java.lang.reflect.Method m = SftpEditorView.class.getDeclaredMethod(method);
+        m.setAccessible(true);
+        m.invoke(mEditor);
+    }
+
 }

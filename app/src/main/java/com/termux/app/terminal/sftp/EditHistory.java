@@ -48,6 +48,8 @@ public class EditHistory implements TextWatcher {
     private int mChars;
     private boolean mApplying;
     private boolean mEnabled = true;
+    /** Whether the next change is a step of its own, even if it continues the last one. */
+    private boolean mNewStep;
     private String mBefore;
     private Listener mListener;
 
@@ -72,6 +74,11 @@ public class EditHistory implements TextWatcher {
         mSavedPosition = 0;
         mChars = 0;
         notifyChanged();
+    }
+
+    /** Make the next change a step of its own, like a paste that should be undone alone. */
+    public void startNewStep() {
+        mNewStep = true;
     }
 
     public void markSaved() {
@@ -150,7 +157,8 @@ public class EditHistory implements TextWatcher {
         }
         if (mSavedPosition > mPosition) mSavedPosition = -1;
 
-        Edit last = mPosition > 0 && mPosition != mSavedPosition ? mEdits.get(mPosition - 1) : null;
+        Edit last = mPosition > 0 && mPosition != mSavedPosition && !mNewStep ? mEdits.get(mPosition - 1) : null;
+        mNewStep = false;
         if (last != null && time - last.time < MERGE_TIME_MS && after.indexOf('\n') < 0 && merge(last, start, before, after)) {
             last.time = time;
         } else {
