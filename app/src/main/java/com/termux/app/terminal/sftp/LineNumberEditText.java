@@ -9,14 +9,16 @@ import android.text.Editable;
 import android.text.InputType;
 import android.text.Layout;
 import android.text.Spanned;
+import android.text.TextWatcher;
 import android.text.style.ForegroundColorSpan;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.widget.EditText;
 
 /**
- * A text editor without line wrapping, that scrolls in both directions and shows line numbers in
- * a gutter at the left. Without wrapping, each layout line is a line of the file.
+ * A text editor that shows line numbers in a gutter at the left. Without word wrap, it scrolls in
+ * both directions and each layout line is a line of the file. With word wrap, a line of the file
+ * can take several layout lines, and only the first one is numbered.
  *
  * It highlights the syntax of a {@link SyntaxHighlighter.Language}: shortly after the text
  * changes or scrolls, the visible lines and some lines around them are colored with spans.
@@ -57,6 +59,34 @@ public class LineNumberEditText extends EditText {
     private int mHighlightedLastLine = -1;
     private boolean mHighlightStale = true;
 
+    private boolean mWordWrap;
+    /** The number of line feeds in the text, kept up to date by {@link #mLineCounter}. */
+    private int mLineFeeds;
+    private int mRemovedLineFeeds;
+    /** The number of line feeds before an offset, so that counting can continue from there. */
+    private int mCachedOffset;
+    private int mCachedLineFeeds;
+
+    private final TextWatcher mLineCounter = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            mRemovedLineFeeds = countLineFeeds(s, start, start + count);
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            mLineFeeds += countLineFeeds(s, start, start + count) - mRemovedLineFeeds;
+            if (start < mCachedOffset) {
+                mCachedOffset = 0;
+                mCachedLineFeeds = 0;
+            }
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+        }
+    };
+
     private final Paint mNumberPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint mGutterPaint = new Paint();
     private final int mGutterPadding;
@@ -75,7 +105,62 @@ public class LineNumberEditText extends EditText {
         mNumberPaint.setColor(Color.GRAY);
         mNumberPaint.setTextAlign(Paint.Align.RIGHT);
         mGutterPaint.setColor(0xFF1A1A1A);
+        mLineFeeds = countLineFeeds(getText(), 0, length());
+        addTextChangedListener(mLineCounter);
         updateGutter();
+    }
+
+    private static int countLineFeeds(CharSequence text, int start, int end) {
+        int count = 0;
+        for (int i = start; i < end; i++)
+            if (text.charAt(i) == '\n') count++;
+        return count;
+    }
+
+    /** The number of line feeds before an offset. */
+    private int countLineFeedsBefore(int offset) {
+        CharSequence text = getText();
+        offset = Math.min(offset, text.length());
+        if (offset >= mCachedOffset)
+            mCachedLineFeeds += countLineFeeds(text, mCachedOffset, offset);
+        else
+            mCachedLineFeeds -= countLineFeeds(text, offset, mCachedOffset);
+        mCachedOffset = offset;
+        return mCachedLineFeeds;
+    }
+
+    public void setWordWrap(boolean wordWrap) {
+        if (wordWrap == mWordWrap) return;
+        mWordWrap = wordWrap;
+        setHorizontallyScrolling(!wordWrap);
+        if (wordWrap) scrollTo(0, getScrollY());
+        mHighlightStale = true;
+        scheduleHighlight(0);
+    }
+
+    public boolean isWordWrap() {
+        return mWordWrap;
+    }
+
+    /** The number of lines of the text. */
+    public int getTextLineCount() {
+        return mLineFeeds + 1;
+    }
+
+    /** Move the cursor to the start of a line, counted from 1, and scroll to it. */
+    public void goToLine(int line) {
+        CharSequence text = getText();
+        int offset = 0;
+        for (int current = 1; current < line && offset < text.length(); offset++)
+            if (text.charAt(offset) == '\n') current++;
+        requestFocus();
+        setSelection(Math.min(offset, text.length()));
+        bringPointIntoView(getSelectionStart());
+    }
+
+    /** The line, counted from 1, of the cursor. */
+    public int getCursorLine() {
+        return countLineFeedsBefore(Math.max(0, getSelectionStart())) + 1;
     }
 
     @Override
@@ -158,7 +243,7 @@ public class LineNumberEditText extends EditText {
     /** Make the gutter wide enough for the largest line number. */
     private void updateGutter() {
         mNumberPaint.setTextSize(getTextSize() * 0.85f);
-        int lines = Math.max(1, getLineCount());
+        int lines = getTextLineCount();
         int width = (int) mNumberPaint.measureText(String.valueOf(Math.max(lines, 99))) + mGutterPadding * 2;
         if (width != mGutterWidth) {
             mGutterWidth = width;
@@ -178,9 +263,18 @@ public class LineNumberEditText extends EditText {
             int top = scrollY - getPaddingTop();
             int first = layout.getLineForVertical(Math.max(0, top));
             int last = layout.getLineForVertical(top + getHeight());
+            CharSequence text = getText();
+            int number = mWordWrap ? countLineFeedsBefore(layout.getLineStart(first)) : first;
             for (int line = first; line <= last; line++) {
+                if (mWordWrap) {
+                    int lineStart = layout.getLineStart(line);
+                    if (lineStart > 0 && text.charAt(lineStart - 1) != '\n') continue;
+                    if (line > first) number++;
+                } else {
+                    number = line;
+                }
                 float y = getPaddingTop() + layout.getLineBaseline(line);
-                canvas.drawText(String.valueOf(line + 1), scrollX + mGutterWidth - mGutterPadding, y, mNumberPaint);
+                canvas.drawText(String.valueOf(number + 1), scrollX + mGutterWidth - mGutterPadding, y, mNumberPaint);
             }
         }
     }

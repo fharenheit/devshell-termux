@@ -29,13 +29,26 @@ SSH 호스트의 파일과 디렉터리를 탐색하고, 이미지를 보고, �
 | 항목 메뉴(길게 누름) | Open, Open as text, Download, Rename, Delete(폴더는 안의 내용까지), Properties(경로, 크기, 권한, uid:gid, 수정 시간) |
 | 목록 메뉴 | New folder, New file, Upload(여러 파일 선택, 같은 이름이 있으면 Replace/Skip existing 선택) |
 | 이미지 뷰어 | jpg/png/gif/webp/bmp/heic, 32MB까지. 두 손가락 확대, 끌기, 두 번 눌러 확대/원래대로, ◀ ▶로 같은 폴더의 이전/다음 이미지 |
-| 편집기 | 터미널 글꼴(`~/.termux/font.ttf`), 줄 번호, 줄 바꿈 없음, 문법 강조, Find/Find next, Syntax highlighting(언어 바꾸기), Reload, Save |
+| 편집기 | 터미널 글꼴(`~/.termux/font.ttf`), 줄 번호, 문법 강조. 툴바: ↶ Undo, ↷ Redo, Find, Ln(줄로 이동), Wrap(자동 줄 바꿈), 인코딩, 줄 끝(LF/CRLF), HEX. 메뉴: Save, Find/Find next, Go to line, Syntax highlighting, Reload |
+
+## 편집기 툴바
+
+- **Undo/Redo**: 이어서 입력한 글자(1.5초 이내, 줄 바꿈 전까지)와 한글 조합 입력은 한 단계로 묶음. 연속 지우기도 한 단계.
+  저장한 상태까지 되돌리면 저장 안 됨 표시(●)가 없어짐. 기록은 최대 약 400만 글자
+- **Wrap**: 자동 줄 바꿈. 줄 번호는 파일의 줄 기준(넘어간 줄에는 번호 없음). 설정은 기억함
+- **인코딩**: 파일을 열 때 BOM → UTF-8 → CP949(EUC-KR) → ISO-8859-1 순서로 자동 판별. 버튼에 현재 인코딩(+BOM) 표시.
+  Reopen with encoding(다른 인코딩으로 다시 읽기), Save with encoding(글자는 그대로 두고 저장할 인코딩만 바꾸기).
+  UTF-8, UTF-16LE/BE, CP949, Shift_JIS, EUC-JP, GB18030, Big5, Windows-1252/1251, KOI8-R, ISO-8859-1. 다시 저장했을 때 원래
+  바이트와 똑같지 않으면(그 인코딩으로 맞지 않는 바이트가 있으면) 읽기 전용. 저장할 인코딩으로 쓸 수 없는 글자가 있으면 저장하지 않고 알림
+- **줄 끝**: LF/CRLF 중에서 골라 저장. 섞여 있는 파일에서 고르면 모두 그 방식으로 통일
+- **HEX**: 바이트를 `주소  16진수  ASCII`로 보여 주는 읽기 전용 화면. 저장하지 않은 수정이 있으면 저장될 바이트를 보여 줌. 화면이 좁으면 한 줄에 8바이트.
+  바이너리 파일을 열면 Open in hex view / Open as text / Download 중에서 고름. 16진수 화면은 16MB까지 읽음
 
 ## 편집기 저장 규칙
 
-- 2MB까지 편집. 더 큰 파일은 앞 2MB만 읽기 전용으로 보여 줌. UTF-8이 아니면 읽기 전용
-- 앞부분에 NUL 바이트가 있으면 바이너리로 보고 Download / Open as text를 물어봄
-- 줄 끝이 모두 CRLF면 CRLF로 다시 저장. 섞여 있으면 그대로 둠
+- 2MB까지 편집. 더 큰 파일은 앞 2MB만 읽기 전용으로 보여 줌
+- 앞부분에 NUL 바이트가 있으면(UTF-16 BOM이 있는 파일 제외) 바이너리로 보고 어떻게 열지 물어봄
+- 줄 끝이 모두 CRLF면 CRLF로 다시 저장. 섞여 있으면 그대로 둠. 인코딩과 BOM도 그대로 유지
 - 저장 전에 서버 파일의 크기와 수정 시간을 다시 확인해서 그 사이에 바뀌었으면 Overwrite / Reload / Cancel을 물어봄
 - 같은 폴더의 임시 파일(`.<이름>.termux-xxxxxxxx.tmp`)에 원래 권한으로 쓴 다음 `posix-rename@openssh.com`으로 한 번에
   바꿈(쓰는 도중 끊겨도 원본이 망가지지 않음). 파일이 심볼릭 링크이거나, 서버가 이 확장을 지원하지 않거나, 임시 파일의
@@ -60,7 +73,8 @@ SSH 호스트의 파일과 디렉터리를 탐색하고, 이미지를 보고, �
 
 ## 테스트
 
-- `SftpTextTest`, `SftpPathsTest`: 줄 끝, UTF-8 판정, 잘린 UTF-8, 경로 처리
+- `SftpTextTest`, `SftpPathsTest`: 줄 끝, 인코딩 판별(CP949, BOM, UTF-16), 쓸 수 없는 글자, 16진수 줄, 잘린 UTF-8, 경로 처리
+- `EditHistoryTest`, `SftpEditorViewTest`, `LineNumberEditTextTest`: 입력/한글 조합/지우기 묶음, 저장 위치, 저장 내용, 읽기 전용, 문법 강조
 - `SftpClientTest`: 환경 변수 `TERMUX_SFTP_TEST_HOST`에 키로 로그인되는 ssh 호스트를 주면 실제 OpenSSH `sftp-server`에
   대해 목록(유니코드 이름), 3MB 파이프라인 전송, 크기 제한, 이름 바꾸기/덮어쓰기, 배타적 생성, chmod, 폴더 통째로 지우기,
   취소를 확인. 없으면 건너뜀

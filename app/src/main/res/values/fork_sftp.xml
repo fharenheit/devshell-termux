@@ -36,6 +36,21 @@
     <string name="sftp_action_reload">Reload</string>
     <string name="sftp_action_syntax">Syntax highlighting</string>
     <string name="sftp_syntax_plain_text">Plain text</string>
+    <string name="sftp_action_undo">Undo</string>
+    <string name="sftp_action_redo">Redo</string>
+    <string name="sftp_action_go_to_line">Go to line</string>
+    <string name="sftp_toolbar_go_to_line">Ln</string>
+    <string name="sftp_action_word_wrap">Word wrap</string>
+    <string name="sftp_toolbar_word_wrap">Wrap</string>
+    <string name="sftp_action_encoding">Encoding</string>
+    <string name="sftp_encoding_title">Encoding: %1$s</string>
+    <string name="sftp_action_reopen_with_encoding">Reopen with encoding</string>
+    <string name="sftp_action_save_with_encoding">Save with encoding</string>
+    <string name="sftp_action_line_ending">Line endings</string>
+    <string name="sftp_line_ending_lf">LF (Linux, macOS)</string>
+    <string name="sftp_line_ending_crlf">CRLF (Windows)</string>
+    <string name="sftp_action_hex">Hex view</string>
+    <string name="sftp_action_open_hex">Open in hex view</string>
     <string name="sftp_action_overwrite">Overwrite</string>
     <string name="sftp_action_discard">Discard</string>
     <string name="sftp_action_replace">Replace</string>
@@ -48,9 +63,13 @@
     <string name="sftp_image_too_large">Images larger than %1$s are not shown. Download the image instead.</string>
     <string name="sftp_image_unsupported">The image format is not supported</string>
 
-    <string name="sftp_binary_file">This looks like a binary file.</string>
+    <string name="sftp_binary_file_title">%1$s looks like a binary file</string>
     <string name="sftp_file_truncated">Only the first %1$s of the file are shown, read only</string>
-    <string name="sftp_not_utf8">The file is not UTF-8 text, so it is shown read only</string>
+    <string name="sftp_not_lossless">The file is not valid %1$s text, so it is shown read only. Choose another encoding to edit it.</string>
+    <string name="sftp_cannot_encode">Some characters can\'t be written in %1$s</string>
+    <string name="sftp_cannot_encode_save">Some characters can\'t be written in the encoding of the file. Choose another encoding with Save with encoding.</string>
+    <string name="sftp_hex_truncated">Only the first %1$s of the file are shown</string>
+    <string name="sftp_hex_unsaved">with unsaved changes</string>
     <string name="sftp_not_found">\"%1$s\" was not found</string>
     <string name="sftp_saved">Saved %1$s</string>
     <string name="sftp_conflict_title">File changed on the server</string>

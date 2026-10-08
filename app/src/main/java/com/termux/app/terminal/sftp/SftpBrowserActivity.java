@@ -49,6 +49,7 @@ import com.termux.shared.termux.TermuxConstants;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.nio.charset.CharacterCodingException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
@@ -141,14 +142,10 @@ public class SftpBrowserActivity extends Activity {
     private int mImageIndex;
 
     // Editor
-    private LineNumberEditText mEditor;
+    private SftpEditorView mEditor;
     @Nullable private String mEditPath;
     private long mEditMtime;
     private long mEditSize;
-    private boolean mEditCrlf;
-    private boolean mEditReadOnly;
-    private boolean mDirty;
-    @Nullable private String mFindQuery;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -231,17 +228,10 @@ public class SftpBrowserActivity extends Activity {
         mImageLayout.addView(imageBar);
         mRoot.addView(mImageLayout);
 
-        mEditor = new LineNumberEditText(this);
-        mEditor.setTypeface(getTerminalTypeface());
-        mEditor.addTextChangedListener(new TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
-            @Override public void afterTextChanged(Editable s) {
-                if (!mDirty && mEditPath != null && !mEditReadOnly) {
-                    mDirty = true;
-                    updateTitle();
-                }
-            }
+        mEditor = new SftpEditorView(this, getTerminalTypeface());
+        mEditor.setListener(() -> {
+            updateTitle();
+            invalidateOptionsMenu();
         });
         mRoot.addView(mEditor);
 
@@ -282,10 +272,12 @@ public class SftpBrowserActivity extends Activity {
                 break;
             case MODE_EDITOR:
                 String name = mEditPath == null ? "" : SftpPaths.name(mEditPath);
-                getActionBar().setTitle((mDirty ? "● " : "") + name);
-                SyntaxHighlighter.Language language = mEditor.getLanguage();
-                String subtitle = mEditReadOnly ? getString(R.string.sftp_read_only) : mHostName;
-                getActionBar().setSubtitle(language == null ? subtitle : subtitle + " · " + language.name);
+                getActionBar().setTitle((mEditor.isDirty() ? "● " : "") + name);
+                SyntaxHighlighter.Language language = mEditor.getTextView().getLanguage();
+                String subtitle = mEditor.isReadOnly() ? getString(R.string.sftp_read_only) : mHostName;
+                if (mEditor.isHex()) subtitle += " · HEX";
+                else if (language != null) subtitle += " · " + language.name;
+                getActionBar().setSubtitle(subtitle);
                 break;
         }
     }
@@ -570,60 +562,53 @@ public class SftpBrowserActivity extends Activity {
     // Editor
 
     private static final Object BINARY = new Object();
+    private static final int OPEN_AUTO = 0;
+    private static final int OPEN_TEXT = 1;
+    private static final int OPEN_HEX = 2;
 
     /** Open a file in the editor, or offer to download it if it is binary, unless {@code force}. */
     private void openText(@NonNull String path, boolean force) {
+        openFile(path, force ? OPEN_TEXT : OPEN_AUTO);
+    }
+
+    /**
+     * Open a file in the editor: as text, in hex, or as text unless it looks binary, then ask how.
+     * Up to {@link SftpText#MAX_EDIT_SIZE} is read for text, and {@link SftpText#MAX_HEX_SIZE}
+     * for hex.
+     */
+    private void openFile(@NonNull String path, int how) {
         runTask(client -> {
             SftpClient.Attributes attributes = client.stat(path);
+            int max = how == OPEN_HEX ? SftpText.MAX_HEX_SIZE : SftpText.MAX_EDIT_SIZE;
             ByteArrayOutputStream out = new ByteArrayOutputStream();
-            long read = client.read(path, out, SftpText.MAX_EDIT_SIZE + 1L, null, null);
+            long read = client.read(path, out, max + 1L, null, null);
             byte[] content = out.toByteArray();
-            boolean truncated = read > SftpText.MAX_EDIT_SIZE;
-            int length = (int) Math.min(read, SftpText.MAX_EDIT_SIZE);
-            if (!force && !SftpText.isProbablyText(content, length)) return BINARY;
-            return new Object[]{attributes, SftpText.decode(content, length, truncated), truncated};
+            int count = (int) Math.min(read, max);
+            if (how == OPEN_AUTO && !SftpText.isProbablyText(content, count)) return BINARY;
+            return new Object[]{attributes, content, count, read > max};
         }, result -> {
             if (result == BINARY) {
+                CharSequence[] actions = {getString(R.string.sftp_action_open_hex), getString(R.string.sftp_action_open_as_text),
+                    getString(R.string.sftp_action_download)};
                 new AlertDialog.Builder(this)
-                    .setTitle(SftpPaths.name(path))
-                    .setMessage(R.string.sftp_binary_file)
-                    .setPositiveButton(R.string.sftp_action_download, (d, which) -> downloadPath(path, -1))
-                    .setNeutralButton(R.string.sftp_action_open_as_text, (d, which) -> openText(path, true))
+                    .setTitle(getString(R.string.sftp_binary_file_title, SftpPaths.name(path)))
+                    .setItems(actions, (d, which) -> {
+                        if (which == 0) openFile(path, OPEN_HEX);
+                        else if (which == 1) openFile(path, OPEN_TEXT);
+                        else downloadPath(path, -1);
+                    })
                     .setNegativeButton(android.R.string.cancel, null)
                     .show();
                 return;
             }
             Object[] loaded = (Object[]) result;
+            mEditPath = path;
             SftpClient.Attributes attributes = (SftpClient.Attributes) loaded[0];
-            SftpText.Text text = (SftpText.Text) loaded[1];
-            boolean truncated = (Boolean) loaded[2];
-            showEditor(path, attributes, text, truncated);
+            mEditMtime = attributes.mtime;
+            mEditSize = attributes.size;
+            mEditor.load(SftpPaths.name(path), (byte[]) loaded[1], (Integer) loaded[2], (Boolean) loaded[3], how == OPEN_HEX);
+            showMode(MODE_EDITOR);
         });
-    }
-
-    private void showEditor(@NonNull String path, @NonNull SftpClient.Attributes attributes, @NonNull SftpText.Text text, boolean truncated) {
-        mEditPath = null; // Do not mark the text set below as changed.
-        int firstLineEnd = text.text.indexOf('\n');
-        mEditor.setLanguage(SyntaxHighlighter.detect(SftpPaths.name(path),
-            text.text.substring(0, firstLineEnd < 0 ? Math.min(text.text.length(), 256) : Math.min(firstLineEnd, 256))));
-        mEditor.setText(text.text);
-        mEditPath = path;
-        mEditMtime = attributes.mtime;
-        mEditSize = attributes.size;
-        mEditCrlf = text.crlf;
-        mEditReadOnly = truncated || !text.utf8;
-        mDirty = false;
-        // A read-only editor can still be scrolled and its text selected and copied.
-        mEditor.setShowSoftInputOnFocus(!mEditReadOnly);
-        mEditor.setKeyListener(mEditReadOnly ? null : new EditText(this).getKeyListener());
-        mEditor.setTextIsSelectable(true);
-        mEditor.setSelection(0);
-        mEditor.scrollTo(0, 0);
-        showMode(MODE_EDITOR);
-        if (truncated)
-            Toast.makeText(this, getString(R.string.sftp_file_truncated, SftpText.formatSize(SftpText.MAX_EDIT_SIZE)), Toast.LENGTH_LONG).show();
-        else if (!text.utf8)
-            Toast.makeText(this, R.string.sftp_not_utf8, Toast.LENGTH_LONG).show();
     }
 
     private static final Object CONFLICT = new Object();
@@ -636,9 +621,15 @@ public class SftpBrowserActivity extends Activity {
      * files when renaming, or if the temporary file would have another owner than the file.
      */
     private void save(boolean force) {
-        if (mEditPath == null || mEditReadOnly) return;
+        if (mEditPath == null || mEditor.isReadOnly()) return;
         final String path = mEditPath;
-        final byte[] content = SftpText.encode(mEditor.getText().toString(), mEditCrlf);
+        final byte[] content;
+        try {
+            content = mEditor.getContent();
+        } catch (CharacterCodingException e) {
+            showError(new IOException(getString(R.string.sftp_cannot_encode_save)));
+            return;
+        }
         runTask(client -> {
             SftpClient.Attributes current = null;
             try {
@@ -680,7 +671,7 @@ public class SftpBrowserActivity extends Activity {
                     .setTitle(R.string.sftp_conflict_title)
                     .setMessage(R.string.sftp_conflict_message)
                     .setPositiveButton(R.string.sftp_action_overwrite, (d, which) -> save(true))
-                    .setNeutralButton(R.string.sftp_action_reload, (d, which) -> openText(path, true))
+                    .setNeutralButton(R.string.sftp_action_reload, (d, which) -> openFile(path, OPEN_TEXT))
                     .setNegativeButton(android.R.string.cancel, null)
                     .show();
                 return;
@@ -689,72 +680,17 @@ public class SftpBrowserActivity extends Activity {
             if (path.equals(mEditPath)) {
                 mEditMtime = saved.mtime;
                 mEditSize = saved.size;
-                mDirty = false;
-                updateTitle();
+                mEditor.markSaved(content);
             }
             Toast.makeText(this, getString(R.string.sftp_saved, SftpPaths.name(path)), Toast.LENGTH_SHORT).show();
         });
     }
 
-    private void showFindDialog() {
-        EditText input = new EditText(this);
-        input.setSingleLine();
-        if (mFindQuery != null) {
-            input.setText(mFindQuery);
-            input.selectAll();
-        }
-        new AlertDialog.Builder(this)
-            .setTitle(R.string.sftp_action_find)
-            .setView(input)
-            .setPositiveButton(R.string.sftp_action_find, (d, which) -> {
-                mFindQuery = input.getText().toString();
-                findNext();
-            })
-            .setNegativeButton(android.R.string.cancel, null)
-            .show();
-    }
-
-    /** Select the next match of the find query after the selection, wrapping around. */
-    private void findNext() {
-        if (TextUtils.isEmpty(mFindQuery)) return;
-        String text = mEditor.getText().toString().toLowerCase(Locale.ROOT);
-        String query = mFindQuery.toLowerCase(Locale.ROOT);
-        int from = Math.max(0, mEditor.getSelectionEnd());
-        int index = text.indexOf(query, from);
-        if (index < 0) index = text.indexOf(query);
-        if (index < 0) {
-            Toast.makeText(this, getString(R.string.sftp_not_found, mFindQuery), Toast.LENGTH_SHORT).show();
-            return;
-        }
-        mEditor.requestFocus();
-        mEditor.setSelection(index, index + query.length());
-    }
-
-    /** Choose the language to highlight the editor text as, or plain text. */
-    private void chooseSyntax() {
-        List<SyntaxHighlighter.Language> languages = SyntaxHighlighter.getLanguages();
-        CharSequence[] names = new CharSequence[languages.size() + 1];
-        names[0] = getString(R.string.sftp_syntax_plain_text);
-        int checked = 0;
-        for (int i = 0; i < languages.size(); i++) {
-            names[i + 1] = languages.get(i).name;
-            if (languages.get(i) == mEditor.getLanguage()) checked = i + 1;
-        }
-        new AlertDialog.Builder(this)
-            .setTitle(R.string.sftp_action_syntax)
-            .setSingleChoiceItems(names, checked, (d, which) -> {
-                mEditor.setLanguage(which == 0 ? null : languages.get(which - 1));
-                updateTitle();
-                d.dismiss();
-            })
-            .show();
-    }
-
     /** Leave the editor, asking first if the text has unsaved changes. */
     private void closeEditor() {
-        if (!mDirty) {
+        if (!mEditor.isDirty()) {
             mEditPath = null;
-            mEditor.setText("");
+            mEditor.clear();
             showMode(MODE_BROWSER);
             loadDirectory(mPath != null ? mPath : ".");
             return;
@@ -762,7 +698,7 @@ public class SftpBrowserActivity extends Activity {
         new AlertDialog.Builder(this)
             .setMessage(getString(R.string.sftp_unsaved_changes, mEditPath == null ? "" : SftpPaths.name(mEditPath)))
             .setPositiveButton(R.string.sftp_action_discard, (d, which) -> {
-                mDirty = false;
+                mEditor.clear();
                 closeEditor();
             })
             .setNegativeButton(android.R.string.cancel, null)
@@ -1031,6 +967,7 @@ public class SftpBrowserActivity extends Activity {
     private static final int MENU_FIND_NEXT = 12;
     private static final int MENU_RELOAD = 13;
     private static final int MENU_SYNTAX = 14;
+    private static final int MENU_GO_TO_LINE = 15;
     private static final int MENU_DOWNLOAD_IMAGE = 20;
 
     @Override
@@ -1048,9 +985,12 @@ public class SftpBrowserActivity extends Activity {
                 menu.add(Menu.NONE, MENU_CLOSE, Menu.NONE, R.string.sftp_action_close);
                 break;
             case MODE_EDITOR:
-                if (!mEditReadOnly) menu.add(Menu.NONE, MENU_SAVE, Menu.NONE, R.string.sftp_action_save).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-                menu.add(Menu.NONE, MENU_FIND, Menu.NONE, R.string.sftp_action_find);
-                menu.add(Menu.NONE, MENU_FIND_NEXT, Menu.NONE, R.string.sftp_action_find_next);
+                if (!mEditor.isReadOnly()) menu.add(Menu.NONE, MENU_SAVE, Menu.NONE, R.string.sftp_action_save).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+                if (!mEditor.isHex()) {
+                    menu.add(Menu.NONE, MENU_FIND, Menu.NONE, R.string.sftp_action_find);
+                    menu.add(Menu.NONE, MENU_FIND_NEXT, Menu.NONE, R.string.sftp_action_find_next);
+                    menu.add(Menu.NONE, MENU_GO_TO_LINE, Menu.NONE, R.string.sftp_action_go_to_line);
+                }
                 menu.add(Menu.NONE, MENU_SYNTAX, Menu.NONE, R.string.sftp_action_syntax);
                 menu.add(Menu.NONE, MENU_RELOAD, Menu.NONE, R.string.sftp_action_reload);
                 break;
@@ -1087,16 +1027,23 @@ public class SftpBrowserActivity extends Activity {
                 return true;
             case MENU_CLOSE: finish(); return true;
             case MENU_SAVE: save(false); return true;
-            case MENU_FIND: showFindDialog(); return true;
-            case MENU_FIND_NEXT:
-                if (mFindQuery == null) showFindDialog();
-                else findNext();
-                return true;
-            case MENU_SYNTAX:
-                chooseSyntax();
-                return true;
+            case MENU_FIND: mEditor.showFindDialog(); return true;
+            case MENU_FIND_NEXT: mEditor.findNext(); return true;
+            case MENU_GO_TO_LINE: mEditor.showGoToLineDialog(); return true;
+            case MENU_SYNTAX: mEditor.showSyntaxDialog(); return true;
             case MENU_RELOAD:
-                if (mEditPath != null) openText(mEditPath, true);
+                if (mEditPath == null) return true;
+                String path = mEditPath;
+                int how = mEditor.isHex() ? OPEN_HEX : OPEN_TEXT;
+                if (!mEditor.isDirty()) {
+                    openFile(path, how);
+                    return true;
+                }
+                new AlertDialog.Builder(this)
+                    .setMessage(getString(R.string.sftp_unsaved_changes, SftpPaths.name(path)))
+                    .setPositiveButton(R.string.sftp_action_discard, (d, which) -> openFile(path, how))
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .show();
                 return true;
             case MENU_DOWNLOAD_IMAGE:
                 if (!mImages.isEmpty()) download(mImages.get(mImageIndex));
