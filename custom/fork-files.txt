@@ -26,3 +26,6 @@ app/src/test/java/com/termux/app/terminal/fonts
 app/src/main/java/com/termux/app/terminal/sftp
 app/src/test/java/com/termux/app/terminal/sftp
 app/src/main/res/values/fork_sftp.xml
+app/src/main/java/com/termux/app/terminal/links
+app/src/test/java/com/termux/app/terminal/links
+app/src/main/res/values/fork_links.xml

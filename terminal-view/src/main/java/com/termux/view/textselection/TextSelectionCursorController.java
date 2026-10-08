@@ -99,11 +99,32 @@ public class TextSelectionCursorController implements CursorController {
         TerminalBuffer screen = terminalView.mEmulator.getScreen();
         if (!" ".equals(screen.getSelectedText(mSelX1, mSelY1, mSelX1, mSelY1))) {
             // Selecting something other than whitespace. Expand to word.
-            while (mSelX1 > 0 && !"".equals(screen.getSelectedText(mSelX1 - 1, mSelY1, mSelX1 - 1, mSelY1))) {
-                mSelX1--;
+            int columns = terminalView.mEmulator.mColumns;
+            while (true) {
+                while (mSelX1 > 0 && !"".equals(screen.getSelectedText(mSelX1 - 1, mSelY1, mSelX1 - 1, mSelY1))) {
+                    mSelX1--;
+                }
+                // Continue on the previous row if the word wrapped from it, like a long URL.
+                if (mSelX1 == 0 && mSelY1 - 1 >= -screen.getActiveTranscriptRows() && screen.getLineWrap(mSelY1 - 1)
+                    && !"".equals(screen.getSelectedText(columns - 1, mSelY1 - 1, columns - 1, mSelY1 - 1))) {
+                    mSelY1--;
+                    mSelX1 = columns - 1;
+                } else {
+                    break;
+                }
             }
-            while (mSelX2 < terminalView.mEmulator.mColumns - 1 && !"".equals(screen.getSelectedText(mSelX2 + 1, mSelY1, mSelX2 + 1, mSelY1))) {
-                mSelX2++;
+            while (true) {
+                while (mSelX2 < columns - 1 && !"".equals(screen.getSelectedText(mSelX2 + 1, mSelY2, mSelX2 + 1, mSelY2))) {
+                    mSelX2++;
+                }
+                // Continue on the next row if the word wraps to it.
+                if (mSelX2 == columns - 1 && mSelY2 + 1 < terminalView.mEmulator.mRows && screen.getLineWrap(mSelY2)
+                    && !"".equals(screen.getSelectedText(0, mSelY2 + 1, 0, mSelY2 + 1))) {
+                    mSelY2++;
+                    mSelX2 = 0;
+                } else {
+                    break;
+                }
             }
         }
     }
