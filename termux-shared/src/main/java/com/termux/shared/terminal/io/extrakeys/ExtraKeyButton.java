@@ -25,6 +25,11 @@ public class ExtraKeyButton {
     /** The key name for the nested dict to define popup extra key info if using a dict to define the extra key. {popup: {key: name, ...}, ...} */
     public static final String KEY_POPUP = "popup";
 
+    /** The number of rows a key takes, like 2 for a tall key, defaults to 1. */
+    public static final String KEY_ROWS = "rows";
+    /** The width of the column of a key relative to the others, like 0.5 for half, defaults to 1. */
+    public static final String KEY_WIDTH = "width";
+
 
     /**
      * The key that will be sent to the terminal, either a control character, like defined in
@@ -47,6 +52,9 @@ public class ExtraKeyButton {
      */
     @Nullable
     private final ExtraKeyButton popup;
+
+    private final int rowSpan;
+    private final float widthWeight;
 
 
     /**
@@ -110,6 +118,19 @@ public class ExtraKeyButton {
         }
 
         this.popup = popup;
+
+        this.rowSpan = Math.max(1, Math.min(4, config.optInt(KEY_ROWS, 1)));
+        this.widthWeight = (float) Math.max(0.25, Math.min(4, config.optDouble(KEY_WIDTH, 1)));
+    }
+
+    /** The number of rows the key takes. */
+    public int getRowSpan() {
+        return rowSpan;
+    }
+
+    /** The width of the key's column relative to the others. */
+    public float getWidthWeight() {
+        return widthWeight;
     }
 
     public String getStringFromJson(@NonNull JSONObject config, @NonNull String key) {

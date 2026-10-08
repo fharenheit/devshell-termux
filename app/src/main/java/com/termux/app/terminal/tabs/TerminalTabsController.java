@@ -33,6 +33,7 @@ import com.termux.app.terminal.fonts.TerminalFonts;
 import com.termux.app.terminal.sftp.SftpBrowserActivity;
 import com.termux.app.language.LanguageDialog;
 import com.termux.app.terminal.search.TerminalSearchBar;
+import com.termux.app.terminal.specialkeys.SpecialKeysPanel;
 import com.termux.app.terminal.snippets.SnippetsDialog;
 import com.termux.app.terminal.ssh.SshConnector;
 import com.termux.app.terminal.ssh.SshForwardsDialog;
@@ -66,6 +67,14 @@ public class TerminalTabsController {
     private static final Set<TerminalSession> sSessionsToRemoveOnExit = Collections.newSetFromMap(new WeakHashMap<>());
 
     private TerminalSearchBar mSearchBar;
+    private SpecialKeysPanel mSpecialKeysPanel;
+
+    /** The panel of special keys, created when first used. */
+    @NonNull
+    public SpecialKeysPanel getSpecialKeysPanel() {
+        if (mSpecialKeysPanel == null) mSpecialKeysPanel = new SpecialKeysPanel(mActivity);
+        return mSpecialKeysPanel;
+    }
 
     /** The bar to find text in the terminal output, created when first used. */
     @NonNull

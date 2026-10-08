@@ -48,3 +48,6 @@ termux-shared/src/main/res/values-zh
 terminal-view/src/main/res/values-ko
 terminal-view/src/main/res/values-ja
 terminal-view/src/main/res/values-zh
+app/src/main/java/com/termux/app/terminal/specialkeys
+app/src/test/java/com/termux/app/terminal/specialkeys
+app/src/main/res/values/fork_special_keys.xml

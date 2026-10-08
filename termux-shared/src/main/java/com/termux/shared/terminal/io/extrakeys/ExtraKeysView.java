@@ -392,6 +392,8 @@ public final class ExtraKeysView extends GridLayout {
                 button.setTextColor(mButtonTextColor);
                 setButtonLabel(button, buttonInfo.getDisplay());
                 button.setPadding(0, 0, 0, 0);
+                button.setTag(buttonInfo.getKey());
+                button.setContentDescription(buttonInfo.getKey());
                 if (mKeycaps) setButtonBackground(button, false);
                 if (isSpecialButton(buttonInfo)) {
                     SpecialButtonState state = mSpecialButtons.get(SpecialButton.valueOf(buttonInfo.getKey()));
@@ -457,8 +459,8 @@ public final class ExtraKeysView extends GridLayout {
                 param.width = 0;
                 param.height = 0;
                 param.setMargins(0, 0, 0, 0);
-                param.columnSpec = GridLayout.spec(col, GridLayout.FILL, 1.f);
-                param.rowSpec = GridLayout.spec(row, GridLayout.FILL, 1.f);
+                param.columnSpec = GridLayout.spec(col, GridLayout.FILL, buttonInfo.getWidthWeight());
+                param.rowSpec = GridLayout.spec(row, buttonInfo.getRowSpan(), GridLayout.FILL, 1.f);
                 button.setLayoutParams(param);
 
                 addView(button);
@@ -675,12 +677,32 @@ public final class ExtraKeysView extends GridLayout {
             view.setBackgroundColor(pressed ? mButtonActiveBackgroundColor : mButtonBackgroundColor);
             return;
         }
-        int color = pressed ? mButtonActiveBackgroundColor : isActiveSpecialButton(view) ? KEYCAP_ACTIVE_COLOR : KEYCAP_COLOR;
+        int color = pressed ? mButtonActiveBackgroundColor
+            : isActiveSpecialButton(view) || mHighlightedKeys.contains(view.getTag()) ? KEYCAP_ACTIVE_COLOR : KEYCAP_COLOR;
         android.graphics.drawable.GradientDrawable keycap = new android.graphics.drawable.GradientDrawable();
         keycap.setColor(color);
         keycap.setCornerRadius(dp(6));
         keycap.setStroke(Math.max(1, dp(1)), KEYCAP_BORDER_COLOR);
         view.setBackground(new android.graphics.drawable.InsetDrawable(keycap, dp(2)));
+    }
+
+    /** The keys shown as active, like the key of a panel that is open. */
+    private final java.util.Set<Object> mHighlightedKeys = new java.util.HashSet<>();
+
+    /** Show a key as active or not, like a key that opened a panel. */
+    public void setKeyHighlighted(String key, boolean highlighted) {
+        if (highlighted) mHighlightedKeys.add(key);
+        else mHighlightedKeys.remove(key);
+        for (int i = 0; i < getChildCount(); i++) {
+            View child = getChildAt(i);
+            if (!key.equals(child.getTag()) || !(child instanceof Button)) continue;
+            if (mKeycaps) {
+                setButtonBackground(child, false);
+                ((Button) child).setTextColor(highlighted ? KEYCAP_ACTIVE_TEXT_COLOR : mButtonTextColor);
+            } else {
+                ((Button) child).setTextColor(highlighted ? mButtonActiveTextColor : mButtonTextColor);
+            }
+        }
     }
 
     private boolean isActiveSpecialButton(View view) {

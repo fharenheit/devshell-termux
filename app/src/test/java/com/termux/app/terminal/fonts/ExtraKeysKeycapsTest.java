@@ -78,4 +78,22 @@ public class ExtraKeysKeycapsTest {
         Assert.assertNotEquals(0xFF000000, ctrl.getCurrentTextColor());
     }
 
+    @Test
+    public void testSpecialKeysKey() throws Exception {
+        Activity activity = Robolectric.buildActivity(Activity.class).setup().get();
+        ExtraKeysView view = new ExtraKeysView(activity, null);
+        activity.setContentView(view);
+        view.reload(info(TermuxPropertyConstants.DEFAULT_IVALUE_EXTRA_KEYS, ExtraKeysInfo.STYLE_KEYCAPS));
+        Assert.assertEquals(21, view.getChildCount());
+        Assert.assertEquals(11, view.getColumnCount());
+        Button special = (Button) view.findViewWithTag("SPECIAL_KEYS");
+        Assert.assertNotNull(special);
+        Assert.assertEquals("⊞", special.getText().toString());
+        // Shown as active while its panel is open.
+        view.setKeyHighlighted("SPECIAL_KEYS", true);
+        Assert.assertEquals(0xFF000000, special.getCurrentTextColor());
+        view.setKeyHighlighted("SPECIAL_KEYS", false);
+        Assert.assertNotEquals(0xFF000000, special.getCurrentTextColor());
+    }
+
 }
