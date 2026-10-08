@@ -35,7 +35,11 @@ import java.util.concurrent.Executors;
  */
 public final class TerminalFontDialog {
 
-    private static final String PREVIEW_TEXT = "가나다 한글 abc ABC 0O 1lI {} -> != ==";
+    /**
+     * Korean, Latin and code characters, and Japanese and Chinese on a second line, which are
+     * drawn with a system fallback font if the font does not have them.
+     */
+    private static final String PREVIEW_TEXT = "가나다 한글 abc ABC 0O 1lI {} -> != ==\n日本語 ひらがな カタカナ 中文 简体 繁體";
 
     private static final String LOG_TAG = "TerminalFontDialog";
 
@@ -165,7 +169,7 @@ public final class TerminalFontDialog {
                 nameView = (CheckedTextView) super.getView(position, null, parent);
                 previewView = new TextView(mActivity);
                 previewView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
-                previewView.setSingleLine();
+                previewView.setMaxLines(2);
                 int padding = nameView.getPaddingStart();
                 previewView.setPadding(padding, 0, padding, Math.round(dp(8)));
                 row.addView(nameView);
