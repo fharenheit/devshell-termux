@@ -7,13 +7,23 @@
 - **Added**: 새 기능, **Changed**: 동작·문서·패치 변경, **Fixed**: 버그 수정
 - "패치 갱신" 커밋은 업스트림 파일을 고친 커밋 뒤에 `custom/update-patches.sh`로 `custom/patches/`를 다시 만든 것입니다.
 
+## v0.118.3-ko.21 (2026-10-08)
+
+| 커밋 | 내용 |
+|---|---|
+| [`8655033`](https://github.com/fharenheit/termux-app/commit/8655033) | Added: 클립보드 기록(최근 20개, ⚙ 메뉴·Ctrl+Shift+H·⎘ PASTE 위로 밀기·`CLIPBOARD` 키). 누르면 붙여넣기, 길게 눌러 복사/삭제 |
+| [`eccb6c6`](https://github.com/fharenheit/termux-app/commit/eccb6c6) | Added: SSH 호스트 키 확인. 로그인 없이 서버 키를 받아 지문 표시, 모르는 키 신뢰, 바뀐 키 경고 후 교체, 신뢰한 키 삭제. SFTP 호스트 키 오류와 호스트 메뉴에서 열기 |
+| [`f1d6df5`](https://github.com/fharenheit/termux-app/commit/f1d6df5) | Added: SFTP 전송 대기열. 다운로드/업로드를 포그라운드 서비스에서 하나씩 실행, 알림에 진행률과 Cancel all, 파일 화면의 Transfers 목록 |
+| [`9ac6a29`](https://github.com/fharenheit/termux-app/commit/9ac6a29) | Changed: 패치 갱신(`0026`, `0027`)과 문서 |
+| (이 릴리즈 커밋) | Added: v0.118.3-ko.21 릴리즈 노트와 이력 |
+
 ## v0.118.3-ko.20 (2026-10-08)
 
 | 커밋 | 내용 |
 |---|---|
 | [`be6cd0f`](https://github.com/fharenheit/termux-app/commit/be6cd0f) | Added: 특수 키 패널. 두 줄 높이의 좁은 ⊞ 키로 열고, 10개 탭(자주·Ctrl·Fn·편집·Alt·기호·tmux·vim·nano·★), 누르면 전송 후 닫힘, 길게 눌러 설명과 ★ 즐겨찾기. 하단 키에 `rows`, `width` 속성 |
 | [`f81ffbf`](https://github.com/fharenheit/termux-app/commit/f81ffbf) | Changed: 패치 갱신(`0025`)과 문서 |
-| (이 릴리즈 커밋) | Added: v0.118.3-ko.20 릴리즈 노트와 이력 |
+| [`083a519`](https://github.com/fharenheit/termux-app/commit/083a519) | Added: v0.118.3-ko.20 릴리즈 노트와 이력 |
 
 ## v0.118.3-ko.19 (2026-10-08)
 
