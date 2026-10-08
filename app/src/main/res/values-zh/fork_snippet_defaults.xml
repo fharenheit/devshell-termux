@@ -29,6 +29,12 @@
     <string name="snippet_termux_install">安装软件包(输入名称)</string>
     <string name="snippet_tmux_attach">tmux 连接或新建</string>
     <string name="snippet_tmux_list">tmux 会话列表</string>
+    <string name="snippet_git_discard">Git 强制丢弃所有修改</string>
+    <string name="snippet_git_force_pull">Git 强制拉取最新代码</string>
+    <string name="snippet_git_reset_commit">Git 强制回退到指定提交(输入哈希)</string>
+    <string name="snippet_system_find_name">按名称查找文件和文件夹(输入模式,例如 \'*log*\')</string>
+    <string name="snippet_system_my_processes">我的所有进程(PID、用户、命令)</string>
+    <string name="snippet_system_my_ports">我打开的端口及其 PID</string>
     <plurals name="msg_snippet_defaults_added">
         <item quantity="other">已添加 %1$d 个片段</item>
     </plurals>

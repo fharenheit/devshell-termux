@@ -136,12 +136,12 @@
   - 지워도 되고, 스니펫 창의 **기본** 버튼으로 묶음을 골라 다시 추가할 수 있습니다(이미 있는 명령은 건너뜀).
   - 이미 스니펫을 저장해 쓰던 경우에는 자동으로 들어가지 않으니 **기본** 버튼으로 추가합니다.
   - 이름은 추가할 때의 앱 언어로 저장됩니다.
-  - 커밋, 패키지 설치처럼 뒤에 입력할 것이 있는 명령은 Enter 없이 입력만 합니다.
+  - 커밋, 패키지 설치처럼 뒤에 입력할 것이 있는 명령과 강제로 되돌리는 Git 명령은 Enter 없이 입력만 합니다. 확인하고 Enter를 누르면 실행됩니다.
 
   | 묶음 | 명령 |
   |---|---|
-  | Git | `git status -sb`, `git log --oneline --graph --decorate -20`, `git diff --stat`, `git branch -vv`, `git pull --rebase`, `git push`, `git commit -am `(메시지 입력), `git stash list` |
-  | 시스템 상태 | `df -h`, `free -h`, 큰 폴더(`du -sh * \| sort -h \| tail -20`), CPU/메모리 상위 프로세스(`ps … --sort`), `top`, `ss -tulpn`, `uptime`, `uname -a` |
+  | Git | `git status -sb`, `git log --oneline --graph --decorate -20`, `git diff --stat`, `git branch -vv`, `git pull --rebase`, `git push`, `git commit -am `(메시지 입력), `git stash list`, 모든 수정 사항 강제로 되돌리기 `git reset --hard && git clean -fd`, 최신 코드로 강제 pull `git fetch origin && git reset --hard @{u}`, 특정 커밋으로 강제로 되돌리기 `git reset --hard `(해시 입력) |
+  | 시스템 상태 | `df -h`, `free -h`, 큰 폴더(`du -sh * \| sort -h \| tail -20`), CPU/메모리 상위 프로세스(`ps … --sort`), `top`, `ss -tulpn`, `uptime`, `uname -a`, 이름으로 찾기 `find . -iname `(패턴 입력), 내 프로세스 `ps -u "$(id -u)" -o pid,user,args`, 내가 연 포트와 PID(`ss -tulpn` 또는 `netstat -tulpn`에서 PID가 보이는 줄) |
   | Termux | `pkg update && pkg upgrade -y`, `termux-setup-storage`, `termux-change-repo`, `pkg install `(이름 입력) |
   | tmux | `tmux new -A -s main`, `tmux ls` |
 

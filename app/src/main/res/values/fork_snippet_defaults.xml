@@ -29,6 +29,12 @@
     <string name="snippet_termux_install">Install package (type name)</string>
     <string name="snippet_tmux_attach">tmux attach or new</string>
     <string name="snippet_tmux_list">tmux sessions</string>
+    <string name="snippet_git_discard">Git discard all changes (reset --hard, clean)</string>
+    <string name="snippet_git_force_pull">Git force pull latest (reset to upstream)</string>
+    <string name="snippet_git_reset_commit">Git force reset to a commit (type hash)</string>
+    <string name="snippet_system_find_name">Find files and folders by name (type pattern like \'*log*\')</string>
+    <string name="snippet_system_my_processes">My processes (PID, user, command)</string>
+    <string name="snippet_system_my_ports">My open ports and their PIDs</string>
     <plurals name="msg_snippet_defaults_added">
         <item quantity="one">Added %1$d snippet</item>
         <item quantity="other">Added %1$d snippets</item>

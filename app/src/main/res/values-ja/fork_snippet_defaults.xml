@@ -29,6 +29,12 @@
     <string name="snippet_termux_install">パッケージをインストール(名前入力)</string>
     <string name="snippet_tmux_attach">tmux に接続または新規作成</string>
     <string name="snippet_tmux_list">tmux セッション一覧</string>
+    <string name="snippet_git_discard">Git すべての変更を強制的に破棄</string>
+    <string name="snippet_git_force_pull">Git 最新コードに強制プル</string>
+    <string name="snippet_git_reset_commit">Git 指定コミットに強制的に戻す(ハッシュ入力)</string>
+    <string name="snippet_system_find_name">名前でファイル・フォルダを検索(パターン入力、例: \'*log*\')</string>
+    <string name="snippet_system_my_processes">自分のプロセス一覧(PID、ユーザー、コマンド)</string>
+    <string name="snippet_system_my_ports">自分が開いたポートと PID</string>
     <plurals name="msg_snippet_defaults_added">
         <item quantity="other">スニペットを %1$d 件追加しました</item>
     </plurals>

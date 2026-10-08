@@ -61,7 +61,11 @@ public final class SnippetDefaults {
             run(R.string.snippet_git_pull, "git pull --rebase"),
             run(R.string.snippet_git_push, "git push"),
             type(R.string.snippet_git_commit, "git commit -am "),
-            run(R.string.snippet_git_stash, "git stash list"))),
+            run(R.string.snippet_git_stash, "git stash list"),
+            // Commands that throw away changes are typed without Enter, to run them on purpose.
+            type(R.string.snippet_git_discard, "git reset --hard && git clean -fd"),
+            type(R.string.snippet_git_force_pull, "git fetch origin && git reset --hard @{u}"),
+            type(R.string.snippet_git_reset_commit, "git reset --hard "))),
         new Group(R.string.snippet_group_system, Arrays.asList(
             run(R.string.snippet_system_disk, "df -h"),
             run(R.string.snippet_system_memory, "free -h"),
@@ -71,7 +75,12 @@ public final class SnippetDefaults {
             run(R.string.snippet_system_processes, "top"),
             run(R.string.snippet_system_ports, "ss -tulpn"),
             run(R.string.snippet_system_uptime, "uptime"),
-            run(R.string.snippet_system_info, "uname -a"))),
+            run(R.string.snippet_system_info, "uname -a"),
+            type(R.string.snippet_system_find_name, "find . -iname "),
+            run(R.string.snippet_system_my_processes, "ps -u \"$(id -u)\" -o pid,user,args"),
+            // Without root, ss and netstat show the PIDs of the own processes only.
+            run(R.string.snippet_system_my_ports,
+                "ss -tulpn 2>/dev/null | grep -E 'Netid|pid=' || netstat -tulpn 2>/dev/null | grep -E 'Proto|[0-9]+/'"))),
         new Group(R.string.snippet_group_termux, Arrays.asList(
             run(R.string.snippet_termux_upgrade, "pkg update && pkg upgrade -y"),
             run(R.string.snippet_termux_storage, "termux-setup-storage"),

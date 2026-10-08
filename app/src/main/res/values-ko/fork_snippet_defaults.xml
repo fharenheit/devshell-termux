@@ -29,6 +29,12 @@
     <string name="snippet_termux_install">패키지 설치(이름 입력)</string>
     <string name="snippet_tmux_attach">tmux 세션 붙기/만들기</string>
     <string name="snippet_tmux_list">tmux 세션 목록</string>
+    <string name="snippet_git_discard">Git 모든 수정 사항 강제로 되돌리기</string>
+    <string name="snippet_git_force_pull">Git 최신 코드로 강제 pull</string>
+    <string name="snippet_git_reset_commit">Git 특정 커밋으로 강제로 되돌리기(해시 입력)</string>
+    <string name="snippet_system_find_name">이름으로 파일·폴더 찾기(패턴 입력, 예: \'*log*\')</string>
+    <string name="snippet_system_my_processes">내 프로세스 전체(PID, 사용자, 명령)</string>
+    <string name="snippet_system_my_ports">내가 연 포트와 PID</string>
     <plurals name="msg_snippet_defaults_added">
         <item quantity="other">스니펫 %1$d개를 추가했습니다</item>
     </plurals>
