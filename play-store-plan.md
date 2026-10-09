@@ -91,10 +91,10 @@ Claude Code CLI에서 단계별로 작업할 수 있게 배경, 결정할 것, �
 완료 조건: 앱에서 `pkg update && pkg install <목록의 패키지>`가 새 저장소로 동작.
 
 ### 4. 포크 기능 이전 (D1이 (b)일 때)
-- [ ] `custom/patches/` 28개와 `custom/fork-files.txt`의 포크 전용 파일을 새 기반으로 이전. 탭, SSH/SFTP, 특수 키, 스니펫, 클립보드 기록, 언어, 글꼴, 설정 내보내기 등
+- [x] `custom/patches/` 28개와 `custom/fork-files.txt`의 포크 전용 파일을 새 기반으로 이전. 탭, SSH/SFTP, 특수 키, 스니펫, 클립보드 기록, 언어, 글꼴, 설정 내보내기 등 (2026-10-09, 기기 확인 전)
 - [ ] `FEATURES.md`의 기능 목록을 하나씩 확인하는 체크리스트로 검증
 - [ ] `custom/upgrade-upstream.sh`와 `custom/update-patches.sh`를 새 기반 기준으로 다시 만들기
-- [ ] 단위 테스트 이전과 통과
+- [x] 단위 테스트 이전과 통과 (126개, SFTP 서버 테스트 4개는 건너뜀)
 
 완료 조건: `FEATURES.md`의 모든 기능이 새 기반에서 동작하고 테스트 통과.
 
@@ -218,6 +218,23 @@ Claude Code CLI에서 단계별로 작업할 수 있게 배경, 결정할 것, �
 - APK: devshell-app 커밋 `087b810d`에서 arm64-v8a만 빌드하고 이 zip을 넣음. 39MB
 - 기기 확인 묶음: `/data1/projects/devshell-verify` (APK, debs, 확인 순서 README)
 - 남은 것: 앱의 기본 apt 저장소(termux.net)는 com.termux용이라 `pkg install`은 아직 쓸 수 없음. 3번 자체 패키지 저장소에서 해결
+
+### 2026-10-09: 포크 기능 이전 (4번을 검증보다 먼저 진행)
+
+- devshell-app `devshell` 브랜치, 커밋 26개(`6431acdd`~`35e2db4f`). 기능 목록은 devshell-app의 `FEATURES.md`
+- 단계: 탭 → 앱 ID 신호 수정, 한글 입력, 글꼴, 글자 크기 → 하단 키, 키캡, 특수 키 패널 → 찾기, URL, 클립보드 기록, 스니펫 → SSH → SFTP → 설정 내보내기/가져오기, 앱 언어, 백업 규칙
+- 빌드와 단위 테스트 통과(126개). APK 44.7MB. 기기에서는 아직 확인하지 않음
+- 바꾼 방식:
+  - `termux-shared`가 없어 Logger 등은 Android 표준 API와 앱 안의 작은 도우미로 바꿈
+  - Play판 실행 방식(W^X): 앱이 실행하는 ssh 등은 `TermuxShellUtils.newProcessBuilder`(linker64)로, 앱이 쓰는 스크립트(askpass)는 `files/` 아래에 둠
+  - 설정 화면(SettingsActivity)이 없어 글꼴, 저장 글자 크기, 언어는 ⚙ 메뉴에서 바꿈
+  - 앱 언어는 Android 13+ 앱별 언어 API(`LocaleManager`), 11~12는 직접 적용
+  - SFTP 전송 서비스는 `dataSync` 포그라운드 서비스. 화면은 edge-to-edge와 뒤로 가기 예측 동작 대응
+  - 백업: SSH 비밀번호는 클라우드 백업과 기기 이전 모두에서 제외, `usr`와 `home`은 클라우드 백업에서 제외
+  - 셸 도구가 앱 ID 기준으로 보내는 신호(`termux-reload-settings`, `termux-wake-lock`, `termux-open` 등)를 앱이 받게 고침
+  - 포크 앱(`com.termux`)에서 내보낸 설정 zip을 가져올 수 있음. 경로는 새 앱 ID로 바꿔 씀. SSH 개인 키 파일은 zip에 없어 직접 옮겨야 함
+- 아직 없는 것: 설정 화면의 나머지 항목(여백, 소프트 키보드, 로그 수준 등), Termux:Float, Termux:Tasker, `RUN_COMMAND`, Termux:Styling 연동(별도 앱이라 이 앱 ID로 빌드되지 않음), 그림 설명서
+- 패키지 쪽 남은 앱 ID 문제: `termux-api` 패키지가 `com.termux`를 직접 씀(devshell-packages에서 고칠 것). 다운로드 글꼴 4종은 아직 `fharenheit/termux-app` 저장소에서 받음
 
 ## 결정 기록
 
