@@ -81,7 +81,7 @@ Claude Code CLI에서 단계별로 작업할 수 있게 배경, 결정할 것, �
 완료 조건: targetSdk 36 빌드가 Android 11~16 기기에서 터미널, 패키지 설치, 기존 테스트 통과.
 
 ### 3. 자체 패키지 저장소
-- [ ] `termux-play-store/termux-packages` 포크. 앱 ID와 경로 설정 변경(`scripts/properties.sh` 등)
+- [x] `termux-play-store/termux-packages` 포크. 앱 ID와 경로 설정 변경(`scripts/properties.sh` 등) → `fharenheit/devshell-packages`
 - [ ] 패키지 목록 작성: 부트스트랩 기본 패키지 + openssh, mosh, git, vim, nano, tmux, python, nodejs, curl, wget, rsync, htop, lsof, iproute2 등
 - [ ] GitHub Actions 빌드 워크플로(D8 아키텍처별)
 - [ ] apt 저장소 생성과 서명 키(GPG). 키는 GitHub Secrets에 보관
@@ -155,9 +155,21 @@ Claude Code CLI에서 단계별로 작업할 수 있게 배경, 결정할 것, �
 
 (1번 검증을 진행하면서 기록)
 
+### 저장소 구성 (2026-10-09)
+
+| 저장소 | 원본(upstream) | 로컬 폴더 | 기본 브랜치 |
+|---|---|---|---|
+| `fharenheit/termux-app` | `termux/termux-app` | `/data1/projects/termux-app` | master. 지금 포크와 이 계획 문서 |
+| `fharenheit/devshell-app` (private) | `termux-play-store/termux-apps` | `/data1/projects/devshell-app` | devshell. 원본 기준선은 `main` |
+| `fharenheit/devshell-packages` (private) | `termux-play-store/termux-packages` | `/data1/projects/devshell-packages` | devshell. 원본 기준선은 `master` |
+
+- 새 저장소는 GitHub fork가 아닌 private 저장소로 만들고 전체 기록을 push함. 원본은 `upstream` remote로 받아옴
+- GitHub Actions는 꺼 둠. 원본 워크플로가 push마다 돌기 때문. 3번과 8번에서 우리 구성에 맞게 다시 켬
+- 출시할 때 GPLv3 소스 공개를 위해 Public으로 바꿈
+
 ### 2026-10-09: termux-apps 빌드 환경
 
-- 받은 위치: `/root/projects/termux-apps` (커밋 `5c736894`)
+- 받은 위치: `/data1/projects/devshell-app` (처음 이름 `termux-apps`, 커밋 `5c736894`)
 - 요구 사항: JDK 21(CI는 21, 25), Gradle 9.6.1(wrapper), AGP 9.2.1, compileSdk·targetSdk 37, minSdk 30, NDK 29.0.14206865
 - 설치한 SDK 구성 요소(`/opt/android-sdk`): `platforms;android-37.0`, `build-tools;37.0.0`, `ndk;29.0.14206865`, `platform-tools`
 - 모듈: `termux-app`, `termux-api`, `termux-style`, `terminal-emulator`, `terminal-view`. ABI는 armeabi-v7a, arm64-v8a, x86_64
@@ -170,7 +182,7 @@ Claude Code CLI에서 단계별로 작업할 수 있게 배경, 결정할 것, �
 
 ### 2026-10-09: 앱 ID를 `com.fharenheit.devshell`로 바꿔 빌드
 
-- termux-apps의 `devshell` 브랜치 커밋 `9a91aa6e` (로컬에만 있음)
+- devshell-app의 `devshell` 브랜치 커밋 `9a91aa6e`
 - 바꾼 것(`termux-app` 모듈):
   - `build.gradle.kts`에 `applicationId = "com.fharenheit.devshell"`. 클래스 패키지(`namespace`)는 `com.termux` 그대로
   - `TermuxConstants.PACKAGE_NAME`을 `BuildConfig.APPLICATION_ID`로. 그래서 `FILES_PATH`가 `/data/data/com.fharenheit.devshell/files`가 됨
@@ -187,7 +199,7 @@ Claude Code CLI에서 단계별로 작업할 수 있게 배경, 결정할 것, �
 
 ### 2026-10-09: 부트스트랩과 openssh, git을 새 경로로 빌드 (aarch64)
 
-- termux-packages: `/root/projects/termux-packages`, `devshell` 브랜치 커밋 `d031820df4`~`de5847d709` (로컬에만 있음)
+- devshell-packages: `/data1/projects/devshell-packages`, `devshell` 브랜치 커밋 `d031820df4`~`de5847d709`
 - 빌드 이미지: 저장소의 `scripts/Dockerfile`(Ubuntu 24.04)로 직접 만든 `devshell-package-builder:noble`과, 그 위에 SDK를 더한 `devshell-package-builder:noble-sdk33`
   - `ghcr.io/termux-play-store/package-builder:latest`는 Ubuntu 26.04로 만들어져 있어 빌드 스크립트(noble 기준)와 맞지 않음. 받아서 쓰지 말 것
 - 빌드 명령:
@@ -203,8 +215,8 @@ Claude Code CLI에서 단계별로 작업할 수 있게 배경, 결정할 것, �
 - 결과:
   - `bootstrap-aarch64.zip` 24.6MB, SHA-256 `e022e7037d53dc82ae2e3533ab1bb0be310644bc4b9e6cd7796a5d513369625d`. 파일 2,773개 중 `/data/data/com.termux/` 경로 0개
   - openssh 10.3p1, git 2.54.0. 부트스트랩에 없는 의존성까지 11개 .deb
-- APK: termux-apps 커밋 `087b810d`에서 arm64-v8a만 빌드하고 이 zip을 넣음. 39MB
-- 기기 확인 묶음: `/root/projects/devshell-verify` (APK, debs, 확인 순서 README)
+- APK: devshell-app 커밋 `087b810d`에서 arm64-v8a만 빌드하고 이 zip을 넣음. 39MB
+- 기기 확인 묶음: `/data1/projects/devshell-verify` (APK, debs, 확인 순서 README)
 - 남은 것: 앱의 기본 apt 저장소(termux.net)는 com.termux용이라 `pkg install`은 아직 쓸 수 없음. 3번 자체 패키지 저장소에서 해결
 
 ## 결정 기록
