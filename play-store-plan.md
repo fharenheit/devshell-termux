@@ -64,7 +64,7 @@ Claude Code CLI에서 단계별로 작업할 수 있게 배경, 결정할 것, �
 
 - [x] `termux-play-store/termux-apps`를 받아 빌드 환경 준비(필요한 JDK, Gradle, NDK 확인)
 - [x] 앱 ID를 D3 값으로 바꿔 빌드
-- [ ] `termux-play-store/termux-packages`로 부트스트랩과 패키지 몇 개(openssh, git)를 새 앱 ID 경로로 빌드
+- [x] `termux-play-store/termux-packages`로 부트스트랩과 패키지 몇 개(openssh, git)를 새 앱 ID 경로로 빌드 (aarch64)
 - [ ] 실제 기기(Android 11 이상)에서 확인: 첫 실행 부트스트랩, `pkg install openssh git`, `ssh` 접속, `git clone`
 - [ ] 결과와 걸린 문제를 이 문서의 "검증 결과"에 기록
 
@@ -184,6 +184,28 @@ Claude Code CLI에서 단계별로 작업할 수 있게 배경, 결정할 것, �
   - `termux-api`, `termux-style`, `termux-tasker` 모듈은 아직 `com.termux`를 가리킴(D5에서 정함)
   - 인텐트 action, extra 이름(`com.termux.service.action.*` 등)과 알림 채널 ID는 앱 안에서만 쓰여 그대로 둠
   - 앱 이름, 아이콘 같은 화면에 보이는 Termux 문구는 5번에서 바꿈
+
+### 2026-10-09: 부트스트랩과 openssh, git을 새 경로로 빌드 (aarch64)
+
+- termux-packages: `/root/projects/termux-packages`, `devshell` 브랜치 커밋 `d031820df4`~`de5847d709` (로컬에만 있음)
+- 빌드 이미지: 저장소의 `scripts/Dockerfile`(Ubuntu 24.04)로 직접 만든 `devshell-package-builder:noble`과, 그 위에 SDK를 더한 `devshell-package-builder:noble-sdk33`
+  - `ghcr.io/termux-play-store/package-builder:latest`는 Ubuntu 26.04로 만들어져 있어 빌드 스크립트(noble 기준)와 맞지 않음. 받아서 쓰지 말 것
+- 빌드 명령:
+  `TERMUX_BUILDER_IMAGE_NAME=devshell-package-builder:noble-sdk33 ./scripts/run-docker.sh ./scripts/generate-bootstraps.sh --build --architectures aarch64`
+  - 호스트를 root로 실행하면 `run-docker.sh`가 uid를 맞추지 않으므로 저장소 폴더 소유자를 1001로 바꿔야 함
+  - 컨테이너는 AppArmor로 `output/` 말고는 쓰지 못함. `generate-bootstraps.sh`는 실행할 때마다 `output/`을 지우고 zip을 저장소 루트에 쓰므로, 로컬에서 임시로 고쳐 실행함(커밋 안 함)
+  - 앱 ID가 공식 저장소와 다르면 의존성을 받지 않고 빌드 전용 의존성(python, X11 라이브러리 등)까지 모두 소스에서 빌드. aarch64 부트스트랩까지 약 200개 .deb, 실제 빌드 시간은 2시간 정도
+- 고친 패키지(커밋함):
+  - `termux-tools`: `configure`에 앱 ID와 경로를 넘기지 않아 `login`, `pkg` 등 12개 파일에 `com.termux` 경로가 들어갔음
+  - `apt`, `apr-util`: 소스가 미러에서 내려가 snapshot.debian.org, archive.apache.org로 바꿈(체크섬 같음)
+  - `foot`: codeberg가 압축 파일을 다시 만들어 체크섬 바꿈(내용은 태그와 같음)
+  - `libxml2`, `tar`, `setup-android-sdk.sh`(termux-am용 SDK): 빌드 이미지 관련
+- 결과:
+  - `bootstrap-aarch64.zip` 24.6MB, SHA-256 `e022e7037d53dc82ae2e3533ab1bb0be310644bc4b9e6cd7796a5d513369625d`. 파일 2,773개 중 `/data/data/com.termux/` 경로 0개
+  - openssh 10.3p1, git 2.54.0. 부트스트랩에 없는 의존성까지 11개 .deb
+- APK: termux-apps 커밋 `087b810d`에서 arm64-v8a만 빌드하고 이 zip을 넣음. 39MB
+- 기기 확인 묶음: `/root/projects/devshell-verify` (APK, debs, 확인 순서 README)
+- 남은 것: 앱의 기본 apt 저장소(termux.net)는 com.termux용이라 `pkg install`은 아직 쓸 수 없음. 3번 자체 패키지 저장소에서 해결
 
 ## 결정 기록
 
