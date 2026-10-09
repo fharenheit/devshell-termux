@@ -63,7 +63,7 @@ Claude Code CLI에서 단계별로 작업할 수 있게 배경, 결정할 것, �
 목표: 새 이름과 앱 ID로 Play 대응 구조가 실제 기기에서 동작하는지 확인합니다. 나머지 작업에 들어가도 될지 판단하는 단계입니다.
 
 - [x] `termux-play-store/termux-apps`를 받아 빌드 환경 준비(필요한 JDK, Gradle, NDK 확인)
-- [ ] 앱 ID를 D3 값으로 바꿔 빌드
+- [x] 앱 ID를 D3 값으로 바꿔 빌드
 - [ ] `termux-play-store/termux-packages`로 부트스트랩과 패키지 몇 개(openssh, git)를 새 앱 ID 경로로 빌드
 - [ ] 실제 기기(Android 11 이상)에서 확인: 첫 실행 부트스트랩, `pkg install openssh git`, `ssh` 접속, `git clone`
 - [ ] 결과와 걸린 문제를 이 문서의 "검증 결과"에 기록
@@ -167,6 +167,23 @@ Claude Code CLI에서 단계별로 작업할 수 있게 배경, 결정할 것, �
   (`local.properties`에 `sdk.dir=/opt/android-sdk`)
 - 결과: BUILD SUCCESSFUL(약 5분), 단위 테스트 150개 모두 통과. 디버그 APK 3개(`termux-app` 84MB, `termux-api` 15MB, `termux-style` 84MB)
 - 참고: 이 기기에는 위 "작업 방법"의 JDK 11(`/root/jdk/jdk-11.0.32.1+1`)이 없고 JDK 21만 있습니다. 지금 포크(`termux-app`)를 빌드하려면 JDK 11을 따로 준비해야 합니다
+
+### 2026-10-09: 앱 ID를 `com.fharenheit.devshell`로 바꿔 빌드
+
+- termux-apps의 `devshell` 브랜치 커밋 `9a91aa6e` (로컬에만 있음)
+- 바꾼 것(`termux-app` 모듈):
+  - `build.gradle.kts`에 `applicationId = "com.fharenheit.devshell"`. 클래스 패키지(`namespace`)는 `com.termux` 그대로
+  - `TermuxConstants.PACKAGE_NAME`을 `BuildConfig.APPLICATION_ID`로. 그래서 `FILES_PATH`가 `/data/data/com.fharenheit.devshell/files`가 됨
+  - `TERMUX_INTERNAL_ACTIVITY`는 클래스 이름이라 `com.termux.app.TermuxActivityInternal`로 고정. 앱 ID에서 만들면 틀린 이름이 됨
+  - 매니페스트의 권한, authority, taskAffinity를 `${applicationId}` 기준으로. `ShareAPI`, `TermuxContentProvider`, 위젯 바로 가기도 `PACKAGE_NAME` 기준으로
+  - `res/xml/shortcuts.xml`의 `targetPackage`는 변수를 쓸 수 없어서 `com.fharenheit.devshell`을 직접 적음
+- 결과: `:termux-app:assembleDebug`와 단위 테스트(2개) 통과. APK의 패키지 이름, 권한, authority가 `com.fharenheit.devshell`로 바뀐 것을 `aapt2`로 확인
+- lint는 실패: 라이브러리 새 버전이 있다는 오류 3개(`androidx.annotation`, `androidx.core`, `robolectric`). 원본에서도 똑같이 나오므로 앱 ID 변경과 관계없음. `warningsAsErrors`라서 실패함. 2번에서 라이브러리를 올릴 때 정리
+- 아직 안 된 것:
+  - 부트스트랩과 패키지는 `/data/data/com.termux/files/usr` 경로로 빌드된 것이라 이 APK는 기기에서 동작하지 않음. 다음 항목(새 경로로 패키지 빌드)에서 해결
+  - `termux-api`, `termux-style`, `termux-tasker` 모듈은 아직 `com.termux`를 가리킴(D5에서 정함)
+  - 인텐트 action, extra 이름(`com.termux.service.action.*` 등)과 알림 채널 ID는 앱 안에서만 쓰여 그대로 둠
+  - 앱 이름, 아이콘 같은 화면에 보이는 Termux 문구는 5번에서 바꿈
 
 ## 결정 기록
 
