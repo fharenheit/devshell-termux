@@ -62,7 +62,7 @@ Claude Code CLI에서 단계별로 작업할 수 있게 배경, 결정할 것, �
 ### 1. 검증 (먼저, 약 2주)
 목표: 새 이름과 앱 ID로 Play 대응 구조가 실제 기기에서 동작하는지 확인합니다. 나머지 작업에 들어가도 될지 판단하는 단계입니다.
 
-- [ ] `termux-play-store/termux-apps`를 받아 빌드 환경 준비(필요한 JDK, Gradle, NDK 확인)
+- [x] `termux-play-store/termux-apps`를 받아 빌드 환경 준비(필요한 JDK, Gradle, NDK 확인)
 - [ ] 앱 ID를 D3 값으로 바꿔 빌드
 - [ ] `termux-play-store/termux-packages`로 부트스트랩과 패키지 몇 개(openssh, git)를 새 앱 ID 경로로 빌드
 - [ ] 실제 기기(Android 11 이상)에서 확인: 첫 실행 부트스트랩, `pkg install openssh git`, `ssh` 접속, `git clone`
@@ -154,6 +154,19 @@ Claude Code CLI에서 단계별로 작업할 수 있게 배경, 결정할 것, �
 ## 검증 결과
 
 (1번 검증을 진행하면서 기록)
+
+### 2026-10-09: termux-apps 빌드 환경
+
+- 받은 위치: `/root/projects/termux-apps` (커밋 `5c736894`)
+- 요구 사항: JDK 21(CI는 21, 25), Gradle 9.6.1(wrapper), AGP 9.2.1, compileSdk·targetSdk 37, minSdk 30, NDK 29.0.14206865
+- 설치한 SDK 구성 요소(`/opt/android-sdk`): `platforms;android-37.0`, `build-tools;37.0.0`, `ndk;29.0.14206865`, `platform-tools`
+- 모듈: `termux-app`, `termux-api`, `termux-style`, `terminal-emulator`, `terminal-view`. ABI는 armeabi-v7a, arm64-v8a, x86_64
+- 부트스트랩은 빌드할 때 `termux-play-store/termux-packages` 릴리즈(`bootstrap-2026.06.21-r2`)에서 받음. proot loader `.so`도 같은 곳에서 받음
+- 빌드 명령:
+  `export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 ANDROID_HOME=/opt/android-sdk && ./gradlew --no-daemon assembleDebug test`
+  (`local.properties`에 `sdk.dir=/opt/android-sdk`)
+- 결과: BUILD SUCCESSFUL(약 5분), 단위 테스트 150개 모두 통과. 디버그 APK 3개(`termux-app` 84MB, `termux-api` 15MB, `termux-style` 84MB)
+- 참고: 이 기기에는 위 "작업 방법"의 JDK 11(`/root/jdk/jdk-11.0.32.1+1`)이 없고 JDK 21만 있습니다. 지금 포크(`termux-app`)를 빌드하려면 JDK 11을 따로 준비해야 합니다
 
 ## 결정 기록
 
