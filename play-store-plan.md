@@ -48,8 +48,8 @@ Claude Code CLI에서 단계별로 작업할 수 있게 배경, 결정할 것, �
 | # | 질문 | 선택지 | 추천 | 결정 |
 |---|---|---|---|---|
 | D1 | 기반 코드 | (a) 지금처럼 `termux/termux-app` + 직접 Play 대응, (b) `termux-play-store/termux-apps`로 옮기고 포크 기능 이전 | (b) | (b) (2026-10-09) |
-| D2 | 앱 이름 | 후보: Nuri Term, ShellBay, Dalbit, Gilbeot, PocketShell 등 | Play, GitHub, 도메인에서 겹치는 이름 검색 후 결정 | DevTerm (2026-10-09) |
-| D3 | 앱 ID | `io.github.fharenheit.<이름>` 또는 소유한 도메인 기반 | 한 번 올리면 못 바꿈 | `com.fharenheit.devterm` (2026-10-09) |
+| D2 | 앱 이름 | 후보: Nuri Term, ShellBay, Dalbit, Gilbeot, PocketShell 등 | Play, GitHub, 도메인에서 겹치는 이름 검색 후 결정 | DevShell (2026-10-09) |
+| D3 | 앱 ID | `io.github.fharenheit.<이름>` 또는 소유한 도메인 기반 | 한 번 올리면 못 바꿈 | `com.fharenheit.devshell` (2026-10-09) |
 | D4 | 최소 Android 버전 | Android 11(API 30) 이상 | Play판 실행 방식과 같게 | Android 11(API 30) 이상 (2026-10-09) |
 | D5 | 넣을 플러그인 기능 | API(알림, 클립보드, 공유 등), Boot, Widget | 꼭 필요한 것만 본 앱에 | |
 | D6 | GitHub 직접 설치판 | (a) Play판과 같은 코드·같은 ID, (b) 지금 `com.termux`판 유지 | (a) | |
@@ -174,5 +174,5 @@ Claude Code CLI에서 단계별로 작업할 수 있게 배경, 결정할 것, �
 
 - 2026-10-09 D1: (b) `termux-play-store/termux-apps`로 옮기고 포크 기능을 이전합니다. 최신 targetSdk와 linker 모드 실행 방식이 이미 들어 있어 Play 대응을 직접 하는 것보다 작업이 적습니다.
 - 2026-10-09 D4: Android 11(API 30) 이상. 기반으로 정한 Play판 실행 방식과 같게 맞춥니다.
-- 2026-10-09 D2: DevTerm. Google Play에 같은 이름의 앱은 없습니다. ClockworkPi의 휴대용 단말기 DevTerm(2021~)과 이름이 같아서 혼동, 사칭 신고, 검색 노출 위험이 있음을 알고 정했습니다. 상표 등록 여부는 확인하지 못했습니다.
-- 2026-10-09 D3: `com.fharenheit.devterm`. Play는 도메인 소유를 확인하지 않습니다.
+- 2026-10-09 D2: DevShell. Google Play에 같은 이름의 앱이 없고, 같은 이름의 하드웨어나 상용 제품도 찾지 못했습니다. 처음에 정한 DevTerm은 ClockworkPi의 휴대용 단말기 DevTerm(2021~)과 이름이 같아 혼동과 사칭 신고 위험이 있어 바꿨습니다. DevShell은 Nix의 `devShell`, numtide `devshell`, Yocto `devshell`처럼 개발 도구 용어로 흔히 쓰여서 상표로 독점하기 어렵고 검색 결과가 섞일 수 있습니다. 상표 등록 여부는 확인하지 못했습니다.
+- 2026-10-09 D3: `com.fharenheit.devshell`. Play는 도메인 소유를 확인하지 않습니다.
