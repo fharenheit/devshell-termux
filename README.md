@@ -1,14 +1,29 @@
 # Termux application
 
-> **이 저장소는 한국어 사용자를 위해 기능을 더한 Termux 포크입니다.** [릴리즈](https://github.com/fharenheit/termux-app/releases)에서 APK를 받아 수동으로 설치하세요(대부분의 기기는 `*_arm64-v8a.apk`). Play 스토어/F-Droid 버전 위에는 덮어 설치할 수 없습니다.
+> **이 저장소는 Termux 포크입니다. 블루투스·하드웨어 키보드에서 한국어, 일본어, 중국어처럼 키보드 앱이 글자를 조합하는 언어를 입력할 수 있도록 고쳤고, SSH 접속 관리, 파일 탐색, 키보드 단축키, 스니펫 등 다양한 기능을 더했습니다.**
 >
-> - 블루투스/하드웨어 키보드 한글 입력, D2Coding 기본 글꼴, 글꼴 목록(미리보기, 큰 글꼴 내려받기), 저장되는 글자 크기 설정과 화면용 A+/A− 키
-> - 세션 탭(새 출력·벨 표시, 이름 바꾸기, 자동 제목, 위/아래 배치), 백그라운드 세션 종료·벨 알림, 탭 바의 ⚙ 메뉴
-> - SSH 접속 관리(비밀번호 암호화 저장, 키 관리, 점프 호스트, 포트 포워딩, 자동 재접속, mosh)
-> - SSH 파일 탐색(SFTP): 이미지 보기, 텍스트 편집(문법 강조, Undo/Redo, 인코딩, 16진수 보기), 업로드/다운로드
-> - 터미널의 URL 열기, 설정 내보내기/가져오기, extra keys의 ENTER·KEYBOARD 버튼
+> *A Termux fork that fixes hardware-keyboard input for languages composed by the IME, such as Korean, Japanese and Chinese, and adds SSH management, a file browser, keyboard shortcuts, snippets and more.*
+>
+> [릴리즈](https://github.com/fharenheit/termux-app/releases)에서 APK를 받아 수동으로 설치하세요(대부분의 기기는 `*_arm64-v8a.apk`). Play 스토어/F-Droid 버전 위에는 덮어 설치할 수 없습니다.
+>
+> - 입력: 블루투스·하드웨어 키보드로 한국어·일본어·중국어 등 조합 입력, 키캡 모양 하단 키, 특수 키 패널(Ctrl·Fn·tmux·vim 키), 키보드 단축키
+> - 화면: 앱 언어 선택(한국어, English, 日本語, 中文), 글꼴 목록과 미리보기, 탭별 글자 크기, 출력에서 찾기, URL 열기
+> - 탭: 세션 탭(새 출력·벨 표시, 자동 제목), 백그라운드 종료·벨 알림
+> - SSH: 접속 관리(비밀번호 암호화 저장, 키 관리, 점프 호스트, 포트 포워딩, 자동 재접속, mosh), 호스트 키 확인
+> - 파일: SFTP 파일 탐색, 텍스트 편집기(문법 강조, 인코딩, 16진수 보기), 백그라운드 전송
+> - 생산성: 스니펫(Git·시스템 명령 기본 제공, 값 입력받기), 클립보드 기록, 설정 내보내기/가져오기
 >
 > 전체 기능 목록은 [FEATURES.md](FEATURES.md), 구현 방식은 [custom/README.md](custom/README.md), 변경 이력은 [history.md](history.md)에 있습니다.
+
+## 스크린샷
+
+| <img src="custom/docs/manual/images/ko/01_terminal_tabs.png" width="240" alt="세션 탭과 키캡 하단 키"> | <img src="custom/docs/manual/images/ko/02_special_keys.png" width="240" alt="특수 키 패널"> | <img src="custom/docs/manual/images/ko/12_snippets.png" width="240" alt="스니펫"> |
+|:---:|:---:|:---:|
+| 세션 탭과 키캡 하단 키 | 특수 키 패널 | 스니펫 |
+| <img src="custom/docs/manual/images/ko/18_ssh_hosts.png" width="240" alt="SSH 호스트"> | <img src="custom/docs/manual/images/ko/25_sftp_browser.png" width="240" alt="SFTP 파일 탐색"> | <img src="custom/docs/manual/images/ko/30_editor_toolbar.png" width="240" alt="텍스트 편집기"> |
+| SSH 호스트 | SFTP 파일 탐색 | 텍스트 편집기 |
+
+더 많은 화면과 사용법은 [사용 설명서](custom/docs/manual/ko/README.md)([English](custom/docs/manual/en/README.md))에 있습니다.
 
 [![Build status](https://github.com/termux/termux-app/workflows/Build/badge.svg)](https://github.com/termux/termux-app/actions)
 [![Testing status](https://github.com/termux/termux-app/workflows/Unit%20tests/badge.svg)](https://github.com/termux/termux-app/actions)
