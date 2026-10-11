@@ -10,6 +10,7 @@ import android.content.pm.ResolveInfo;
 import androidx.annotation.NonNull;
 
 import com.termux.shared.R;
+import com.termux.shared.fork.DevShellInfo;
 import com.termux.shared.file.FileUtils;
 import com.termux.shared.file.TermuxFileUtils;
 import com.termux.shared.logger.Logger;
@@ -323,7 +324,8 @@ public class TermuxUtils {
 
         StringBuilder markdownString = new StringBuilder();
 
-        markdownString.append("## Where To Report An Issue");
+        markdownString.append(DevShellInfo.getMarkdownString(context)).append("\n");
+        markdownString.append("## Where To Report An Issue of Termux");
 
         markdownString.append("\n\n").append(context.getString(R.string.msg_report_issue, TermuxConstants.TERMUX_WIKI_URL)).append("\n");
 
@@ -334,7 +336,7 @@ public class TermuxUtils {
         markdownString.append("\n").append(MarkdownUtils.getLinkMarkdownString(TermuxConstants.TERMUX_REDDIT_SUBREDDIT, TermuxConstants.TERMUX_REDDIT_SUBREDDIT_URL)).append("  ");
 
         markdownString.append("\n\n### Github Issues for Termux apps\n");
-        markdownString.append("\n").append(MarkdownUtils.getLinkMarkdownString(TermuxConstants.TERMUX_APP_NAME, TermuxConstants.TERMUX_GITHUB_ISSUES_REPO_URL)).append("  ");
+        markdownString.append("\n").append(MarkdownUtils.getLinkMarkdownString("Termux", TermuxConstants.TERMUX_GITHUB_ISSUES_REPO_URL)).append("  ");
         markdownString.append("\n").append(MarkdownUtils.getLinkMarkdownString(TermuxConstants.TERMUX_API_APP_NAME, TermuxConstants.TERMUX_API_GITHUB_ISSUES_REPO_URL)).append("  ");
         markdownString.append("\n").append(MarkdownUtils.getLinkMarkdownString(TermuxConstants.TERMUX_BOOT_APP_NAME, TermuxConstants.TERMUX_BOOT_GITHUB_ISSUES_REPO_URL)).append("  ");
         markdownString.append("\n").append(MarkdownUtils.getLinkMarkdownString(TermuxConstants.TERMUX_FLOAT_APP_NAME, TermuxConstants.TERMUX_FLOAT_GITHUB_ISSUES_REPO_URL)).append("  ");
@@ -366,10 +368,11 @@ public class TermuxUtils {
 
         StringBuilder markdownString = new StringBuilder();
 
-        markdownString.append("## Important Links");
+        markdownString.append(DevShellInfo.getMarkdownString(context)).append("\n");
+        markdownString.append("## Important Links of Termux");
 
         markdownString.append("\n\n### Github\n");
-        markdownString.append("\n").append(MarkdownUtils.getLinkMarkdownString(TermuxConstants.TERMUX_APP_NAME, TermuxConstants.TERMUX_GITHUB_REPO_URL)).append("  ");
+        markdownString.append("\n").append(MarkdownUtils.getLinkMarkdownString("Termux", TermuxConstants.TERMUX_GITHUB_REPO_URL)).append("  ");
         markdownString.append("\n").append(MarkdownUtils.getLinkMarkdownString(TermuxConstants.TERMUX_API_APP_NAME, TermuxConstants.TERMUX_API_GITHUB_REPO_URL)).append("  ");
         markdownString.append("\n").append(MarkdownUtils.getLinkMarkdownString(TermuxConstants.TERMUX_BOOT_APP_NAME, TermuxConstants.TERMUX_BOOT_GITHUB_REPO_URL)).append("  ");
         markdownString.append("\n").append(MarkdownUtils.getLinkMarkdownString(TermuxConstants.TERMUX_FLOAT_APP_NAME, TermuxConstants.TERMUX_FLOAT_GITHUB_REPO_URL)).append("  ");
@@ -386,7 +389,7 @@ public class TermuxUtils {
 
         markdownString.append("\n\n### Wiki\n");
         markdownString.append("\n").append(MarkdownUtils.getLinkMarkdownString(TermuxConstants.TERMUX_WIKI, TermuxConstants.TERMUX_WIKI_URL)).append("  ");
-        markdownString.append("\n").append(MarkdownUtils.getLinkMarkdownString(TermuxConstants.TERMUX_APP_NAME, TermuxConstants.TERMUX_GITHUB_WIKI_REPO_URL)).append("  ");
+        markdownString.append("\n").append(MarkdownUtils.getLinkMarkdownString("Termux", TermuxConstants.TERMUX_GITHUB_WIKI_REPO_URL)).append("  ");
         markdownString.append("\n").append(MarkdownUtils.getLinkMarkdownString(TermuxConstants.TERMUX_PACKAGES_GITHUB_REPO_NAME, TermuxConstants.TERMUX_PACKAGES_GITHUB_WIKI_REPO_URL)).append("  ");
 
         markdownString.append("\n##\n");

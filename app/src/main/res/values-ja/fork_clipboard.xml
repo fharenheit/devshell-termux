@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="title_clipboard_history">クリップボード履歴</string>
-    <string name="msg_clipboard_history_empty">まだコピーした内容はありません。Termux を開いている間にコピーしたもの、または他のアプリでコピーしてから戻ったものがここに表示されます。アプリを閉じるまで保持されます。</string>
+    <string name="msg_clipboard_history_empty">まだコピーした内容はありません。DevShell を開いている間にコピーしたもの、または他のアプリでコピーしてから戻ったものがここに表示されます。アプリを閉じるまで保持されます。</string>
     <string name="action_clipboard_history_close">閉じる</string>
     <string name="action_clipboard_history_clear">すべて消去</string>
     <string name="clipboard_history_item_size">%1$d 文字 · %2$d 行</string>

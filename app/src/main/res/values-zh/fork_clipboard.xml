@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="title_clipboard_history">剪贴板历史</string>
-    <string name="msg_clipboard_history_empty">还没有复制的内容。在 Termux 打开时复制的内容，或在其他应用中复制后返回的内容会显示在这里。仅保留到应用关闭为止。</string>
+    <string name="msg_clipboard_history_empty">还没有复制的内容。在 DevShell 打开时复制的内容，或在其他应用中复制后返回的内容会显示在这里。仅保留到应用关闭为止。</string>
     <string name="action_clipboard_history_close">关闭</string>
     <string name="action_clipboard_history_clear">清空</string>
     <string name="clipboard_history_item_size">%1$d 个字符 · %2$d 行</string>

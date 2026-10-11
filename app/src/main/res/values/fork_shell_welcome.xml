@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="shell_welcome_title">"DevShell · a terminal based on Termux · %1$s"</string>
+    <string name="shell_welcome">"\n Manual      %1$s\n Releases    %2$s\n Issues      %3$s\n\n Packages    pkg search &lt;name&gt; · pkg install &lt;name&gt; · pkg upgrade\n Shortcuts   ⊞ special keys · ⚙ → SSH · ⚙ → Snippets · Ctrl+Shift+F find\n\n Packages come from the Termux repositories. Report package issues to Termux:\n %4$s"</string>
+</resources>

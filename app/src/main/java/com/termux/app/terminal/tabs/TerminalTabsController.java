@@ -33,6 +33,7 @@ import com.termux.app.terminal.fonts.TerminalFonts;
 import com.termux.app.terminal.sftp.SftpBrowserActivity;
 import com.termux.app.language.LanguageDialog;
 import com.termux.app.terminal.clipboard.ClipboardHistory;
+import com.termux.app.terminal.welcome.ShellWelcome;
 import com.termux.app.terminal.search.TerminalSearchBar;
 import com.termux.app.terminal.specialkeys.SpecialKeysPanel;
 import com.termux.app.terminal.snippets.SnippetsDialog;
@@ -86,6 +87,7 @@ public class TerminalTabsController {
 
     public TerminalTabsController(@NonNull TermuxActivity activity) {
         ClipboardHistory.attach(activity, activity.getTerminalView());
+        ShellWelcome.install(activity);
         mActivity = activity;
         mTabsBar = activity.findViewById(R.id.terminal_tabs_bar);
         mScrollView = activity.findViewById(R.id.terminal_tabs_scroll_view);

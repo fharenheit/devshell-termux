@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="shell_welcome_title">"DevShell · Termux 기반 터미널 · %1$s"</string>
+    <string name="shell_welcome">"\n 설명서     %1$s\n 새 버전    %2$s\n 문제 신고  %3$s\n\n 패키지     pkg search &lt;이름&gt; · pkg install &lt;이름&gt; · pkg upgrade\n 바로가기   ⊞ 특수 키 · ⚙ → SSH · ⚙ → 스니펫 · Ctrl+Shift+F 찾기\n\n 패키지는 Termux 저장소에서 받습니다. 패키지 문제는 Termux에 신고하세요:\n %4$s"</string>
+</resources>

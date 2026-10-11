@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="title_clipboard_history">클립보드 기록</string>
-    <string name="msg_clipboard_history_empty">아직 복사한 내용이 없습니다. Termux가 열려 있는 동안 복사하거나, 다른 앱에서 복사한 뒤 돌아오면 여기에 표시됩니다. 앱을 닫을 때까지만 보관합니다.</string>
+    <string name="msg_clipboard_history_empty">아직 복사한 내용이 없습니다. DevShell이 열려 있는 동안 복사하거나, 다른 앱에서 복사한 뒤 돌아오면 여기에 표시됩니다. 앱을 닫을 때까지만 보관합니다.</string>
     <string name="action_clipboard_history_close">닫기</string>
     <string name="action_clipboard_history_clear">모두 지우기</string>
     <string name="clipboard_history_item_size">%1$d자 · %2$d줄</string>

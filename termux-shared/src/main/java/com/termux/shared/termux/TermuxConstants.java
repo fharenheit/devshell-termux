@@ -276,7 +276,7 @@ public final class TermuxConstants {
      */
 
     /** Termux app name */
-    public static final String TERMUX_APP_NAME = "Termux"; // Default: "Termux"
+    public static final String TERMUX_APP_NAME = "DevShell"; // Default: "Termux"
     /** Termux package name */
     public static final String TERMUX_PACKAGE_NAME = "com.termux"; // Default: "com.termux"
     /** Termux Github repo name */
@@ -486,13 +486,13 @@ public final class TermuxConstants {
      */
 
     /** Termux Site */
-    public static final String TERMUX_SITE = TERMUX_APP_NAME + " Site"; // Default: "Termux Site"
+    public static final String TERMUX_SITE = "Termux Site"; // Default: "Termux Site"
 
     /** Termux Site url */
     public static final String TERMUX_SITE_URL = "https://termux.dev"; // Default: "https://termux.dev"
 
     /** Termux Wiki */
-    public static final String TERMUX_WIKI = TERMUX_APP_NAME + " Wiki"; // Default: "Termux Wiki"
+    public static final String TERMUX_WIKI = "Termux Wiki"; // Default: "Termux Wiki"
 
     /** Termux Wiki url */
     public static final String TERMUX_WIKI_URL = "https://wiki.termux.com"; // Default: "https://wiki.termux.com"

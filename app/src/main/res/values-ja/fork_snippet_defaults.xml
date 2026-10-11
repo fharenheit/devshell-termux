@@ -4,7 +4,7 @@
     <string name="title_snippet_defaults">デフォルトのスニペットを追加</string>
     <string name="snippet_group_git">Git</string>
     <string name="snippet_group_system">システム状態</string>
-    <string name="snippet_group_termux">Termux</string>
+    <string name="snippet_group_termux">パッケージ(pkg)</string>
     <string name="snippet_group_tmux">tmux</string>
     <string name="snippet_git_status">Git ステータス</string>
     <string name="snippet_git_log">Git ログ(グラフ)</string>

@@ -4,7 +4,7 @@
     <string name="title_snippet_defaults">添加默认片段</string>
     <string name="snippet_group_git">Git</string>
     <string name="snippet_group_system">系统状态</string>
-    <string name="snippet_group_termux">Termux</string>
+    <string name="snippet_group_termux">软件包(pkg)</string>
     <string name="snippet_group_tmux">tmux</string>
     <string name="snippet_git_status">Git 状态</string>
     <string name="snippet_git_log">Git 日志图</string>

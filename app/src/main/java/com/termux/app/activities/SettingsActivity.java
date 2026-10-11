@@ -24,6 +24,7 @@ import com.termux.shared.settings.preferences.TermuxFloatAppSharedPreferences;
 import com.termux.shared.settings.preferences.TermuxTaskerAppSharedPreferences;
 import com.termux.shared.settings.preferences.TermuxWidgetAppSharedPreferences;
 import com.termux.shared.termux.AndroidUtils;
+import com.termux.shared.fork.DevShellInfo;
 import com.termux.shared.termux.TermuxConstants;
 import com.termux.shared.termux.TermuxUtils;
 
@@ -72,7 +73,7 @@ public class SettingsActivity extends AppCompatActivity {
             configureTermuxTaskerPreference(context);
             configureTermuxWidgetPreference(context);
             configureAboutPreference(context);
-            configureDonatePreference(context);
+            // Not shown: the donation link is for Termux, not this fork, whose links are in the about.
         }
 
         private void configureTermuxAPIPreference(@NonNull Context context) {
@@ -121,6 +122,7 @@ public class SettingsActivity extends AppCompatActivity {
                             String title = "About";
 
                             StringBuilder aboutString = new StringBuilder();
+                            aboutString.append(DevShellInfo.getMarkdownString(context)).append("\n\n");
                             aboutString.append(TermuxUtils.getAppInfoMarkdownString(context, false));
 
                             String termuxPluginAppsInfo =  TermuxUtils.getTermuxPluginAppsInfoMarkdownString(context);
