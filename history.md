@@ -7,6 +7,15 @@
 - **Added**: 새 기능, **Changed**: 동작·문서·패치 변경, **Fixed**: 버그 수정
 - "패치 갱신" 커밋은 업스트림 파일을 고친 커밋 뒤에 `custom/update-patches.sh`로 `custom/patches/`를 다시 만든 것입니다.
 
+## v0.118.3-ko.27 (2026-10-11)
+
+| 커밋 | 내용 |
+|---|---|
+| [`34d587a`](https://github.com/fharenheit/devshell-termux/commit/34d587a) | Changed: 사용 설명서를 DevShell 이름으로, 셸 첫 화면과 정보·도움말 설명 추가 |
+| [`af4f1e0`](https://github.com/fharenheit/devshell-termux/commit/af4f1e0) | Changed: 저장소 이름 `fharenheit/devshell-termux`(앱 링크, 글꼴 내려받기 주소, 문서), APK 이름 `devshell_<버전>_<ABI>.apk` |
+| [`15b16c9`](https://github.com/fharenheit/devshell-termux/commit/15b16c9) | Changed: 패치 갱신(`0033`) |
+| (이 릴리즈 커밋) | Added: v0.118.3-ko.27 릴리즈 노트와 이력 |
+
 ## v0.118.3-ko.26 (2026-10-11)
 
 | 커밋 | 내용 |
@@ -20,7 +29,7 @@
 | [`9bd30ac`](https://github.com/fharenheit/devshell-termux/commit/9bd30ac) | Changed: 앱 이름 DevShell, 로컬 셸 첫 화면을 앱 언어의 `~/.termux/motd.sh`로(설명서·릴리즈·문제 신고 링크, 패키지 문제는 Termux에), 도움말은 이 저장소 설명서, 정보·문제 신고 화면에 DevShell 링크, Termux 후원 숨김 |
 | [`e80cf24`](https://github.com/fharenheit/devshell-termux/commit/e80cf24) | Changed: README와 기능 목록에 DevShell 이름 |
 | [`d9699ff`](https://github.com/fharenheit/devshell-termux/commit/d9699ff) | Changed: 패치 갱신(`0031`, `0032`) |
-| (이 릴리즈 커밋) | Added: v0.118.3-ko.26 릴리즈 노트와 이력 |
+| [`53464fd`](https://github.com/fharenheit/devshell-termux/commit/53464fd) | Added: v0.118.3-ko.26 릴리즈 노트와 이력 |
 
 ## v0.118.3-ko.25 (2026-10-09)
 
