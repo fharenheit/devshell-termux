@@ -67,7 +67,7 @@
 
 | 내용 | 위치 |
 |---|---|
-| README 상단의 포크 안내와 기능 요약, 전체 기능 목록 `FEATURES.md`(포크 전용) | `custom/patches/0003-*.patch`, `0017-*.patch`, `0028-*.patch` (`README.md`) |
+| README 상단의 포크 안내와 기능 요약, 전체 기능 목록 `FEATURES.md`(포크 전용) | `custom/patches/0003-*.patch`, `0017-*.patch`, `0028-*.patch`, `0029-*.patch` (`README.md`) |
 | 단위 테스트 워크플로를 JDK 11로 실행(Robolectric 4.4가 새 JDK에서 실패) | `custom/patches/0014-*.patch` (`.github/workflows/run_tests.yml`) |
 | 빌드 결과로 GitHub 릴리즈 게시 워크플로 | `.github/workflows/publish_release_from_build.yml`, `.github/release-notes/` |
 
