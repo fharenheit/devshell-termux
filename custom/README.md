@@ -68,7 +68,7 @@
 | 내용 | 위치 |
 |---|---|
 | 앱 이름 DevShell(`TERMUX_APP_NAME`, 앱 ID는 `com.termux` 그대로). 로컬 셸 첫 화면은 앱이 앱 언어로 쓰는 `~/.termux/motd.sh`(로그인 스크립트가 패키지의 motd보다 먼저 씀, 앱 표시 줄이 없으면 사용자 파일로 보고 두지 않음): 설명서·릴리즈·문제 신고 링크와 패키지 문제는 Termux에 신고하라는 안내. 도움말은 이 저장소의 설명서, 정보와 문제 신고 화면은 이 앱 링크 먼저, Termux 후원 항목 숨김 | `custom/patches/0031-*.patch` (`TermuxConstants.java`, `TermuxUtils.java`, `SettingsActivity.java`, `HelpActivity.java`, `strings.xml`) + `termux-shared/.../fork/DevShellInfo.java`, `app/.../terminal/welcome/`, `fork_shell_welcome.xml` |
-| README 상단의 포크 안내와 기능 요약, 전체 기능 목록 `FEATURES.md`(포크 전용) | `custom/patches/0003-*.patch`, `0017-*.patch`, `0028-*.patch`, `0029-*.patch`, `0030-*.patch` (`README.md`) |
+| README 상단의 포크 안내와 기능 요약, 전체 기능 목록 `FEATURES.md`(포크 전용) | `custom/patches/0003-*.patch`, `0017-*.patch`, `0028-*.patch`, `0029-*.patch`, `0030-*.patch`, `0032-*.patch` (`README.md`) |
 | 단위 테스트 워크플로를 JDK 11로 실행(Robolectric 4.4가 새 JDK에서 실패) | `custom/patches/0014-*.patch` (`.github/workflows/run_tests.yml`) |
 | 빌드 결과로 GitHub 릴리즈 게시 워크플로 | `.github/workflows/publish_release_from_build.yml`, `.github/release-notes/` |
 

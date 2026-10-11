@@ -1,0 +1,31 @@
+From e80cf24b8584124217afeca374d822bf2aa746a4 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sun, 11 Oct 2026 01:04:25 +0000
+Subject: [PATCH] Changed: Name the app DevShell in the README and the feature
+ list
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01GLNsTPnn2xKUQ4uFcevT6G
+---
+ README.md | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/README.md b/README.md
+index 9b101dd..67c7ab1 100644
+--- a/README.md
++++ b/README.md
+@@ -1,8 +1,8 @@
+-# Termux application
++# DevShell (Termux application fork)
+ 
+-> **이 저장소는 Termux 포크입니다. 블루투스·하드웨어 키보드에서 한국어, 일본어, 중국어처럼 키보드 앱이 글자를 조합하는 언어를 입력할 수 있도록 고쳤고, SSH 접속 관리, 파일 탐색, 키보드 단축키, 스니펫 등 다양한 기능을 더했습니다.**
++> **이 저장소는 Termux 포크인 DevShell입니다. 블루투스·하드웨어 키보드에서 한국어, 일본어, 중국어처럼 키보드 앱이 글자를 조합하는 언어를 입력할 수 있도록 고쳤고, SSH 접속 관리, 파일 탐색, 키보드 단축키, 스니펫 등 다양한 기능을 더했습니다.**
+ >
+-> *A Termux fork that fixes hardware-keyboard input for languages composed by the IME, such as Korean, Japanese and Chinese, and adds SSH management, a file browser, keyboard shortcuts, snippets and more.*
++> *DevShell is a Termux fork that fixes hardware-keyboard input for languages composed by the IME, such as Korean, Japanese and Chinese, and adds SSH management, a file browser, keyboard shortcuts, snippets and more.*
+ >
+ > [릴리즈](https://github.com/fharenheit/termux-app/releases)에서 APK를 받아 수동으로 설치하세요(대부분의 기기는 `*_arm64-v8a.apk`). Play 스토어/F-Droid 버전 위에는 덮어 설치할 수 없습니다.
+ >
+-- 
+2.43.0
+
