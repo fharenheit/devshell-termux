@@ -127,13 +127,16 @@ android {
 dependencies {
     // JDBC drivers of the database client (custom/docs/db-client-plan.md). Bundled in the APK,
     // since Google Play does not allow downloading executable code.
-    // Stay on 42.2.x: 42.7+ uses MethodHandle.invoke, which D8 only dexes at minSdk 26,
-    // while this app is minSdk 24. 42.2.x does not, so it dexes. Its shaded SCRAM library
-    // derives ScramException from javax.security.sasl.SaslException, which Android lacks;
-    // a tiny stub of that class (app/src/main/java/javax/security/sasl/SaslException.java)
-    // lets SCRAM-SHA-256 logins (the default of PostgreSQL 14+) work instead of throwing
-    // NoClassDefFoundError.
-    implementation("org.postgresql:postgresql:42.2.29") {
+    // Pinned to 42.2.9, the newest pgjdbc that works on this app's minSdk 24:
+    //  - 42.7+ uses MethodHandle.invoke, which D8 only dexes at minSdk 26.
+    //  - 42.2.10+ added the maxResultBuffer parser, which references java.lang.management
+    //    (absent on Android, and java.* cannot be stubbed), so a connection throws
+    //    NoClassDefFoundError when the class is verified.
+    //  - 42.2.9 avoids both. Its shaded SCRAM library still derives ScramException from
+    //    javax.security.sasl.SaslException, which Android also lacks, but that one is not a
+    //    java.* class, so a tiny stub (app/src/main/java/javax/security/sasl/SaslException.java)
+    //    lets SCRAM-SHA-256 logins (the default of PostgreSQL 14+) work.
+    implementation("org.postgresql:postgresql:42.2.9") {
         // Annotations only, which clash with the ones of another library.
         exclude group: "org.checkerframework", module: "checker-qual"
     }

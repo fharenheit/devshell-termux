@@ -89,7 +89,7 @@
 
 | 종류 | 방식 |
 |---|---|
-| PostgreSQL | pgjdbc 42.2.29(`org.postgresql:postgresql`, `checker-qual` 제외, SCRAM용 `javax.security.sasl.SaslException` 스텁 포함). `jdbc:postgresql://호스트:포트/db` |
+| PostgreSQL | pgjdbc 42.2.9(`org.postgresql:postgresql`, `checker-qual` 제외, SCRAM용 `javax.security.sasl.SaslException` 스텁 포함). `jdbc:postgresql://호스트:포트/db` |
 | MySQL / MariaDB | MariaDB Connector/J 2.7.12(MySQL 5.7/8.0도 접속). `jdbc:mariadb://…` |
 | SQLite | Android 내장 `SQLiteDatabase`(드라이버 없음). 파일이 없으면 만듦(읽기 전용이면 오류). `NO_LOCALIZED_COLLATORS`로 열어서 `android_metadata` 테이블을 만들지 않음 |
 
