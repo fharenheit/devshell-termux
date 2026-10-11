@@ -1,14 +1,14 @@
 # 7. Settings and language
 
-[← SFTP file browser](6-sftp.md) · [Contents](README.md)
+[← SFTP file browser](6-sftp.md) · [Contents](README.md) · [Next: Database →](8-database.md)
 
 ## Exporting and importing settings
 
 <img src="../images/en/34_export_settings.png" width="270" alt="Settings exported">
 
 - **⚙ → Export settings**: saves one file, `Download/termux-settings-*.zip`.
-  - It has `termux.properties`, colors, SSH hosts, snippets, special key favorites, app preferences and the font.
-  - SSH passwords can't leave the device, so they are not included. Enter them again on the new device.
+  - It has `termux.properties`, colors, SSH hosts, snippets, special key favorites, app preferences, the font, database connections and saved queries.
+  - SSH and database passwords can't leave the device, so they are not included. Enter them again on the new device.
 - **⚙ → Import settings**: pick the zip file with **Choose file**. The previous files are backed up in `~/.termux/backup/`.
 
 ## App language

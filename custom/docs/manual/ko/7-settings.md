@@ -1,14 +1,14 @@
 # 7. 설정과 언어
 
-[← SFTP 파일 탐색](6-sftp.md) · [목차](README.md)
+[← SFTP 파일 탐색](6-sftp.md) · [목차](README.md) · [다음: 데이터베이스 →](8-database.md)
 
 ## 설정 내보내기/가져오기
 
 <img src="../images/ko/34_export_settings.png" width="270" alt="설정 내보내기">
 
 - **⚙ → 설정 내보내기**: `Download/termux-settings-*.zip` 파일 하나로 저장합니다.
-  - 들어가는 것: `termux.properties`, 색상, SSH 호스트, 스니펫, 특수 키 즐겨찾기, 앱 설정, 글꼴
-  - SSH 비밀번호는 기기 밖으로 나갈 수 없어서 포함되지 않습니다. 새 기기에서 다시 입력합니다.
+  - 들어가는 것: `termux.properties`, 색상, SSH 호스트, 스니펫, 특수 키 즐겨찾기, 앱 설정, 글꼴, DB 접속, 저장한 쿼리
+  - SSH와 DB 비밀번호는 기기 밖으로 나갈 수 없어서 포함되지 않습니다. 새 기기에서 다시 입력합니다.
 - **⚙ → 설정 가져오기**: **파일 선택**으로 zip 파일을 고릅니다. 기존 파일은 `~/.termux/backup/`에 백업합니다.
 
 ## 앱 언어

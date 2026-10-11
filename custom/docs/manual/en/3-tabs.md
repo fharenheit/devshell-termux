@@ -14,7 +14,8 @@ The **session tab bar** above the terminal switches sessions (tap a tab), create
 
 - **Rename**: tap the selected tab again (above, right). **Reset** clears the name and goes back to the automatic title.
 - **Reorder, close**: long press a tab.
-- **New tab (+)**: choose **Local shell**, **SSH** or **Web browser**.
+- **New tab (+)**: choose **Local shell**, **SSH**, **Web browser** or **Database**.
+  - **Database** lists the saved database connections and **Manage connections…**, or opens the connection list if there are none ([Database](8-database.md)).
   - **SSH** is shown only when hosts are registered in the app, and lists them (● connected). **Manage SSH hosts…** at the bottom adds hosts.
   - Long press + for a named local shell. Ctrl+Shift+T opens a local shell right away.
 - **Web tabs**: choosing a 🌐 tab shows an address bar and the page in place of the terminal.

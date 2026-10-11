@@ -15,6 +15,7 @@ The features of DevShell, with screenshots. DevShell is based on Termux and adds
 5. [SSH](5-ssh.md): adding hosts, host keys, keys, SSH tabs, port forwards
 6. [SFTP file browser](6-sftp.md): file actions, permissions, the transfer queue, the text editor, the image viewer
 7. [Settings and language](7-settings.md): exporting/importing settings, the app language, the shell welcome, about and help
+8. [Database](8-database.md): database connections, running SQL, the results grid, editing rows, export and CSV import
 
 ## Getting started
 

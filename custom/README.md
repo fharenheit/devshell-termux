@@ -52,11 +52,17 @@
 | SSH 호스트 키 확인(SFTP 오류 창의 Check host key, 호스트 메뉴 → Host key): 서버 키 지문 표시, 모르는 키 신뢰, 바뀐 키 경고 후 교체, 신뢰한 키 삭제. 터미널 없는 SFTP 연결에서도 키를 받을 수 있음 | 포크 전용 파일만 (`app/.../terminal/ssh/SshHostKeys*.java`, `fork_ssh_host_key.xml`) |
 | SFTP 전송 대기열: 다운로드/업로드를 백그라운드에서 하나씩 실행(파일 화면을 나가도 계속), 알림에 진행률과 Cancel all, 끝나면 완료/실패 알림, 파일 화면 메뉴 → Transfers에서 중지/정리 | `custom/patches/0027-*.patch` (`AndroidManifest.xml`) + `app/.../terminal/sftp/SftpTransfers.java`, `SftpTransferService.java`, `fork_sftp_transfers.xml` |
 
+### 데이터베이스
+
+| 내용 | 위치 |
+|---|---|
+| DB 클라이언트(+ → 데이터베이스): PostgreSQL, MySQL/MariaDB(JDBC, Android 8.0 이상), SQLite 접속 관리(비밀번호 암호화 저장, SSL, SSH 터널, 읽기 전용, 색상), 웹 탭 뒤의 🗄 DB 탭(스키마 트리, SQL 편집기와 자동 완성·정렬·기록·저장한 쿼리, 캔버스 결과 표, 트랜잭션), 데이터 편집(기본 키로 UPDATE/INSERT/DELETE, 미리 보기, 한 트랜잭션), 결과·테이블 내보내기(테이블은 백그라운드 스트리밍과 알림), CSV 가져오기. 자세한 내용은 `custom/docs/db-client.md` | `custom/patches/0034-*.patch` (`app/build.gradle`: pgjdbc, MariaDB Connector/J) + `app/.../terminal/db/`, `fork_db.xml`, `TerminalTabsController.java`·`NewTabMenu.java`(탭 바와 + 메뉴) |
+
 ### 설정
 
 | 내용 | 위치 |
 |---|---|
-| 설정 내보내기/가져오기(⚙ 메뉴): `Download/termux-settings-*.zip`에 termux.properties, colors, SSH 호스트, 스니펫, 특수 키 즐겨찾기, 앱 설정, 글꼴 저장(SSH 비밀번호 제외). 가져올 때 기존 파일은 `~/.termux/backup/`에 백업 | `custom/patches/0012-*.patch` (`TermuxActivity.java`) + `app/.../terminal/backup/` |
+| 설정 내보내기/가져오기(⚙ 메뉴): `Download/termux-settings-*.zip`에 termux.properties, colors, SSH 호스트, 스니펫, 특수 키 즐겨찾기, 앱 설정, 글꼴, DB 접속, 저장한 쿼리 저장(SSH·DB 비밀번호 제외). 가져올 때 기존 파일은 `~/.termux/backup/`에 백업 | `custom/patches/0012-*.patch` (`TermuxActivity.java`) + `app/.../terminal/backup/` |
 
 ### 언어
 
