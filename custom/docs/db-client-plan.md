@@ -130,7 +130,7 @@ Claude Code CLI에서 단계별로 작업할 수 있게 배경, 결정할 것, �
 
 ## 검증 결과
 
-- 2026-10-11 드라이버: `org.postgresql:postgresql:42.7.4`, `org.mariadb.jdbc:mariadb-java-client:2.7.12`. APK에 들어가고 빌드됨(universal APK 약 1.4MB 증가). pgjdbc의 `checker-qual`은 다른 라이브러리와 겹쳐서 제외(어노테이션뿐)
+- 2026-10-11 드라이버: `org.postgresql:postgresql:42.2.29`, `org.mariadb.jdbc:mariadb-java-client:2.7.12`. APK에 들어가고 빌드됨(universal APK 약 1.4MB 증가). pgjdbc의 `checker-qual`은 다른 라이브러리와 겹쳐서 제외(어노테이션뿐)
 - `jdeps`로 Android에 없는 API 참조 확인:
   - 두 드라이버 모두 `java.time`, `java.util.Base64`, `java.nio.file`(Android 8.0, API 26부터)을 씀 → **DB 기능은 Android 8.0 이상에서만** 켬. 그보다 낮으면 안내 표시
   - TLS 호스트 이름 확인이 `javax.naming.ldap`(Android에 없음)을 씀 → PostgreSQL은 Android의 확인기를 `sslhostnameverifier`로 넘김, MariaDB는 인증서는 확인하고 호스트 이름 확인은 끔(`disableSslHostnameVerification`)
@@ -138,7 +138,9 @@ Claude Code CLI에서 단계별로 작업할 수 있게 배경, 결정할 것, �
 - 컨테이너의 PostgreSQL 16, MariaDB 10.11에 JVM 테스트로 접속, 쿼리, 메타데이터, 취소, 트랜잭션 확인(`DbLiveTest`, 환경 변수 `DEVSHELL_TEST_PG`, `DEVSHELL_TEST_MARIADB`). 데이터 편집의 적용·되돌리기·`SAVEPOINT`, 스트리밍 내보내기도 같은 테스트로 확인
 - 화면: Robolectric(`DbTabViewTest`)에서 SQLite 접속으로 탭 열기 → 여러 문장 실행 → 구조 갱신 → 자동 완성 → 데이터 편집 적용 → 탭 닫기 확인
 - 이 컨테이너에는 Android 기기·에뮬레이터가 없어서 **실제 기기 접속은 확인하지 못함**. 기기에서 확인할 것: 두 DB 직접·SSH 터널 접속, SSL
-- 2026-10-11 실기기 확인: PostgreSQL 16(SCRAM-SHA-256 인증, PG 14+ 기본)에 접속 시 "지원하지 않습니다"로 종료됨. 원인은 pgjdbc 42.2.29에 shade된 SCRAM 라이브러리의 `ScramException`이 Android에 없는 `javax.security.sasl.SaslException`을 상속하여, SCRAM 인증 필수 경로에서 `NoClassDefFoundError`가 난 것. `jdeps`가 설정 단계에 잡지 못한 이유는 SCRAM 접속 때만 로드되는 shade 클래스라서임. pgjdbc 42.7.4로 올려 해결(42.7+는 더 이상 `javax.security.sasl`을 참조하지 않음)
+- 2026-10-11 실기기 확인: PostgreSQL 16(SCRAM-SHA-256 인증, PG 14+ 기본)에 접속 시 "지원하지 않습니다"로 종료됨. 원인은 pgjdbc 42.2.29에 shade된 SCRAM 라이브러리의 `ScramException`이 Android에 없는 `javax.security.sasl.SaslException`을 상속하여, SCRAM 인증 필수 경로에서 `NoClassDefFoundError`가 난 것. `jdeps`가 설정 단계에 잡지 못한 이유는 SCRAM 접속 때만 로드되는 shade 클래스라서임.
+  - 처음엔 pgjdbc 42.7.4로 올려(42.7+는 `javax.security.sasl` 미참조) 해결하려 했으나, **42.7+는 `MethodHandle.invoke`를 써서 D8이 minSdk 26부터만 dex**함 → 이 앱은 minSdk 24라 `:app:mergeExtDexDebug` 실패. 42.5/42.6은 아직 `javax.security.sasl`을 참조해 둘 다 피하는 버전이 없음.
+  - 최종: **pgjdbc 42.2.29 유지**(MethodHandle.invoke 미사용 → dex 가능) + fork에 `app/src/main/java/javax/security/sasl/SaslException.java` 스텁 추가. Android는 어느 레벨에도 `javax.security.sasl`이 없어(최신 `android.jar`에도 없음) 스텁이 충돌 없이 로드됨. minSdk를 올리면 앱 전체가 Android 7 지원을 잃으므로 스텁이 최소·정확한 해법.
 
 ## 결정 기록
 
