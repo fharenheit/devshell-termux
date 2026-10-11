@@ -12,6 +12,7 @@
 | 커밋 | 내용 |
 |---|---|
 | [`f0bba6b`](https://github.com/fharenheit/devshell-termux/commit/f0bba6b) | Added: DB 탭에 앱 글꼴 크기 설정 적용(편집기·결과 표·메시지), 결과 창 기본 접힘 + 툴바 ▶▶ 오른쪽 ⌄/⌃ 토글(실행 시 자동 펼침) |
+| [`7977388`](https://github.com/fharenheit/devshell-termux/commit/7977388) | Fixed: DB 글꼴 크기를 `TermuxAppSharedPreferences`에서 읽도록 수정(컴파일 오류 수정) |
 | (이 릴리즈 커밋) | Added: v0.118.3-ko.33 릴리즈 노트와 이력 |
 
 ## v0.118.3-ko.32 (2026-10-11)
