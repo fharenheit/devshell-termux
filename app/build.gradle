@@ -127,7 +127,10 @@ android {
 dependencies {
     // JDBC drivers of the database client (custom/docs/db-client-plan.md). Bundled in the APK,
     // since Google Play does not allow downloading executable code.
-    implementation("org.postgresql:postgresql:42.2.29") {
+    // 42.7+ is needed on Android: its shaded SCRAM library no longer extends
+    // javax.security.sasl.SaslException, which Android lacks, so SCRAM-SHA-256
+    // logins (the default of PostgreSQL 14+) no longer fail with NoClassDefFoundError.
+    implementation("org.postgresql:postgresql:42.7.4") {
         // Annotations only, which clash with the ones of another library.
         exclude group: "org.checkerframework", module: "checker-qual"
     }
