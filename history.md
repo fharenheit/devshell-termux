@@ -7,7 +7,20 @@
 - **Added**: 새 기능, **Changed**: 동작·문서·패치 변경, **Fixed**: 버그 수정
 - "패치 갱신" 커밋은 업스트림 파일을 고친 커밋 뒤에 `custom/update-patches.sh`로 `custom/patches/`를 다시 만든 것입니다.
 
+## v0.118.3-ko.31 (2026-10-11)
+
+| 커밋 | 내용 |
+|---|---|
+| [`be48726`](https://github.com/fharenheit/devshell-termux/commit/be48726) | Added: 터미널 "더 보기"의 `URL 열기`를 `URL 열기(외부 브라우저)`로 바꾸고 `URL 열기(탭)` 추가(웹 탭으로 열기), 설정 메뉴 SSH 아래 `데이터베이스` 항목(접속 관리) |
+| [`4e8105d`](https://github.com/fharenheit/devshell-termux/commit/4e8105d) | Changed: 위 변경에 맞춰 패치 갱신(`0036`) |
+| [`feacb07`](https://github.com/fharenheit/devshell-termux/commit/feacb07) | Fixed: SCRAM-SHA-256 로그인 실패를 `javax.security.sasl.SaslException` 스텁으로 해결(pgjdbc 42.2.29 유지, minSdk 24). ko.30의 42.7.4 방식은 `MethodHandle.invoke`로 dex가 안 돼 대체 |
+| [`1fb17f9`](https://github.com/fharenheit/devshell-termux/commit/1fb17f9) | Changed: SCRAM 수정에 맞춰 패치 갱신(`0037`) |
+| (이 릴리즈 커밋) | Added: v0.118.3-ko.31 릴리즈 노트와 이력 |
+
 ## v0.118.3-ko.30 (2026-10-11)
+
+> 참고: ko.30의 pgjdbc 42.7.4 업그레이드는 `MethodHandle.invoke` 때문에 minSdk 24에서 dex가 되지 않아 빌드가 실패했고, APK 릴리즈는 만들어지지 않았습니다. SCRAM 수정은 ko.31에서 다른 방식으로 완료했습니다.
+
 
 | 커밋 | 내용 |
 |---|---|
