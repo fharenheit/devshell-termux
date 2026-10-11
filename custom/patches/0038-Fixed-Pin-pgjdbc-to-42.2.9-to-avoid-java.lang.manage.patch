@@ -1,0 +1,47 @@
+From 90e4fd9a73bbe980b466ce2f504636f32836e382 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?=EA=B9=80=EB=B3=91=EA=B3=A4?= <fharenheit@gmail.com>
+Date: Sun, 11 Oct 2026 14:19:26 +0900
+Subject: [PATCH] Fixed: Pin pgjdbc to 42.2.9 to avoid java.lang.management on
+ Android
+
+42.2.10+ bundles PGPropertyMaxResultBufferParser, which references
+java.lang.management.ManagementFactory; the class is loaded on every
+PostgreSQL connection and java.* cannot be stubbed, so a connection threw
+NoClassDefFoundError. 42.2.9 is the newest pgjdbc without it, and still has
+the shaded SCRAM library and the SSL options the client uses. The
+javax.security.sasl.SaslException stub is still needed.
+---
+ app/build.gradle | 17 ++++++++++-------
+ 1 file changed, 10 insertions(+), 7 deletions(-)
+
+diff --git a/app/build.gradle b/app/build.gradle
+index 3f211cb..7e85235 100644
+--- a/app/build.gradle
++++ b/app/build.gradle
+@@ -127,13 +127,16 @@ android {
+ dependencies {
+     // JDBC drivers of the database client (custom/docs/db-client-plan.md). Bundled in the APK,
+     // since Google Play does not allow downloading executable code.
+-    // Stay on 42.2.x: 42.7+ uses MethodHandle.invoke, which D8 only dexes at minSdk 26,
+-    // while this app is minSdk 24. 42.2.x does not, so it dexes. Its shaded SCRAM library
+-    // derives ScramException from javax.security.sasl.SaslException, which Android lacks;
+-    // a tiny stub of that class (app/src/main/java/javax/security/sasl/SaslException.java)
+-    // lets SCRAM-SHA-256 logins (the default of PostgreSQL 14+) work instead of throwing
+-    // NoClassDefFoundError.
+-    implementation("org.postgresql:postgresql:42.2.29") {
++    // Pinned to 42.2.9, the newest pgjdbc that works on this app's minSdk 24:
++    //  - 42.7+ uses MethodHandle.invoke, which D8 only dexes at minSdk 26.
++    //  - 42.2.10+ added the maxResultBuffer parser, which references java.lang.management
++    //    (absent on Android, and java.* cannot be stubbed), so a connection throws
++    //    NoClassDefFoundError when the class is verified.
++    //  - 42.2.9 avoids both. Its shaded SCRAM library still derives ScramException from
++    //    javax.security.sasl.SaslException, which Android also lacks, but that one is not a
++    //    java.* class, so a tiny stub (app/src/main/java/javax/security/sasl/SaslException.java)
++    //    lets SCRAM-SHA-256 logins (the default of PostgreSQL 14+) work.
++    implementation("org.postgresql:postgresql:42.2.9") {
+         // Annotations only, which clash with the ones of another library.
+         exclude group: "org.checkerframework", module: "checker-qual"
+     }
+-- 
+2.43.0
+
