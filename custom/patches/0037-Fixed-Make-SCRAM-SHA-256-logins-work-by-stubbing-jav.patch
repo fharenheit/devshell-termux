@@ -1,0 +1,40 @@
+From feacb07f624bd0e686f6ec3a2e5ea6a0f4a7ad96 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?=EA=B9=80=EB=B3=91=EA=B3=A4?= <fharenheit@gmail.com>
+Date: Sun, 11 Oct 2026 14:03:27 +0900
+Subject: [PATCH] Fixed: Make SCRAM-SHA-256 logins work by stubbing
+ javax.security.sasl.SaslException
+
+Keeping pgjdbc at 42.2.29 (42.7+ uses MethodHandle.invoke, which D8 only
+dexes at minSdk 26 while this app is minSdk 24) and adding a tiny stub of
+javax.security.sasl.SaslException, the one class the driver's shaded SCRAM
+library needs that Android does not ship. Supersedes the 42.7.4 upgrade,
+which broke :app:mergeExtDexDebug.
+---
+ app/build.gradle | 11 +++++++----
+ 1 file changed, 7 insertions(+), 4 deletions(-)
+
+diff --git a/app/build.gradle b/app/build.gradle
+index a43dedc..3f211cb 100644
+--- a/app/build.gradle
++++ b/app/build.gradle
+@@ -127,10 +127,13 @@ android {
+ dependencies {
+     // JDBC drivers of the database client (custom/docs/db-client-plan.md). Bundled in the APK,
+     // since Google Play does not allow downloading executable code.
+-    // 42.7+ is needed on Android: its shaded SCRAM library no longer extends
+-    // javax.security.sasl.SaslException, which Android lacks, so SCRAM-SHA-256
+-    // logins (the default of PostgreSQL 14+) no longer fail with NoClassDefFoundError.
+-    implementation("org.postgresql:postgresql:42.7.4") {
++    // Stay on 42.2.x: 42.7+ uses MethodHandle.invoke, which D8 only dexes at minSdk 26,
++    // while this app is minSdk 24. 42.2.x does not, so it dexes. Its shaded SCRAM library
++    // derives ScramException from javax.security.sasl.SaslException, which Android lacks;
++    // a tiny stub of that class (app/src/main/java/javax/security/sasl/SaslException.java)
++    // lets SCRAM-SHA-256 logins (the default of PostgreSQL 14+) work instead of throwing
++    // NoClassDefFoundError.
++    implementation("org.postgresql:postgresql:42.2.29") {
+         // Annotations only, which clash with the ones of another library.
+         exclude group: "org.checkerframework", module: "checker-qual"
+     }
+-- 
+2.43.0
+
