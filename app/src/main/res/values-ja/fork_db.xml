@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="msg_db_file_required">データベースファイルを入力してください</string>
+    <string name="msg_db_host_required">ホストを入力してください</string>
+    <string name="msg_db_port_invalid">ポートは 1〜65535 にしてください</string>
+    <string name="msg_db_confirm_drop">データベースオブジェクトを削除(DROP)します。元に戻せません。実行しますか?</string>
+    <string name="msg_db_confirm_truncate">テーブルの全行を削除します(TRUNCATE)。元に戻せません。実行しますか?</string>
+    <string name="msg_db_confirm_alter">データベースの構造を変更します(ALTER)。実行しますか?</string>
+    <string name="msg_db_confirm_delete_all">WHERE のない DELETE はテーブルの全行を削除します。実行しますか?</string>
+    <string name="msg_db_confirm_update_all">WHERE のない UPDATE はテーブルの全行を変更します。実行しますか?</string>
+    <string name="msg_db_tunnel_failed">%1$s 経由でポートを転送できませんでした: %2$s</string>
+    <string name="msg_db_android_version">DB クライアントには Android 8.0 以降が必要です</string>
+</resources>

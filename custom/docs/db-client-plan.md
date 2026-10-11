@@ -38,13 +38,13 @@ Claude Code CLI에서 단계별로 작업할 수 있게 배경, 결정할 것, �
 
 | # | 질문 | 선택지 | 추천 | 결정 |
 |---|---|---|---|---|
-| D1 | 접속 방식 | (A) 앱 안 JDBC, (B) 터미널 클라이언트 위 UI | (A). B는 지금도 터미널에서 쓸 수 있음 | |
-| D2 | 처음 지원할 DB | PostgreSQL, MySQL/MariaDB, SQLite, SQL Server, Oracle 등 | PostgreSQL, MySQL/MariaDB, SQLite | |
-| D3 | 주 접속 경로 | 직접 접속, SSH 터널(저장된 SSH 호스트 경유) | 둘 다. SSH 터널을 1차에 포함 | |
-| D4 | 화면 위치 | (a) +메뉴의 "DB" 탭(웹 탭처럼 탭 바 안), (b) 별도 화면(SFTP 파일 화면처럼) | (a). 웹 탭과 같은 구조라 탭 전환·단축키가 통일됨 | |
-| D5 | 데이터 편집 시점 | 1차, 2차 | 2차 | |
-| D6 | 드라이버 크기 허용 | APK가 수 MB 커짐(pgjdbc 약 1MB, MariaDB Connector/J 약 0.7MB) | 허용 | |
-| D7 | 접속 정보 저장 위치 | `~/.termux/db_connections.json`(설정 내보내기 포함, 비밀번호 제외) | 그대로 | |
+| D1 | 접속 방식 | (A) 앱 안 JDBC, (B) 터미널 클라이언트 위 UI | (A). B는 지금도 터미널에서 쓸 수 있음 | (A) 앱 안 JDBC (2026-10-11) |
+| D2 | 처음 지원할 DB | PostgreSQL, MySQL/MariaDB, SQLite, SQL Server, Oracle 등 | PostgreSQL, MySQL/MariaDB, SQLite | PostgreSQL, MySQL/MariaDB, SQLite (2026-10-11) |
+| D3 | 주 접속 경로 | 직접 접속, SSH 터널(저장된 SSH 호스트 경유) | 둘 다. SSH 터널을 1차에 포함 | 둘 다, SSH 터널 1차 포함 (2026-10-11) |
+| D4 | 화면 위치 | (a) +메뉴의 "DB" 탭(웹 탭처럼 탭 바 안), (b) 별도 화면(SFTP 파일 화면처럼) | (a). 웹 탭과 같은 구조라 탭 전환·단축키가 통일됨 | (a) +메뉴의 DB 탭 (2026-10-11) |
+| D5 | 데이터 편집 시점 | 1차, 2차 | 2차 | 추천 순서대로 끝까지 구현하기로 해서 1차 뒤 바로 2차까지 (2026-10-11) |
+| D6 | 드라이버 크기 허용 | APK가 수 MB 커짐(pgjdbc 약 1MB, MariaDB Connector/J 약 0.7MB) | 허용 | 허용 (2026-10-11) |
+| D7 | 접속 정보 저장 위치 | `~/.termux/db_connections.json`(설정 내보내기 포함, 비밀번호 제외) | 그대로 | 그대로 (2026-10-11) |
 
 ## 작업
 
@@ -130,8 +130,14 @@ Claude Code CLI에서 단계별로 작업할 수 있게 배경, 결정할 것, �
 
 ## 검증 결과
 
-(1번 검증을 진행하면서 기록)
+- 2026-10-11 드라이버: `org.postgresql:postgresql:42.2.29`, `org.mariadb.jdbc:mariadb-java-client:2.7.12`. APK에 들어가고 빌드됨(universal APK 약 1.4MB 증가). pgjdbc의 `checker-qual`은 다른 라이브러리와 겹쳐서 제외(어노테이션뿐)
+- `jdeps`로 Android에 없는 API 참조 확인:
+  - 두 드라이버 모두 `java.time`, `java.util.Base64`, `java.nio.file`(Android 8.0, API 26부터)을 씀 → **DB 기능은 Android 8.0 이상에서만** 켬. 그보다 낮으면 안내 표시
+  - TLS 호스트 이름 확인이 `javax.naming.ldap`(Android에 없음)을 씀 → PostgreSQL은 Android의 확인기를 `sslhostnameverifier`로 넘김, MariaDB는 인증서는 확인하고 호스트 이름 확인은 끔(`disableSslHostnameVerification`)
+  - `javax.naming`(JNDI DataSource), `java.lang.management`(`maxResultBuffer`), `java.awt`(PGpoint), `javax.xml`(SQLXML)은 쓰지 않는 기능에서만 참조
+- 컨테이너의 PostgreSQL 16, MariaDB 10.11에 JVM 테스트로 접속, 쿼리, 메타데이터, 취소, 트랜잭션 확인(`DbLiveTest`, 환경 변수 `DEVSHELL_TEST_PG_URL`, `DEVSHELL_TEST_MARIADB_URL`)
+- 이 컨테이너에는 Android 기기·에뮬레이터가 없어서 **실제 기기 접속은 확인하지 못함**. 기기에서 확인할 것: 두 DB 직접·SSH 터널 접속, SSL
 
 ## 결정 기록
 
-(0번의 결정을 내릴 때 날짜, 결정, 이유를 기록)
+- 2026-10-11 D1~D7: 사용자가 "추천 순서대로 끝까지 구현"을 요청해서 모두 추천안으로 결정

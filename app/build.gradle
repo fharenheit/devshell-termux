@@ -125,6 +125,14 @@ android {
 }
 
 dependencies {
+    // JDBC drivers of the database client (custom/docs/db-client-plan.md). Bundled in the APK,
+    // since Google Play does not allow downloading executable code.
+    implementation("org.postgresql:postgresql:42.2.29") {
+        // Annotations only, which clash with the ones of another library.
+        exclude group: "org.checkerframework", module: "checker-qual"
+    }
+    implementation "org.mariadb.jdbc:mariadb-java-client:2.7.12"
+
     testImplementation "junit:junit:4.13.2"
     testImplementation "org.robolectric:robolectric:4.4"
 }

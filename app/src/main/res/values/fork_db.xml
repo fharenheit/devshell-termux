@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="msg_db_file_required">Enter the database file</string>
+    <string name="msg_db_host_required">Enter the host</string>
+    <string name="msg_db_port_invalid">The port must be 1 to 65535</string>
+    <string name="msg_db_confirm_drop">This drops a database object, which can\'t be undone. Run it?</string>
+    <string name="msg_db_confirm_truncate">This deletes all rows of a table (TRUNCATE), which can\'t be undone. Run it?</string>
+    <string name="msg_db_confirm_alter">This changes the structure of the database (ALTER). Run it?</string>
+    <string name="msg_db_confirm_delete_all">DELETE without WHERE deletes all rows of the table. Run it?</string>
+    <string name="msg_db_confirm_update_all">UPDATE without WHERE changes all rows of the table. Run it?</string>
+    <string name="msg_db_tunnel_failed">Could not forward a port through %1$s: %2$s</string>
+    <string name="msg_db_android_version">The database client needs Android 8.0 or later</string>
+</resources>

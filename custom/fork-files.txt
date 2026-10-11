@@ -64,3 +64,6 @@ app/src/main/java/com/termux/app/terminal/web
 app/src/main/res/values/fork_web_tabs.xml
 app/src/test/java/com/termux/app/terminal/tabs
 app/src/test/java/com/termux/app/terminal/web
+app/src/main/res/values/fork_db.xml
+app/src/main/java/com/termux/app/terminal/db
+app/src/test/java/com/termux/app/terminal/db

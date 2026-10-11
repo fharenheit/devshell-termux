@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="msg_db_file_required">请输入数据库文件</string>
+    <string name="msg_db_host_required">请输入主机</string>
+    <string name="msg_db_port_invalid">端口必须在 1 到 65535 之间</string>
+    <string name="msg_db_confirm_drop">将删除(DROP)数据库对象,无法撤销。要执行吗?</string>
+    <string name="msg_db_confirm_truncate">将删除表的所有行(TRUNCATE),无法撤销。要执行吗?</string>
+    <string name="msg_db_confirm_alter">将更改数据库结构(ALTER)。要执行吗?</string>
+    <string name="msg_db_confirm_delete_all">没有 WHERE 的 DELETE 会删除表的所有行。要执行吗?</string>
+    <string name="msg_db_confirm_update_all">没有 WHERE 的 UPDATE 会更改表的所有行。要执行吗?</string>
+    <string name="msg_db_tunnel_failed">无法通过 %1$s 转发端口: %2$s</string>
+    <string name="msg_db_android_version">数据库客户端需要 Android 8.0 或更高版本</string>
+</resources>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="msg_db_file_required">데이터베이스 파일을 입력하세요</string>
+    <string name="msg_db_host_required">호스트를 입력하세요</string>
+    <string name="msg_db_port_invalid">포트는 1~65535여야 합니다</string>
+    <string name="msg_db_confirm_drop">데이터베이스 객체를 삭제(DROP)합니다. 되돌릴 수 없습니다. 실행할까요?</string>
+    <string name="msg_db_confirm_truncate">테이블의 모든 행을 지웁니다(TRUNCATE). 되돌릴 수 없습니다. 실행할까요?</string>
+    <string name="msg_db_confirm_alter">데이터베이스 구조를 바꿉니다(ALTER). 실행할까요?</string>
+    <string name="msg_db_confirm_delete_all">WHERE 없는 DELETE는 테이블의 모든 행을 지웁니다. 실행할까요?</string>
+    <string name="msg_db_confirm_update_all">WHERE 없는 UPDATE는 테이블의 모든 행을 바꿉니다. 실행할까요?</string>
+    <string name="msg_db_tunnel_failed">%1$s을(를) 통해 포트를 포워딩하지 못했습니다: %2$s</string>
+    <string name="msg_db_android_version">DB 클라이언트는 Android 8.0 이상이 필요합니다</string>
+</resources>
