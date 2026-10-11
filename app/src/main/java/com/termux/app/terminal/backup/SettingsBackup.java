@@ -20,6 +20,8 @@ import com.termux.app.TermuxActivity;
 import com.termux.app.terminal.fonts.TerminalFontDialog;
 import com.termux.app.terminal.fonts.TerminalFonts;
 import com.termux.app.terminal.snippets.SnippetStore;
+import com.termux.app.terminal.db.DbConnectionStore;
+import com.termux.app.terminal.db.QueryHistory;
 import com.termux.app.terminal.specialkeys.SpecialKeyFavorites;
 import com.termux.app.terminal.ssh.SshHostStore;
 import com.termux.shared.logger.Logger;
@@ -141,6 +143,9 @@ public final class SettingsBackup {
         putFile(entries, SettingsBackupArchive.ENTRY_SSH_HOSTS, SshHostStore.HOSTS_FILE);
         putFile(entries, SettingsBackupArchive.ENTRY_SNIPPETS, SnippetStore.SNIPPETS_FILE);
         putFile(entries, SettingsBackupArchive.ENTRY_SPECIAL_KEYS_FAVORITES, SpecialKeyFavorites.FAVORITES_FILE);
+        // The database passwords are encrypted apart and not exported, like the SSH ones.
+        putFile(entries, SettingsBackupArchive.ENTRY_DB_CONNECTIONS, DbConnectionStore.CONNECTIONS_FILE);
+        putFile(entries, SettingsBackupArchive.ENTRY_DB_QUERIES, QueryHistory.SAVED_FILE);
 
         JSONObject preferences = new JSONObject();
         Map<String, ?> values = getAppPreferences(context).getAll();
@@ -271,6 +276,8 @@ public final class SettingsBackup {
         copyIfExists(SshHostStore.HOSTS_FILE, new File(dir, SettingsBackupArchive.ENTRY_SSH_HOSTS));
         copyIfExists(SnippetStore.SNIPPETS_FILE, new File(dir, SettingsBackupArchive.ENTRY_SNIPPETS));
         copyIfExists(SpecialKeyFavorites.FAVORITES_FILE, new File(dir, SettingsBackupArchive.ENTRY_SPECIAL_KEYS_FAVORITES));
+        copyIfExists(DbConnectionStore.CONNECTIONS_FILE, new File(dir, SettingsBackupArchive.ENTRY_DB_CONNECTIONS));
+        copyIfExists(QueryHistory.SAVED_FILE, new File(dir, SettingsBackupArchive.ENTRY_DB_QUERIES));
         copyIfExists(TermuxConstants.TERMUX_FONT_FILE, new File(dir, SettingsBackupArchive.ENTRY_FONT_FILE));
         return dir;
     }
@@ -295,6 +302,10 @@ public final class SettingsBackup {
         if (snippets != null) writeFile(SnippetStore.SNIPPETS_FILE, snippets);
         byte[] favorites = entries.get(SettingsBackupArchive.ENTRY_SPECIAL_KEYS_FAVORITES);
         if (favorites != null) writeFile(SpecialKeyFavorites.FAVORITES_FILE, favorites);
+        byte[] dbConnections = entries.get(SettingsBackupArchive.ENTRY_DB_CONNECTIONS);
+        if (dbConnections != null) writeFile(DbConnectionStore.CONNECTIONS_FILE, dbConnections);
+        byte[] dbQueries = entries.get(SettingsBackupArchive.ENTRY_DB_QUERIES);
+        if (dbQueries != null) writeFile(QueryHistory.SAVED_FILE, dbQueries);
         byte[] fontFile = entries.get(SettingsBackupArchive.ENTRY_FONT_FILE);
         if (fontFile != null && !entries.containsKey(SettingsBackupArchive.ENTRY_FONT))
             writeFile(TermuxConstants.TERMUX_FONT_FILE, fontFile);

@@ -87,6 +87,72 @@ public class DbLiveTest {
         session.rollback();
         session.setAutoCommit(true);
 
+        // Rows passed one by one, as a table is exported.
+        long[] streamed = {0};
+        long count = session.stream("select * from orders", new DbSession.RowSink() {
+            @Override
+            public void columns(List<QueryResult.Column> columns) {
+                Assert.assertEquals("id", columns.get(0).name);
+            }
+
+            @Override
+            public boolean row(Object[] row) {
+                streamed[0]++;
+                return true;
+            }
+        });
+        long orders = Long.parseLong(session.execute("select count(*) from orders", 0, 0).rows.get(0)[0].toString());
+        Assert.assertTrue(orders > 1);
+        Assert.assertEquals(orders, count);
+        Assert.assertEquals(orders, streamed[0]);
+        Assert.assertTrue(session.getAutoCommit());
+        java.io.StringWriter csv = new java.io.StringWriter();
+        session.stream("select id, name from customers where id = 1", new DbSession.RowSink() {
+            ResultExport.Writer writer;
+
+            @Override
+            public void columns(List<QueryResult.Column> columns) throws java.io.IOException {
+                writer = new ResultExport.Writer(ResultExport.CSV, csv, columns, session.getType(), null);
+            }
+
+            @Override
+            public boolean row(Object[] row) throws java.io.IOException {
+                writer.row(row);
+                writer.finish();
+                return true;
+            }
+        });
+        Assert.assertEquals("id,name\r\n1,김철수\r\n", csv.toString());
+
+        // Changes of the data editor, in a transaction that a missing row undoes.
+        Object note = session.execute("select note from customers where id = 1", 0, 0).rows.get(0)[0];
+        List<DbDataEditor.Change> changes = new ArrayList<>();
+        changes.add(new DbDataEditor.Change("update customers set note = ? where id = ?", java.util.Arrays.asList("edited", "1"), true, "1"));
+        changes.add(new DbDataEditor.Change("update customers set note = ? where id = ?", java.util.Arrays.asList("edited", "999999"), true, "999999"));
+        String error = DbDataEditor.applyChanges(session, changes, "missing %s", Throwable::getMessage);
+        Assert.assertEquals("missing 999999", error);
+        Assert.assertEquals(note, session.execute("select note from customers where id = 1", 0, 0).rows.get(0)[0]);
+        Assert.assertTrue(session.getAutoCommit());
+        changes.remove(1);
+        Assert.assertNull(DbDataEditor.applyChanges(session, changes, "missing %s", Throwable::getMessage));
+        Assert.assertEquals("edited", session.execute("select note from customers where id = 1", 0, 0).rows.get(0)[0]);
+        // In an open transaction, a failure undoes only the changes, up to a savepoint.
+        session.setAutoCommit(false);
+        session.execute("update customers set note = 'kept' where id = 2", 0, 0);
+        changes.clear();
+        changes.add(new DbDataEditor.Change("update customers set note = ? where id = ?", java.util.Arrays.asList(note, "1"), true, "1"));
+        changes.add(new DbDataEditor.Change("insert into customers (id, name) values (?, ?)", java.util.Arrays.asList("1", "dup"), false, "CSV #2"));
+        error = DbDataEditor.applyChanges(session, changes, "missing %s", Throwable::getMessage);
+        Assert.assertNotNull(error);
+        Assert.assertTrue(error, error.endsWith("CSV #2"));
+        Assert.assertEquals("edited", session.execute("select note from customers where id = 1", 0, 0).rows.get(0)[0]);
+        Assert.assertEquals("kept", session.execute("select note from customers where id = 2", 0, 0).rows.get(0)[0]);
+        session.rollback();
+        session.setAutoCommit(true);
+        changes.remove(1);
+        Assert.assertNull(DbDataEditor.applyChanges(session, changes, "missing %s", Throwable::getMessage));
+        Assert.assertEquals(note, session.execute("select note from customers where id = 1", 0, 0).rows.get(0)[0]);
+
         try {
             session.execute("select * from no_such_table", 0, 0);
             Assert.fail();

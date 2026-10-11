@@ -90,8 +90,11 @@ public final class WebTabs {
     public interface Host {
         void onWebTabsChanged();
 
-        /** A web tab is shown in place of the terminal, so the panels of the terminal are closed. */
+        /** A web tab is shown in place of the terminal, which is hidden. */
         void onWebTabsShown();
+
+        /** No web tab is shown any more. */
+        void onWebTabsHidden();
 
         void switchTab(boolean forward);
 
@@ -118,7 +121,6 @@ public final class WebTabs {
     private final ProgressBar mProgress;
     private final FrameLayout mContent;
     private final ListView mQuickLinks;
-    private int mToolbarVisibility = View.VISIBLE;
 
     public WebTabs(@NonNull TermuxActivity activity, @NonNull Host host) {
         mActivity = activity;
@@ -231,12 +233,8 @@ public final class WebTabs {
         boolean wasShown = isShown();
         mSelected = tab;
         if (!wasShown) {
-            ViewGroup toolbar = mActivity.getTerminalToolbarViewPager();
-            mToolbarVisibility = toolbar.getVisibility();
-            toolbar.setVisibility(View.GONE);
-            mActivity.getTerminalView().setVisibility(View.GONE);
-            mContainer.setVisibility(View.VISIBLE);
             mHost.onWebTabsShown();
+            mContainer.setVisibility(View.VISIBLE);
         }
         mContent.removeAllViews();
         if (tab.url.isEmpty()) {
@@ -253,16 +251,14 @@ public final class WebTabs {
         mHost.onWebTabsChanged();
     }
 
-    /** Show the terminal again. */
+    /** Stop showing a web tab, like when the terminal or another kind of tab is shown. */
     public void hide() {
         if (!isShown()) return;
         mSelected = null;
         mContainer.setVisibility(View.GONE);
         mContent.removeAllViews();
-        mActivity.getTerminalView().setVisibility(View.VISIBLE);
-        mActivity.getTerminalToolbarViewPager().setVisibility(mToolbarVisibility);
         hideKeyboard();
-        mActivity.getTerminalView().requestFocus();
+        mHost.onWebTabsHidden();
         mHost.onWebTabsChanged();
     }
 

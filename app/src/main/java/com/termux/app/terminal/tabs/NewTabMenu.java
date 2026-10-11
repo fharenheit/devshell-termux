@@ -11,6 +11,8 @@ import androidx.annotation.Nullable;
 import com.termux.R;
 import com.termux.app.TermuxActivity;
 import com.termux.app.TermuxService;
+import com.termux.app.terminal.db.DbConnectionConfig;
+import com.termux.app.terminal.db.DbConnectionStore;
 import com.termux.app.terminal.ssh.SshConnector;
 import com.termux.app.terminal.ssh.SshHost;
 import com.termux.app.terminal.ssh.SshHostStore;
@@ -24,7 +26,8 @@ import java.util.Set;
 
 /**
  * The menu of the new tab button: a local shell, an ssh connection to a host registered in the
- * app, or a web tab. The SSH item is shown only if hosts are registered.
+ * app, a web tab, or a database tab. The SSH item is shown only if hosts are registered; the
+ * database item opens the connection list if there are no connections yet.
  */
 final class NewTabMenu {
 
@@ -35,12 +38,18 @@ final class NewTabMenu {
         void onSsh(@NonNull String hostName);
 
         void onWeb();
+
+        void onDatabase(@NonNull DbConnectionConfig config);
+
+        void onManageDatabases();
     }
 
     private static final int ITEM_LOCAL = 1;
     private static final int ITEM_WEB = 2;
     private static final int ITEM_MANAGE_SSH = 3;
+    private static final int ITEM_MANAGE_DB = 4;
     private static final int ITEM_HOST = 100;
+    private static final int ITEM_DB = 1000;
 
     private NewTabMenu() {}
 
@@ -61,11 +70,25 @@ final class NewTabMenu {
             ssh.add(Menu.NONE, ITEM_MANAGE_SSH, hosts.size(), activity.getString(R.string.action_new_tab_manage_ssh));
         }
         menu.add(Menu.NONE, ITEM_WEB, 2, activity.getString(R.string.action_new_tab_web));
+        List<DbConnectionConfig> databases = DbConnectionStore.load();
+        if (databases.isEmpty()) {
+            menu.add(Menu.NONE, ITEM_MANAGE_DB, 3, activity.getString(R.string.action_db_new_tab) + "…");
+        } else {
+            SubMenu db = menu.addSubMenu(Menu.NONE, Menu.NONE, 3, activity.getString(R.string.action_db_new_tab));
+            db.setHeaderTitle(R.string.action_db_new_tab);
+            for (int i = 0; i < databases.size(); i++) {
+                DbConnectionConfig config = databases.get(i);
+                db.add(Menu.NONE, ITEM_DB + i, i, config.getTitle() + " · " + config.type.label + (config.readOnly ? "  🔒" : ""));
+            }
+            db.add(Menu.NONE, ITEM_MANAGE_DB, databases.size(), activity.getString(R.string.action_db_manage_connections));
+        }
         popup.setOnMenuItemClickListener(item -> {
             int id = item.getItemId();
             if (id == ITEM_LOCAL) listener.onLocalShell();
             else if (id == ITEM_WEB) listener.onWeb();
             else if (id == ITEM_MANAGE_SSH) SshHostsDialog.show(activity);
+            else if (id == ITEM_MANAGE_DB) listener.onManageDatabases();
+            else if (id >= ITEM_DB && id - ITEM_DB < databases.size()) listener.onDatabase(databases.get(id - ITEM_DB));
             else if (id >= ITEM_HOST && id - ITEM_HOST < hosts.size()) listener.onSsh(hosts.get(id - ITEM_HOST).name);
             else return false;
             return true;

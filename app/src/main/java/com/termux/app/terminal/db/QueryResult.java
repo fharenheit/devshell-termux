@@ -50,6 +50,8 @@ public final class QueryResult {
     public boolean truncated;
     /** Messages of the database, like warnings or notices, or {@code null}. */
     @Nullable public String message;
+    /** The error of a statement that failed, or {@code null}. */
+    @Nullable public String error;
 
     public QueryResult(@NonNull String sql, @NonNull List<Column> columns, @NonNull List<Object[]> rows, long updateCount) {
         this.sql = sql;
@@ -64,8 +66,16 @@ public final class QueryResult {
         return new QueryResult(sql, new ArrayList<>(), new ArrayList<>(), updateCount);
     }
 
+    /** A result of a statement that failed. */
+    @NonNull
+    public static QueryResult ofError(@NonNull String sql, @NonNull String error) {
+        QueryResult result = new QueryResult(sql, new ArrayList<>(), new ArrayList<>(), 0);
+        result.error = error;
+        return result;
+    }
+
     public boolean hasRows() {
-        return updateCount < 0;
+        return updateCount < 0 && error == null;
     }
 
     /** The value as text, like it is shown: empty for null, and hex for binary data. */

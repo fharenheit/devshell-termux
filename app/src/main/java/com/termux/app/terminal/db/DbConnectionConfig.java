@@ -131,6 +131,16 @@ public class DbConnectionConfig {
         return config;
     }
 
+    /** A copy with the same id, to change without changing this one. */
+    @NonNull
+    static DbConnectionConfig fromJsonQuietly(@NonNull DbConnectionConfig config) {
+        try {
+            return fromJson(config.toJson());
+        } catch (JSONException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
     @Nullable
     public static DbConnectionConfig find(@NonNull Iterable<DbConnectionConfig> configs, @Nullable String id) {
         for (DbConnectionConfig config : configs) if (config.id.equals(id)) return config;

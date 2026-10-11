@@ -32,11 +32,14 @@ public final class DbConnectionStore {
 
     private static final String LOG_TAG = "DbConnectionStore";
 
+    /** The file of {@link #load()} and {@link #save(List)}, which tests change. */
+    static File sFile = CONNECTIONS_FILE;
+
     private DbConnectionStore() {}
 
     @NonNull
     public static List<DbConnectionConfig> load() {
-        return load(CONNECTIONS_FILE);
+        return load(sFile);
     }
 
     @NonNull
@@ -60,7 +63,7 @@ public final class DbConnectionStore {
     }
 
     public static void save(@NonNull List<DbConnectionConfig> configs) throws IOException {
-        save(CONNECTIONS_FILE, configs);
+        save(sFile, configs);
     }
 
     static synchronized void save(@NonNull File file, @NonNull List<DbConnectionConfig> configs) throws IOException {

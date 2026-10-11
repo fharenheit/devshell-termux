@@ -109,4 +109,18 @@ public abstract class DbSession implements Closeable {
         return Long.parseLong(result.rows.get(0)[0].toString());
     }
 
+    /** Receives the rows of a statement one by one. */
+    public interface RowSink {
+        void columns(@NonNull List<QueryResult.Column> columns) throws java.io.IOException;
+
+        /** Take a row, or return {@code false} to stop. The array is reused for the next row. */
+        boolean row(@NonNull Object[] row) throws java.io.IOException;
+    }
+
+    /**
+     * Run a query and pass all its rows, with whole values, to a sink without keeping them, to
+     * export a large table. Returns the number of rows passed.
+     */
+    public abstract long stream(@NonNull String sql, @NonNull RowSink sink) throws SQLException, java.io.IOException;
+
 }

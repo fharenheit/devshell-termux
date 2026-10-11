@@ -3,7 +3,6 @@ package com.termux.app.terminal.db;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -32,81 +31,133 @@ public final class ResultExport {
                                 @Nullable List<Integer> columns, @NonNull DbType type, @Nullable String table) {
         int rowCount = rows != null ? rows.size() : result.rows.size();
         int columnCount = columns != null ? columns.size() : result.columns.size();
-        StringBuilder text = new StringBuilder();
-        switch (format) {
-            case CSV:
-            case TSV: {
-                char separator = format == CSV ? ',' : '\t';
-                for (int c = 0; c < columnCount; c++) {
-                    if (c > 0) text.append(separator);
-                    text.append(quoteCsv(result.columns.get(column(columns, c)).name, separator));
+        List<QueryResult.Column> shownColumns = new java.util.ArrayList<>(columnCount);
+        for (int c = 0; c < columnCount; c++) shownColumns.add(result.columns.get(column(columns, c)));
+        java.io.StringWriter text = new java.io.StringWriter();
+        try {
+            Writer writer = new Writer(format, text, shownColumns, type, table);
+            Object[] values = new Object[columnCount];
+            for (int r = 0; r < rowCount; r++) {
+                Object[] row = result.rows.get(row(rows, r));
+                for (int c = 0; c < columnCount; c++) values[c] = row[column(columns, c)];
+                writer.row(values);
+            }
+            writer.finish();
+        } catch (java.io.IOException e) {
+            throw new IllegalStateException(e);
+        }
+        return text.toString();
+    }
+
+    /** Writes rows in a format one by one, to export a whole table without keeping it in memory. */
+    public static final class Writer {
+        private final int mFormat;
+        private final java.io.Writer mOut;
+        private final List<QueryResult.Column> mColumns;
+        private final DbType mType;
+        @Nullable private final String mTable;
+        @Nullable private String mInsertNames;
+        private long mRows;
+
+        public Writer(int format, @NonNull java.io.Writer out, @NonNull List<QueryResult.Column> columns,
+                      @NonNull DbType type, @Nullable String table) throws java.io.IOException {
+            mFormat = format;
+            mOut = out;
+            mColumns = columns;
+            mType = type;
+            mTable = table;
+            int count = columns.size();
+            switch (format) {
+                case CSV:
+                case TSV: {
+                    char separator = format == CSV ? ',' : '\t';
+                    for (int c = 0; c < count; c++) {
+                        if (c > 0) out.write(separator);
+                        out.write(quoteCsv(columns.get(c).name, separator));
+                    }
+                    out.write("\r\n");
+                    break;
                 }
-                text.append("\r\n");
-                for (int r = 0; r < rowCount; r++) {
-                    Object[] row = result.rows.get(row(rows, r));
-                    for (int c = 0; c < columnCount; c++) {
+                case JSON:
+                    out.write("[");
+                    break;
+                case MARKDOWN: {
+                    StringBuilder text = new StringBuilder("|");
+                    for (int c = 0; c < count; c++) text.append(' ').append(escapeMarkdown(columns.get(c).name)).append(" |");
+                    text.append("\n|");
+                    for (int c = 0; c < count; c++) text.append(columns.get(c).isNumeric() ? "---:|" : "---|");
+                    text.append('\n');
+                    out.write(text.toString());
+                    break;
+                }
+                default: {
+                    StringBuilder names = new StringBuilder();
+                    for (int c = 0; c < count; c++) {
+                        if (c > 0) names.append(", ");
+                        names.append(type.quote(columns.get(c).name));
+                    }
+                    mInsertNames = names.toString();
+                }
+            }
+        }
+
+        public long getRowCount() {
+            return mRows;
+        }
+
+        /** Write a row with a value for each column. */
+        public void row(@NonNull Object[] row) throws java.io.IOException {
+            int count = mColumns.size();
+            StringBuilder text = new StringBuilder();
+            switch (mFormat) {
+                case CSV:
+                case TSV: {
+                    char separator = mFormat == CSV ? ',' : '\t';
+                    for (int c = 0; c < count; c++) {
                         if (c > 0) text.append(separator);
-                        Object value = row[column(columns, c)];
-                        if (value != null) text.append(quoteCsv(QueryResult.toText(value), separator));
+                        if (row[c] != null) text.append(quoteCsv(QueryResult.toText(row[c]), separator));
                     }
                     text.append("\r\n");
+                    break;
                 }
-                return text.toString();
-            }
-            case JSON: {
-                JSONArray array = new JSONArray();
-                try {
-                    for (int r = 0; r < rowCount; r++) {
-                        Object[] row = result.rows.get(row(rows, r));
-                        JSONObject object = new JSONObject();
-                        for (int c = 0; c < columnCount; c++) {
-                            int index = column(columns, c);
-                            Object value = row[index];
-                            object.put(result.columns.get(index).name, value == null ? JSONObject.NULL : jsonValue(value, result.columns.get(index)));
+                case JSON: {
+                    JSONObject object = new JSONObject();
+                    try {
+                        for (int c = 0; c < count; c++) {
+                            object.put(mColumns.get(c).name, row[c] == null ? JSONObject.NULL : jsonValue(row[c], mColumns.get(c)));
                         }
-                        array.put(object);
+                        text.append(mRows > 0 ? ",\n  " : "\n  ").append(object.toString(2).replace("\n", "\n  "));
+                    } catch (JSONException e) {
+                        throw new java.io.IOException(e);
                     }
-                    return array.toString(2);
-                } catch (JSONException e) {
-                    throw new IllegalStateException(e);
+                    break;
                 }
-            }
-            case MARKDOWN: {
-                text.append('|');
-                for (int c = 0; c < columnCount; c++) text.append(' ').append(escapeMarkdown(result.columns.get(column(columns, c)).name)).append(" |");
-                text.append("\n|");
-                for (int c = 0; c < columnCount; c++) text.append(result.columns.get(column(columns, c)).isNumeric() ? "---:|" : "---|");
-                text.append('\n');
-                for (int r = 0; r < rowCount; r++) {
-                    Object[] row = result.rows.get(row(rows, r));
+                case MARKDOWN: {
                     text.append('|');
-                    for (int c = 0; c < columnCount; c++) {
-                        Object value = row[column(columns, c)];
-                        text.append(' ').append(value == null ? "NULL" : escapeMarkdown(QueryResult.toText(value))).append(" |");
+                    for (int c = 0; c < count; c++) {
+                        text.append(' ').append(row[c] == null ? "NULL" : escapeMarkdown(QueryResult.toText(row[c]))).append(" |");
                     }
                     text.append('\n');
+                    break;
                 }
-                return text.toString();
-            }
-            default: {
-                String name = table != null && !table.isEmpty() ? table : "table_name";
-                StringBuilder names = new StringBuilder();
-                for (int c = 0; c < columnCount; c++) {
-                    if (c > 0) names.append(", ");
-                    names.append(type.quote(result.columns.get(column(columns, c)).name));
-                }
-                for (int r = 0; r < rowCount; r++) {
-                    Object[] row = result.rows.get(row(rows, r));
-                    text.append("INSERT INTO ").append(name).append(" (").append(names).append(") VALUES (");
-                    for (int c = 0; c < columnCount; c++) {
+                default: {
+                    String name = mTable != null && !mTable.isEmpty() ? mTable : "table_name";
+                    text.append("INSERT INTO ").append(name).append(" (").append(mInsertNames).append(") VALUES (");
+                    for (int c = 0; c < count; c++) {
                         if (c > 0) text.append(", ");
-                        int index = column(columns, c);
-                        text.append(toLiteral(row[index], result.columns.get(index), type));
+                        text.append(toLiteral(row[c], mColumns.get(c), mType));
                     }
                     text.append(");\n");
                 }
-                return text.toString();
             }
+            mOut.write(text.toString());
+            mRows++;
+        }
+
+        /** Write the end of the format and flush. */
+        public void finish() throws java.io.IOException {
+            if (mFormat == JSON) mOut.write(mRows > 0 ? "\n]\n" : "]\n");
+            mOut.flush();
         }
     }
 

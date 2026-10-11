@@ -198,6 +198,44 @@ public final class JdbcSession extends DbSession {
         return result;
     }
 
+    @Override
+    public long stream(@NonNull String sql, @NonNull RowSink sink) throws SQLException, java.io.IOException {
+        // PostgreSQL fetches rows in parts only in a transaction.
+        boolean autoCommit = mConnection.getAutoCommit();
+        if (autoCommit && getType() == DbType.POSTGRESQL) mConnection.setAutoCommit(false);
+        try (Statement statement = mConnection.createStatement()) {
+            mRunning = statement;
+            statement.setFetchSize(1000);
+            try (ResultSet resultSet = statement.executeQuery(sql)) {
+                ResultSetMetaData metaData = resultSet.getMetaData();
+                int count = metaData.getColumnCount();
+                List<QueryResult.Column> columns = new ArrayList<>(count);
+                boolean[] binary = new boolean[count];
+                for (int i = 0; i < count; i++) {
+                    int sqlType = metaData.getColumnType(i + 1);
+                    String typeName = metaData.getColumnTypeName(i + 1);
+                    columns.add(new QueryResult.Column(metaData.getColumnLabel(i + 1), typeName != null ? typeName : "", sqlType));
+                    binary[i] = sqlType == Types.BINARY || sqlType == Types.VARBINARY || sqlType == Types.LONGVARBINARY || sqlType == Types.BLOB;
+                }
+                sink.columns(columns);
+                Object[] row = new Object[count];
+                long rows = 0;
+                while (resultSet.next()) {
+                    for (int i = 0; i < count; i++) row[i] = binary[i] ? resultSet.getBytes(i + 1) : resultSet.getString(i + 1);
+                    rows++;
+                    if (!sink.row(row)) break;
+                }
+                return rows;
+            }
+        } finally {
+            mRunning = null;
+            if (autoCommit && getType() == DbType.POSTGRESQL) {
+                mConnection.rollback();
+                mConnection.setAutoCommit(true);
+            }
+        }
+    }
+
     @Nullable
     private static String getWarnings(@Nullable SQLWarning warning) {
         StringBuilder text = new StringBuilder();

@@ -33,6 +33,10 @@ import com.termux.app.terminal.fonts.TerminalFonts;
 import com.termux.app.terminal.sftp.SftpBrowserActivity;
 import com.termux.app.language.LanguageDialog;
 import com.termux.app.terminal.clipboard.ClipboardHistory;
+import com.termux.app.terminal.db.DbConnectionConfig;
+import com.termux.app.terminal.db.DbDialogs;
+import com.termux.app.terminal.db.DbTab;
+import com.termux.app.terminal.db.DbTabs;
 import com.termux.app.terminal.web.WebTabs;
 import com.termux.app.terminal.welcome.ShellWelcome;
 import com.termux.app.terminal.search.TerminalSearchBar;
@@ -68,6 +72,9 @@ public class TerminalTabsController {
 
     /** Sessions closed from a tab while running, to be removed once their process has exited. */
     private final WebTabs mWebTabs;
+    private DbTabs mDbTabs;
+    private boolean mTerminalCovered;
+    private int mToolbarVisibility = View.VISIBLE;
     @Nullable private TerminalSession mLastSession;
 
     private static final Set<TerminalSession> sSessionsToRemoveOnExit = Collections.newSetFromMap(new WeakHashMap<>());
@@ -105,8 +112,13 @@ public class TerminalTabsController {
 
             @Override
             public void onWebTabsShown() {
-                if (mSpecialKeysPanel != null) mSpecialKeysPanel.hide();
-                if (mSearchBar != null) mSearchBar.hide();
+                if (mDbTabs != null) mDbTabs.hide(false);
+                coverTerminal();
+            }
+
+            @Override
+            public void onWebTabsHidden() {
+                if (mDbTabs == null || !mDbTabs.isShown()) uncoverTerminal();
             }
 
             @Override
@@ -119,6 +131,35 @@ public class TerminalTabsController {
                 getSessionClient().addNewSession(false, null);
             }
         });
+
+        mDbTabs = new DbTabs(activity, new DbTabs.Host() {
+            @Override
+            public void onDbTabsChanged() {
+                refresh(true);
+            }
+
+            @Override
+            public void onDbTabsShown() {
+                // The database tabs are already shown, so hiding the web tabs keeps the terminal covered.
+                mWebTabs.hide();
+                coverTerminal();
+            }
+
+            @Override
+            public void onDbTabsHidden() {
+                if (!mWebTabs.isShown()) uncoverTerminal();
+            }
+
+            @Override
+            public void switchTab(boolean forward) {
+                TerminalTabsController.this.switchTab(forward);
+            }
+
+            @Override
+            public void openLocalShell() {
+                getSessionClient().addNewSession(false, null);
+            }
+        }, activity.getTerminalView());
 
         View newSessionButton = activity.findViewById(R.id.terminal_tabs_new_session_button);
         newSessionButton.setOnClickListener(v -> NewTabMenu.show(mActivity, v, new NewTabMenu.Listener() {
@@ -135,6 +176,16 @@ public class TerminalTabsController {
             @Override
             public void onWeb() {
                 mWebTabs.open(null);
+            }
+
+            @Override
+            public void onDatabase(@NonNull DbConnectionConfig config) {
+                mDbTabs.open(config);
+            }
+
+            @Override
+            public void onManageDatabases() {
+                DbDialogs.showConnections(mActivity, mDbTabs::open);
             }
         }));
         newSessionButton.setOnLongClickListener(v -> {
@@ -333,7 +384,10 @@ public class TerminalTabsController {
     /** Called when the session displayed in the terminal has changed or may have changed. */
     public void onCurrentSessionChanged(TerminalSession currentSession) {
         // Switching to another terminal session, like a new one, shows the terminal again.
-        if (currentSession != mLastSession) mWebTabs.hide();
+        if (currentSession != mLastSession) {
+            mWebTabs.hide();
+            mDbTabs.hide(true);
+        }
         mLastSession = currentSession;
         if (mSearchBar != null) mSearchBar.onSessionChanged();
         // Each tab has its own font size on the screen.
@@ -358,7 +412,9 @@ public class TerminalTabsController {
 
         List<WebTabs.Tab> webTabs = mWebTabs.getTabs();
         WebTabs.Tab selectedWebTab = mWebTabs.getSelected();
-        int count = sessions.size() + webTabs.size();
+        List<DbTab> dbTabs = mDbTabs.getTabs();
+        DbTab selectedDbTab = mDbTabs.getSelected();
+        int count = sessions.size() + webTabs.size() + dbTabs.size();
 
         // Reuse the tab views and only add or remove views when the number of tabs changes.
         while (mTabsLayout.getChildCount() > count)
@@ -370,7 +426,7 @@ public class TerminalTabsController {
         int selectedIndex = -1;
         for (int i = 0; i < sessions.size(); i++) {
             TerminalSession session = sessions.get(i).getTerminalSession();
-            boolean selected = selectedWebTab == null && session == currentSession;
+            boolean selected = selectedWebTab == null && selectedDbTab == null && session == currentSession;
             bindTab(mTabsLayout.getChildAt(i), i, session, selected);
             if (selected) selectedIndex = i;
         }
@@ -380,6 +436,13 @@ public class TerminalTabsController {
             WebTabs.Tab tab = webTabs.get(i);
             bindWebTab(mTabsLayout.getChildAt(index), index, tab, tab == selectedWebTab);
             if (tab == selectedWebTab) selectedIndex = index;
+        }
+        // Then the database tabs.
+        for (int i = 0; i < dbTabs.size(); i++) {
+            int index = sessions.size() + webTabs.size() + i;
+            DbTab tab = dbTabs.get(i);
+            bindDbTab(mTabsLayout.getChildAt(index), index, tab, tab == selectedDbTab);
+            if (tab == selectedDbTab) selectedIndex = index;
         }
 
         if (scrollToSelectedTab && selectedIndex >= 0) scrollToTab(selectedIndex);
@@ -421,7 +484,10 @@ public class TerminalTabsController {
         tabView.setContentDescription(stateDescription == null ? titleView.getText() : titleView.getText() + ", " + stateDescription);
         // Tapping the tab of the current session renames it, since it is already displayed.
         tabView.setOnClickListener(v -> {
-            if (mWebTabs.isShown() && session == mActivity.getCurrentSession()) mWebTabs.hide();
+            if ((mWebTabs.isShown() || mDbTabs.isShown()) && session == mActivity.getCurrentSession()) {
+                mWebTabs.hide();
+                mDbTabs.hide(true);
+            }
             else if (session == mActivity.getCurrentSession()) showRenameDialog(session);
             else getSessionClient().setCurrentSession(session);
         });
@@ -453,16 +519,60 @@ public class TerminalTabsController {
         closeButton.setOnClickListener(v -> mWebTabs.close(tab));
     }
 
+    private void bindDbTab(View tabView, int index, DbTab tab, boolean selected) {
+        TextView titleView = tabView.findViewById(R.id.terminal_tab_title);
+        titleView.setText((index + 1) + ": 🗄 " + mDbTabs.getLabel(tab));
+        titleView.setPaintFlags(titleView.getPaintFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
+        int colorId = tab.state == DbTab.FAILED ? R.color.terminal_tab_text_failed
+            : selected ? R.color.terminal_tab_text_selected : R.color.terminal_tab_text;
+        titleView.setTextColor(ContextCompat.getColor(mActivity, colorId));
+        tabView.findViewById(R.id.terminal_tab_indicator).setVisibility(View.GONE);
+        tabView.setActivated(selected);
+        tabView.setContentDescription(titleView.getText());
+        tabView.setOnClickListener(v -> mDbTabs.select(tab));
+        tabView.setOnLongClickListener(v -> {
+            mDbTabs.showTabMenu(tab, index);
+            return true;
+        });
+        View closeButton = tabView.findViewById(R.id.terminal_tab_close_button);
+        closeButton.setVisibility(TerminalTabsSettings.shouldShowCloseButton() ? View.VISIBLE : View.GONE);
+        closeButton.setOnClickListener(v -> mDbTabs.close(tab));
+    }
+
+    /** Hide the terminal and its panels and extra keys, for a web or database tab shown in its place. */
+    void coverTerminal() {
+        if (mTerminalCovered) return;
+        mTerminalCovered = true;
+        if (mSpecialKeysPanel != null) mSpecialKeysPanel.hide();
+        if (mSearchBar != null) mSearchBar.hide();
+        View toolbar = mActivity.getTerminalToolbarViewPager();
+        mToolbarVisibility = toolbar.getVisibility();
+        toolbar.setVisibility(View.GONE);
+        mActivity.getTerminalView().setVisibility(View.GONE);
+    }
+
+    /** Show the terminal again. */
+    void uncoverTerminal() {
+        if (!mTerminalCovered) return;
+        mTerminalCovered = false;
+        mActivity.getTerminalView().setVisibility(View.VISIBLE);
+        mActivity.getTerminalToolbarViewPager().setVisibility(mToolbarVisibility);
+        mActivity.getTerminalView().requestFocus();
+    }
+
     /** Go to the next or previous tab, terminal or web, wrapping around. */
     public void switchTab(boolean forward) {
         TermuxService service = mActivity.getTermuxService();
         List<TermuxSession> sessions = service == null ? Collections.emptyList() : new ArrayList<>(service.getTermuxSessions());
         List<WebTabs.Tab> webTabs = mWebTabs.getTabs();
-        int count = sessions.size() + webTabs.size();
+        List<DbTab> dbTabs = mDbTabs.getTabs();
+        int count = sessions.size() + webTabs.size() + dbTabs.size();
         if (count == 0) return;
         int current;
         if (mWebTabs.getSelected() != null) {
             current = sessions.size() + webTabs.indexOf(mWebTabs.getSelected());
+        } else if (mDbTabs.getSelected() != null) {
+            current = sessions.size() + webTabs.size() + dbTabs.indexOf(mDbTabs.getSelected());
         } else {
             current = -1;
             for (int i = 0; i < sessions.size(); i++)
@@ -471,10 +581,16 @@ public class TerminalTabsController {
         int next = ((current + (forward ? 1 : -1)) % count + count) % count;
         if (next < sessions.size()) {
             TerminalSession session = sessions.get(next).getTerminalSession();
-            if (session == mActivity.getCurrentSession()) mWebTabs.hide();
-            else getSessionClient().setCurrentSession(session);
-        } else {
+            if (session == mActivity.getCurrentSession()) {
+                mWebTabs.hide();
+                mDbTabs.hide(true);
+            } else {
+                getSessionClient().setCurrentSession(session);
+            }
+        } else if (next < sessions.size() + webTabs.size()) {
             mWebTabs.select(webTabs.get(next - sessions.size()));
+        } else {
+            mDbTabs.select(dbTabs.get(next - sessions.size() - webTabs.size()));
         }
     }
 

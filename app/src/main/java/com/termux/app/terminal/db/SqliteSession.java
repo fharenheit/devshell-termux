@@ -9,6 +9,8 @@ import android.os.OperationCanceledException;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.termux.shared.termux.TermuxConstants;
+
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
@@ -46,9 +48,45 @@ public final class SqliteSession extends DbSession {
         int flags = SQLiteDatabase.NO_LOCALIZED_COLLATORS |
             (config.readOnly ? SQLiteDatabase.OPEN_READONLY : SQLiteDatabase.OPEN_READWRITE | SQLiteDatabase.CREATE_IF_NECESSARY);
         try {
-            return new SqliteSession(config, SQLiteDatabase.openDatabase(config.database, null, flags));
+            return new SqliteSession(config, SQLiteDatabase.openDatabase(getPath(config.database), null, flags));
         } catch (SQLiteException e) {
             throw new SQLException(e.getMessage(), e);
+        }
+    }
+
+    /** The path of a database file, with `~/` for the home directory. */
+    @NonNull
+    static String getPath(@NonNull String path) {
+        if (path.equals("~") || path.startsWith("~/")) return TermuxConstants.TERMUX_HOME_DIR_PATH + path.substring(1);
+        return path;
+    }
+
+    @Override
+    public long stream(@NonNull String sql, @NonNull RowSink sink) throws SQLException, java.io.IOException {
+        CancellationSignal cancellation = new CancellationSignal();
+        mCancellation = cancellation;
+        try (Cursor cursor = mDatabase.rawQueryWithFactory(null, sql, null, null, cancellation)) {
+            int count = cursor.getColumnCount();
+            List<QueryResult.Column> columns = new ArrayList<>(count);
+            for (int i = 0; i < count; i++) columns.add(new QueryResult.Column(cursor.getColumnName(i), "", Types.OTHER));
+            sink.columns(columns);
+            Object[] row = new Object[count];
+            long rows = 0;
+            while (cursor.moveToNext()) {
+                for (int i = 0; i < count; i++) {
+                    int type = cursor.getType(i);
+                    row[i] = type == Cursor.FIELD_TYPE_NULL ? null : type == Cursor.FIELD_TYPE_BLOB ? cursor.getBlob(i) : cursor.getString(i);
+                }
+                rows++;
+                if (!sink.row(row)) break;
+            }
+            return rows;
+        } catch (SQLiteException e) {
+            throw new SQLException(e.getMessage(), e);
+        } catch (OperationCanceledException e) {
+            throw new SQLException("Cancelled", e);
+        } finally {
+            mCancellation = null;
         }
     }
 
