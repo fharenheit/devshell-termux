@@ -7,12 +7,22 @@
 - **Added**: 새 기능, **Changed**: 동작·문서·패치 변경, **Fixed**: 버그 수정
 - "패치 갱신" 커밋은 업스트림 파일을 고친 커밋 뒤에 `custom/update-patches.sh`로 `custom/patches/`를 다시 만든 것입니다.
 
+## v0.118.3-ko.29 (2026-10-11)
+
+| 커밋 | 내용 |
+|---|---|
+| [`d487d91`](https://github.com/fharenheit/devshell-termux/commit/d487d91) | Added: DB 클라이언트 계획 문서(`custom/docs/db-client-plan.md`) |
+| [`ef51dc8`](https://github.com/fharenheit/devshell-termux/commit/ef51dc8) | Added: DB 클라이언트 코어(PostgreSQL·MySQL/MariaDB JDBC 드라이버, SQLite, SSH 터널, 문장 나누기, 위험 SQL 판별, 결과 내보내기, 실행 기록, 실서버 테스트) |
+| [`9296dad`](https://github.com/fharenheit/devshell-termux/commit/9296dad) | Added: + 메뉴의 데이터베이스와 🗄 DB 탭(접속 관리, 스키마 트리, SQL 편집기와 자동 완성·정렬, 결과 표, 트랜잭션, 데이터 편집, 테이블 백그라운드 내보내기, CSV 가져오기) |
+| [`8bfc654`](https://github.com/fharenheit/devshell-termux/commit/8bfc654) | Added: DB 클라이언트 설계 문서, 사용 설명서 8장(한/영), 기능 목록, 패치 갱신(`0034`) |
+| (이 릴리즈 커밋) | Added: v0.118.3-ko.29 릴리즈 노트와 이력 |
+
 ## v0.118.3-ko.28 (2026-10-11)
 
 | 커밋 | 내용 |
 |---|---|
 | [`c87be65`](https://github.com/fharenheit/devshell-termux/commit/c87be65) | Added: 새 탭(+) 메뉴(로컬 셸, 등록한 호스트가 있을 때 SSH 호스트 목록과 관리, 웹 브라우저). 탭 바의 🌐 웹 탭(주소 줄, 빠른 주소: SSH 로컬 포워딩·최근 주소·설명서, 뒤로/Ctrl+Tab/Ctrl+Shift+W, 내려받기, 주소 저장) |
-| (이 릴리즈 커밋) | Added: v0.118.3-ko.28 릴리즈 노트와 이력 |
+| [`bd4ffd8`](https://github.com/fharenheit/devshell-termux/commit/bd4ffd8) | Added: v0.118.3-ko.28 릴리즈 노트와 이력 |
 
 ## v0.118.3-ko.27 (2026-10-11)
 
