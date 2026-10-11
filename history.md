@@ -7,13 +7,28 @@
 - **Added**: 새 기능, **Changed**: 동작·문서·패치 변경, **Fixed**: 버그 수정
 - "패치 갱신" 커밋은 업스트림 파일을 고친 커밋 뒤에 `custom/update-patches.sh`로 `custom/patches/`를 다시 만든 것입니다.
 
+## v0.118.3-ko.26 (2026-10-11)
+
+| 커밋 | 내용 |
+|---|---|
+| [`7c9a388`](https://github.com/fharenheit/termux-app/commit/7c9a388) | Added: Google Play 출시 계획 문서(`custom/docs/play-store-plan.md`) |
+| [`ccf322c`](https://github.com/fharenheit/termux-app/commit/ccf322c) | Added: Google Play 계획 복원과 결정 D1, D4 기록 (다음 커밋들도 계획 문서 갱신: `9e4d892`, `d685f54`, `371075e`, `3477d6e` 이름 DevShell·앱 ID `com.fharenheit.devshell`, `6cf65c8`, `1979834`, `71d554a`, `afb81a4`, `736b63b` 문서 정리) |
+| [`4c5ff69`](https://github.com/fharenheit/termux-app/commit/4c5ff69) | Changed: README 소개를 IME로 조합하는 모든 언어 기준으로 바꾸고 기능 요약과 스크린샷 추가 |
+| [`8b27ce0`](https://github.com/fharenheit/termux-app/commit/8b27ce0) | Changed: 패치 갱신(`0029`) |
+| [`c86505b`](https://github.com/fharenheit/termux-app/commit/c86505b) | Changed: README에 앱 언어, 글꼴, 설정 내보내기 스크린샷 추가 |
+| [`aab2e3c`](https://github.com/fharenheit/termux-app/commit/aab2e3c) | Changed: 패치 갱신(`0030`) |
+| [`9bd30ac`](https://github.com/fharenheit/termux-app/commit/9bd30ac) | Changed: 앱 이름 DevShell, 로컬 셸 첫 화면을 앱 언어의 `~/.termux/motd.sh`로(설명서·릴리즈·문제 신고 링크, 패키지 문제는 Termux에), 도움말은 이 저장소 설명서, 정보·문제 신고 화면에 DevShell 링크, Termux 후원 숨김 |
+| [`e80cf24`](https://github.com/fharenheit/termux-app/commit/e80cf24) | Changed: README와 기능 목록에 DevShell 이름 |
+| [`d9699ff`](https://github.com/fharenheit/termux-app/commit/d9699ff) | Changed: 패치 갱신(`0031`, `0032`) |
+| (이 릴리즈 커밋) | Added: v0.118.3-ko.26 릴리즈 노트와 이력 |
+
 ## v0.118.3-ko.25 (2026-10-09)
 
 | 커밋 | 내용 |
 |---|---|
 | [`04fceb9`](https://github.com/fharenheit/termux-app/commit/04fceb9) | Added: 기본 스니펫에 Git 강제 되돌리기/강제 pull/특정 커밋으로 되돌리기, 이름으로 찾기, 내 프로세스, 내 포트와 PID |
 | [`2bc68d7`](https://github.com/fharenheit/termux-app/commit/2bc68d7) | Added: 스니펫 명령의 `<NAME>`, `<NAME=기본값>`을 누를 때 입력받는 창(보낼 명령 미리 보기, 실행/입력만, 마지막 값 기억). 기본 스니펫이 메시지·해시·사용자 이름 등을 입력받도록 바꾸고 `git revert <HASH>` 추가, 예전 기본 명령 자동 변경 |
-| (이 릴리즈 커밋) | Added: v0.118.3-ko.25 릴리즈 노트와 이력, ko.24(사용 설명서, SSH 수정)와 합침 |
+| [`8e81b0a`](https://github.com/fharenheit/termux-app/commit/8e81b0a) | Added: v0.118.3-ko.25 릴리즈 노트와 이력, ko.24(사용 설명서, SSH 수정)와 합침 |
 
 ## v0.118.3-ko.24 (2026-10-08)
 
