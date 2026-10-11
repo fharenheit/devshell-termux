@@ -2,7 +2,7 @@
 
 [한국어](../ko/README.md)
 
-The features of DevShell, with screenshots. DevShell is based on Termux and adds keyboard input, SSH, a file browser and more (repository: fharenheit/termux-app). Its packages come from the Termux repositories, so the `pkg` and `termux-*` commands and the `~/.termux` settings folder are the same as in Termux. For just the list of features, see [FEATURES.md](../../../../FEATURES.md) (Korean).
+The features of DevShell, with screenshots. DevShell is based on Termux and adds keyboard input, SSH, a file browser and more (repository: fharenheit/devshell-termux). Its packages come from the Termux repositories, so the `pkg` and `termux-*` commands and the `~/.termux` settings folder are the same as in Termux. For just the list of features, see [FEATURES.md](../../../../FEATURES.md) (Korean).
 
 <img src="../images/en/01_terminal_tabs.png" width="270" alt="Terminal">
 

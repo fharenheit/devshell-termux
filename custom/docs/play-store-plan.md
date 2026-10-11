@@ -4,7 +4,7 @@
 Claude Code CLI에서 단계별로 작업할 수 있게 배경, 결정할 것, 작업, 완료 조건을 적었습니다.
 
 - 작성일: 2026-10-09
-- 기준 저장소: `fharenheit/termux-app` (업스트림 `termux/termux-app` v0.118.3 + 포크 패치 28개)
+- 기준 저장소: `fharenheit/devshell-termux` (업스트림 `termux/termux-app` v0.118.3 + 포크 패치 28개)
 - 관련 문서: `CLAUDE.md`, `custom/README.md`, `FEATURES.md`, `history.md`
 
 ## Claude에게: 작업 방법

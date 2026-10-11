@@ -49,7 +49,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public final class TerminalFonts {
 
     /** Where downloadable fonts are downloaded from: the `custom/fonts` directory of this fork. */
-    static final String DOWNLOAD_BASE_URL = "https://raw.githubusercontent.com/fharenheit/termux-app/master/custom/fonts/";
+    static final String DOWNLOAD_BASE_URL = "https://raw.githubusercontent.com/fharenheit/devshell-termux/master/custom/fonts/";
 
     /** Where downloaded fonts are kept. */
     public static final File DOWNLOADED_FONTS_DIR = new File(TermuxConstants.TERMUX_DATA_HOME_DIR_PATH, "fonts");

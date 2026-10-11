@@ -4,7 +4,7 @@
 >
 > *DevShell is a Termux fork that fixes hardware-keyboard input for languages composed by the IME, such as Korean, Japanese and Chinese, and adds SSH management, a file browser, keyboard shortcuts, snippets and more.*
 >
-> [릴리즈](https://github.com/fharenheit/termux-app/releases)에서 APK를 받아 수동으로 설치하세요(대부분의 기기는 `*_arm64-v8a.apk`). Play 스토어/F-Droid 버전 위에는 덮어 설치할 수 없습니다.
+> [릴리즈](https://github.com/fharenheit/devshell-termux/releases)에서 APK를 받아 수동으로 설치하세요(대부분의 기기는 `*_arm64-v8a.apk`). Play 스토어/F-Droid 버전 위에는 덮어 설치할 수 없습니다.
 >
 > - 입력: 블루투스·하드웨어 키보드로 한국어·일본어·중국어 등 조합 입력, 키캡 모양 하단 키, 특수 키 패널(Ctrl·Fn·tmux·vim 키), 키보드 단축키
 > - 화면: 앱 언어 선택(한국어, English, 日本語, 中文), 글꼴 목록과 미리보기, 탭별 글자 크기, 출력에서 찾기, URL 열기

@@ -13,7 +13,7 @@ import java.util.Locale;
 public final class DevShellInfo {
 
     public static final String NAME = "DevShell";
-    public static final String REPO_URL = "https://github.com/fharenheit/termux-app";
+    public static final String REPO_URL = "https://github.com/fharenheit/devshell-termux";
     public static final String RELEASES_URL = REPO_URL + "/releases";
     public static final String ISSUES_URL = REPO_URL + "/issues";
     public static final String MANUAL_URL = REPO_URL + "/blob/master/custom/docs/manual";

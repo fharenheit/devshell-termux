@@ -2,7 +2,7 @@
 
 [English](../en/README.md)
 
-DevShell의 기능을 화면과 함께 설명합니다. DevShell은 Termux를 바탕으로 키보드 입력, SSH, 파일 탐색 등을 더한 앱입니다(저장소: fharenheit/termux-app). 패키지는 Termux 저장소에서 받으므로 `pkg`, `termux-*` 명령과 `~/.termux` 설정 폴더는 Termux와 같습니다. 기능 목록만 보려면 [FEATURES.md](../../../../FEATURES.md)를 봅니다.
+DevShell의 기능을 화면과 함께 설명합니다. DevShell은 Termux를 바탕으로 키보드 입력, SSH, 파일 탐색 등을 더한 앱입니다(저장소: fharenheit/devshell-termux). 패키지는 Termux 저장소에서 받으므로 `pkg`, `termux-*` 명령과 `~/.termux` 설정 폴더는 Termux와 같습니다. 기능 목록만 보려면 [FEATURES.md](../../../../FEATURES.md)를 봅니다.
 
 <img src="../images/ko/01_terminal_tabs.png" width="270" alt="터미널 화면">
 
