@@ -7,6 +7,14 @@
 - **Added**: 새 기능, **Changed**: 동작·문서·패치 변경, **Fixed**: 버그 수정
 - "패치 갱신" 커밋은 업스트림 파일을 고친 커밋 뒤에 `custom/update-patches.sh`로 `custom/patches/`를 다시 만든 것입니다.
 
+## v0.118.3-ko.32 (2026-10-11)
+
+| 커밋 | 내용 |
+|---|---|
+| [`90e4fd9`](https://github.com/fharenheit/devshell-termux/commit/90e4fd9) | Fixed: PostgreSQL 접속 시 `java.lang.management.ManagementFactory` NoClassDefFoundError 수정 — 이 클래스를 참조하지 않는 pgjdbc 42.2.9로 고정(42.2.10+의 `maxResultBuffer` 파서가 참조, `java.*`라 스텁 불가) |
+| [`605443c`](https://github.com/fharenheit/devshell-termux/commit/605443c) | Changed: 위 변경에 맞춰 패치 갱신(`0038`) |
+| (이 릴리즈 커밋) | Added: v0.118.3-ko.32 릴리즈 노트와 이력 |
+
 ## v0.118.3-ko.31 (2026-10-11)
 
 | 커밋 | 내용 |
