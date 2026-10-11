@@ -1,0 +1,53 @@
+From be487269671d6c703c67d18384fc6a74d16ba68d Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?=EA=B9=80=EB=B3=91=EA=B3=A4?= <fharenheit@gmail.com>
+Date: Sun, 11 Oct 2026 13:49:52 +0900
+Subject: [PATCH] Added: Open a URL in a web tab, and manage databases from the
+ settings menu
+
+The terminal's "More" menu renames "Open URL" to "Open URL (external
+browser)" and adds "Open URL (tab)", which opens the link in a new web
+tab via WebTabs. The tab bar's settings menu gains a "Database" item
+below "SSH" that opens the saved-connection manager, like SSH hosts.
+---
+ app/src/main/java/com/termux/app/TermuxActivity.java | 10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
+
+diff --git a/app/src/main/java/com/termux/app/TermuxActivity.java b/app/src/main/java/com/termux/app/TermuxActivity.java
+index 204ef14..32df2df 100644
+--- a/app/src/main/java/com/termux/app/TermuxActivity.java
++++ b/app/src/main/java/com/termux/app/TermuxActivity.java
+@@ -189,6 +189,7 @@ public final class TermuxActivity extends Activity implements ServiceConnection
+     private static final int CONTEXT_MENU_REPORT_ID = 9;
+     private static final int CONTEXT_MENU_OPEN_URL_ID = 12;
+     private static final int CONTEXT_MENU_FIND_ID = 13;
++    private static final int CONTEXT_MENU_OPEN_URL_TAB_ID = 14;
+ 
+     private static final String ARG_TERMINAL_TOOLBAR_TEXT_INPUT = "terminal_toolbar_text_input";
+ 
+@@ -636,8 +637,10 @@ public final class TermuxActivity extends Activity implements ServiceConnection
+ 
+         boolean autoFillEnabled = mTerminalView.isAutoFillEnabled();
+ 
+-        if (!TerminalLinks.findUrls(mTerminalView.getStoredSelectedText()).isEmpty())
++        if (!TerminalLinks.findUrls(mTerminalView.getStoredSelectedText()).isEmpty()) {
+             menu.add(Menu.NONE, CONTEXT_MENU_OPEN_URL_ID, Menu.NONE, R.string.action_open_url);
++            menu.add(Menu.NONE, CONTEXT_MENU_OPEN_URL_TAB_ID, Menu.NONE, R.string.action_open_url_tab);
++        }
+         menu.add(Menu.NONE, CONTEXT_MENU_FIND_ID, Menu.NONE, R.string.action_terminal_search);
+         menu.add(Menu.NONE, CONTEXT_MENU_SELECT_URL_ID, Menu.NONE, R.string.action_select_url);
+         menu.add(Menu.NONE, CONTEXT_MENU_SHARE_TRANSCRIPT_ID, Menu.NONE, R.string.action_share_transcript);
+@@ -671,6 +674,11 @@ public final class TermuxActivity extends Activity implements ServiceConnection
+             case CONTEXT_MENU_OPEN_URL_ID:
+                 TerminalLinks.open(this, TerminalLinks.findUrls(mTerminalView.getStoredSelectedText()));
+                 return true;
++            case CONTEXT_MENU_OPEN_URL_TAB_ID:
++                if (mTerminalTabsController != null)
++                    TerminalLinks.openInTab(this, TerminalLinks.findUrls(mTerminalView.getStoredSelectedText()),
++                        mTerminalTabsController::openWebTab);
++                return true;
+             case CONTEXT_MENU_FIND_ID:
+                 if (mTerminalTabsController != null) mTerminalTabsController.getSearchBar().show();
+                 return true;
+-- 
+2.43.0
+
