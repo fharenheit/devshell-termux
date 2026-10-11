@@ -7,6 +7,13 @@
 - **Added**: 새 기능, **Changed**: 동작·문서·패치 변경, **Fixed**: 버그 수정
 - "패치 갱신" 커밋은 업스트림 파일을 고친 커밋 뒤에 `custom/update-patches.sh`로 `custom/patches/`를 다시 만든 것입니다.
 
+## v0.118.3-ko.33 (2026-10-11)
+
+| 커밋 | 내용 |
+|---|---|
+| [`f0bba6b`](https://github.com/fharenheit/devshell-termux/commit/f0bba6b) | Added: DB 탭에 앱 글꼴 크기 설정 적용(편집기·결과 표·메시지), 결과 창 기본 접힘 + 툴바 ▶▶ 오른쪽 ⌄/⌃ 토글(실행 시 자동 펼침) |
+| (이 릴리즈 커밋) | Added: v0.118.3-ko.33 릴리즈 노트와 이력 |
+
 ## v0.118.3-ko.32 (2026-10-11)
 
 | 커밋 | 내용 |
