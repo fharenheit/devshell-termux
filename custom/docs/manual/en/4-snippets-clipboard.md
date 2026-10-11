@@ -11,7 +11,7 @@ Save the commands you use often, and tap one to type it into the current tab. Op
 - **Use**: tap a snippet to type it into the current tab. With ⏎ it also presses Enter.
 - **Manage**: long press a snippet for Type into the tab, Edit, Move up/down and Delete.
 - **Add** (middle): a name (the command is shown if empty), the command (can have several lines), **Press Enter after the command**, and **Show on** (all tabs, or the tabs of one SSH host).
-- **Defaults** (right): pick the Git, System status, Termux and tmux groups to add again. Commands you already have are skipped.
+- **Defaults** (right): pick the Git, System status, Packages (pkg) and tmux groups to add again. Commands you already have are skipped.
   - The first time you open the snippets, all the defaults are there.
   - Values a command needs, like a commit message, a commit hash or a user name, are shown as `<MESSAGE>`, `<HASH>`, `<USERNAME>` and asked for when tapped.
   - The Git commands that throw changes away without asking for a value are typed without Enter.

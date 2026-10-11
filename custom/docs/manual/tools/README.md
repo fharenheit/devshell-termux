@@ -6,7 +6,7 @@
 |---|---|
 | `scenario.sh` | 앱을 조작하며 화면 37개를 찍는 시나리오. `LANGX=ko` 또는 `en` |
 | `drv.py` | adb로 누르기/입력/스크린샷. `@문자열이름`으로 앱 문자열 리소스(언어별)를 찾아 누름 |
-| `setup.sh` | Termux 안에서 예제 git 저장소와 SSH 키를 만듦 |
+| `setup.sh` | DevShell(Termux) 셸 안에서 예제 git 저장소와 SSH 키를 만듦 |
 | `sshd/` | SSH/SFTP 화면용 예제 서버(Docker, 사용자 `demo` / `demo1234`, 호스트 이름 `dev-server`) |
 | `process.py` | 스크린샷을 절반 크기, 128색으로 줄여 `../images/<언어>/`에 저장 |
 

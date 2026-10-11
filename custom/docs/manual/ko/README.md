@@ -1,8 +1,8 @@
-# 사용 설명서
+# DevShell 사용 설명서
 
 [English](../en/README.md)
 
-이 포크(fharenheit/termux-app)의 기능을 화면과 함께 설명합니다. 기능 목록만 보려면 [FEATURES.md](../../../../FEATURES.md)를 봅니다.
+DevShell의 기능을 화면과 함께 설명합니다. DevShell은 Termux를 바탕으로 키보드 입력, SSH, 파일 탐색 등을 더한 앱입니다(저장소: fharenheit/termux-app). 패키지는 Termux 저장소에서 받으므로 `pkg`, `termux-*` 명령과 `~/.termux` 설정 폴더는 Termux와 같습니다. 기능 목록만 보려면 [FEATURES.md](../../../../FEATURES.md)를 봅니다.
 
 <img src="../images/ko/01_terminal_tabs.png" width="270" alt="터미널 화면">
 
@@ -14,7 +14,7 @@
 4. [스니펫과 클립보드](4-snippets-clipboard.md): 스니펫, 기본 스니펫, 클립보드 기록
 5. [SSH](5-ssh.md): 호스트 등록, 호스트 키, 키, SSH 탭, 포트 포워딩
 6. [SFTP 파일 탐색](6-sftp.md): 파일 작업, 권한, 전송 대기열, 텍스트 편집기, 이미지 보기
-7. [설정과 언어](7-settings.md): 설정 내보내기/가져오기, 앱 언어
+7. [설정과 언어](7-settings.md): 설정 내보내기/가져오기, 앱 언어, 셸 첫 화면, 정보와 도움말
 
 ## 처음 쓸 때
 

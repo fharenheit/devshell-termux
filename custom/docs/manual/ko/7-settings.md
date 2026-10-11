@@ -22,4 +22,18 @@
 
 <img src="../images/ko/37_settings_terminal_view.png" width="270" alt="Terminal View 설정">
 
-**⚙ → 설정** → Termux → **Terminal View**에서 글꼴과 저장되는 글꼴 크기를 바꿀 수 있습니다. 그 밖의 설정은 `~/.termux/termux.properties`에 있고, **⚙ → termux.properties 편집**으로 열 수 있습니다.
+**⚙ → 설정** → DevShell → **Terminal View**에서 글꼴과 저장되는 글꼴 크기를 바꿀 수 있습니다. 그 밖의 설정은 `~/.termux/termux.properties`에 있고, **⚙ → termux.properties 편집**으로 열 수 있습니다.
+
+## 셸 첫 화면
+
+새 탭의 로컬 셸은 DevShell 안내로 시작합니다: 설명서, 새 버전, 문제 신고 링크, `pkg` 사용법, 바로가기. 앱 언어로 표시됩니다.
+
+- 패키지(bash, ssh, git 등)는 Termux 저장소에서 받으므로 패키지 문제는 안내에 나온 Termux 링크로 신고합니다. 앱 문제는 이 저장소의 이슈로 신고합니다.
+- 안내는 `~/.termux/motd.sh`입니다. 앱이 앱 언어와 버전에 맞춰 다시 씁니다.
+  - 직접 고치려면 파일 안의 `# devshell-managed` 줄을 지웁니다. 그러면 앱이 더 이상 바꾸지 않습니다.
+  - 안내를 보지 않으려면 `touch ~/.hushlogin`을 실행합니다.
+
+## 정보와 도움말
+
+- **설정 → 정보**: DevShell 저장소, 릴리즈, 설명서, 문제 신고 링크와 앱·기기 정보를 보여 줍니다.
+- 왼쪽 서랍의 **도움말**은 이 사용 설명서를 엽니다.

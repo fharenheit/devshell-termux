@@ -1,8 +1,8 @@
-# User manual
+# DevShell user manual
 
 [한국어](../ko/README.md)
 
-The features of this fork (fharenheit/termux-app), with screenshots. For just the list of features, see [FEATURES.md](../../../../FEATURES.md) (Korean).
+The features of DevShell, with screenshots. DevShell is based on Termux and adds keyboard input, SSH, a file browser and more (repository: fharenheit/termux-app). Its packages come from the Termux repositories, so the `pkg` and `termux-*` commands and the `~/.termux` settings folder are the same as in Termux. For just the list of features, see [FEATURES.md](../../../../FEATURES.md) (Korean).
 
 <img src="../images/en/01_terminal_tabs.png" width="270" alt="Terminal">
 
@@ -14,7 +14,7 @@ The features of this fork (fharenheit/termux-app), with screenshots. For just th
 4. [Snippets and clipboard](4-snippets-clipboard.md): snippets, default snippets, clipboard history
 5. [SSH](5-ssh.md): adding hosts, host keys, keys, SSH tabs, port forwards
 6. [SFTP file browser](6-sftp.md): file actions, permissions, the transfer queue, the text editor, the image viewer
-7. [Settings and language](7-settings.md): exporting/importing settings, the app language
+7. [Settings and language](7-settings.md): exporting/importing settings, the app language, the shell welcome, about and help
 
 ## Getting started
 
