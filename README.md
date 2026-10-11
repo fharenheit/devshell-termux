@@ -1,8 +1,8 @@
-# Termux application
+# DevShell (Termux application fork)
 
-> **이 저장소는 Termux 포크입니다. 블루투스·하드웨어 키보드에서 한국어, 일본어, 중국어처럼 키보드 앱이 글자를 조합하는 언어를 입력할 수 있도록 고쳤고, SSH 접속 관리, 파일 탐색, 키보드 단축키, 스니펫 등 다양한 기능을 더했습니다.**
+> **이 저장소는 Termux 포크인 DevShell입니다. 블루투스·하드웨어 키보드에서 한국어, 일본어, 중국어처럼 키보드 앱이 글자를 조합하는 언어를 입력할 수 있도록 고쳤고, SSH 접속 관리, 파일 탐색, 키보드 단축키, 스니펫 등 다양한 기능을 더했습니다.**
 >
-> *A Termux fork that fixes hardware-keyboard input for languages composed by the IME, such as Korean, Japanese and Chinese, and adds SSH management, a file browser, keyboard shortcuts, snippets and more.*
+> *DevShell is a Termux fork that fixes hardware-keyboard input for languages composed by the IME, such as Korean, Japanese and Chinese, and adds SSH management, a file browser, keyboard shortcuts, snippets and more.*
 >
 > [릴리즈](https://github.com/fharenheit/termux-app/releases)에서 APK를 받아 수동으로 설치하세요(대부분의 기기는 `*_arm64-v8a.apk`). Play 스토어/F-Droid 버전 위에는 덮어 설치할 수 없습니다.
 >

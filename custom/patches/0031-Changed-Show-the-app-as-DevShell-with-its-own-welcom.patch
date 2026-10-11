@@ -1,0 +1,252 @@
+From 9bd30acc9d76bf14092b955d435254ccdc9f06fd Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sun, 11 Oct 2026 01:03:57 +0000
+Subject: [PATCH] Changed: Show the app as DevShell with its own welcome
+ message and links
+
+The app name is DevShell, a fork of Termux. The local shell welcomes
+with ~/.termux/motd.sh, which the login script prefers over the
+package's motd, written in the language of the app with the manual,
+releases and issues of this repository, and where to report package
+issues to Termux. A motd.sh without the app's marker line is left
+alone. Help opens the manual of this repository instead of the Termux
+wiki, the about and issue reports start with this app's links, and the
+donation link of Termux is not shown.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01GLNsTPnn2xKUQ4uFcevT6G
+---
+ .../termux/app/activities/HelpActivity.java   |  7 +--
+ .../app/activities/SettingsActivity.java      |  4 +-
+ app/src/main/res/values/strings.xml           |  2 +-
+ .../terminal/welcome/ShellWelcomeTest.java    | 45 +++++++++++++++++++
+ .../termux/shared/termux/TermuxConstants.java |  6 +--
+ .../com/termux/shared/termux/TermuxUtils.java | 13 +++---
+ termux-shared/src/main/res/values/strings.xml |  2 +-
+ 7 files changed, 65 insertions(+), 14 deletions(-)
+ create mode 100644 app/src/test/java/com/termux/app/terminal/welcome/ShellWelcomeTest.java
+
+diff --git a/app/src/main/java/com/termux/app/activities/HelpActivity.java b/app/src/main/java/com/termux/app/activities/HelpActivity.java
+index 0d046c8..aa0bff7 100644
+--- a/app/src/main/java/com/termux/app/activities/HelpActivity.java
++++ b/app/src/main/java/com/termux/app/activities/HelpActivity.java
+@@ -14,7 +14,7 @@ import android.webkit.WebViewClient;
+ import android.widget.ProgressBar;
+ import android.widget.RelativeLayout;
+ 
+-import com.termux.shared.termux.TermuxConstants;
++import com.termux.shared.fork.DevShellInfo;
+ 
+ /** Basic embedded browser for viewing help pages. */
+ public final class HelpActivity extends Activity {
+@@ -49,7 +49,7 @@ public final class HelpActivity extends Activity {
+         mWebView.setWebViewClient(new WebViewClient() {
+             @Override
+             public boolean shouldOverrideUrlLoading(WebView view, String url) {
+-                if (url.equals(TermuxConstants.TERMUX_WIKI_URL) || url.startsWith(TermuxConstants.TERMUX_WIKI_URL + "/")) {
++                if (url.startsWith(DevShellInfo.MANUAL_URL + "/")) {
+                     // Inline help.
+                     setContentView(progressLayout);
+                     return false;
+@@ -70,7 +70,8 @@ public final class HelpActivity extends Activity {
+                 setContentView(mWebView);
+             }
+         });
+-        mWebView.loadUrl(TermuxConstants.TERMUX_WIKI_URL);
++        // The manual of this fork instead of the Termux wiki.
++        mWebView.loadUrl(DevShellInfo.getManualUrl(this));
+     }
+ 
+     @Override
+diff --git a/app/src/main/java/com/termux/app/activities/SettingsActivity.java b/app/src/main/java/com/termux/app/activities/SettingsActivity.java
+index fcd9731..1e3e921 100644
+--- a/app/src/main/java/com/termux/app/activities/SettingsActivity.java
++++ b/app/src/main/java/com/termux/app/activities/SettingsActivity.java
+@@ -24,6 +24,7 @@ import com.termux.shared.settings.preferences.TermuxFloatAppSharedPreferences;
+ import com.termux.shared.settings.preferences.TermuxTaskerAppSharedPreferences;
+ import com.termux.shared.settings.preferences.TermuxWidgetAppSharedPreferences;
+ import com.termux.shared.termux.AndroidUtils;
++import com.termux.shared.fork.DevShellInfo;
+ import com.termux.shared.termux.TermuxConstants;
+ import com.termux.shared.termux.TermuxUtils;
+ 
+@@ -72,7 +73,7 @@ public class SettingsActivity extends AppCompatActivity {
+             configureTermuxTaskerPreference(context);
+             configureTermuxWidgetPreference(context);
+             configureAboutPreference(context);
+-            configureDonatePreference(context);
++            // Not shown: the donation link is for Termux, not this fork, whose links are in the about.
+         }
+ 
+         private void configureTermuxAPIPreference(@NonNull Context context) {
+@@ -121,6 +122,7 @@ public class SettingsActivity extends AppCompatActivity {
+                             String title = "About";
+ 
+                             StringBuilder aboutString = new StringBuilder();
++                            aboutString.append(DevShellInfo.getMarkdownString(context)).append("\n\n");
+                             aboutString.append(TermuxUtils.getAppInfoMarkdownString(context, false));
+ 
+                             String termuxPluginAppsInfo =  TermuxUtils.getTermuxPluginAppsInfoMarkdownString(context);
+diff --git a/app/src/main/res/values/strings.xml b/app/src/main/res/values/strings.xml
+index 3d58b1f..b7882d4 100644
+--- a/app/src/main/res/values/strings.xml
++++ b/app/src/main/res/values/strings.xml
+@@ -2,7 +2,7 @@
+ 
+ <!DOCTYPE resources [
+     <!ENTITY TERMUX_PACKAGE_NAME "com.termux">
+-    <!ENTITY TERMUX_APP_NAME "Termux">
++    <!ENTITY TERMUX_APP_NAME "DevShell">
+     <!ENTITY TERMUX_API_APP_NAME "Termux:API">
+     <!ENTITY TERMUX_BOOT_APP_NAME "Termux:Boot">
+     <!ENTITY TERMUX_FLOAT_APP_NAME "Termux:Float">
+diff --git a/app/src/test/java/com/termux/app/terminal/welcome/ShellWelcomeTest.java b/app/src/test/java/com/termux/app/terminal/welcome/ShellWelcomeTest.java
+new file mode 100644
+index 0000000..cc4ead5
+--- /dev/null
++++ b/app/src/test/java/com/termux/app/terminal/welcome/ShellWelcomeTest.java
+@@ -0,0 +1,45 @@
++package com.termux.app.terminal.welcome;
++
++import org.junit.Assert;
++import org.junit.Rule;
++import org.junit.Test;
++import org.junit.rules.TemporaryFolder;
++
++import java.io.File;
++import java.io.FileWriter;
++import java.io.IOException;
++import java.nio.charset.StandardCharsets;
++import java.nio.file.Files;
++
++public class ShellWelcomeTest {
++
++    @Rule
++    public TemporaryFolder folder = new TemporaryFolder();
++
++    @Test
++    public void testBuild() {
++        String script = ShellWelcome.build("It's DevShell", "line\nDEVSHELL_WELCOME_END\n<name>");
++        Assert.assertTrue(script.startsWith("#!"));
++        Assert.assertTrue(script.contains(ShellWelcome.MARKER));
++        Assert.assertTrue(script.contains("'It'\\''s DevShell'"));
++        // A line of the text cannot end the here-document early.
++        Assert.assertTrue(script.contains("\n DEVSHELL_WELCOME_END\n<name>\nDEVSHELL_WELCOME_END\n"));
++    }
++
++    @Test
++    public void testKeepsOwnFile() throws IOException {
++        File file = new File(folder.getRoot(), ".termux/motd.sh");
++        String script = ShellWelcome.build("DevShell", "text");
++        Assert.assertTrue(ShellWelcome.write(file, script));
++        Assert.assertTrue(file.canExecute());
++        Assert.assertFalse(ShellWelcome.write(file, script));
++        Assert.assertTrue(ShellWelcome.write(file, ShellWelcome.build("DevShell", "other")));
++
++        try (FileWriter writer = new FileWriter(file)) {
++            writer.write("echo mine\n");
++        }
++        Assert.assertFalse(ShellWelcome.write(file, script));
++        Assert.assertEquals("echo mine\n", new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8));
++    }
++
++}
+diff --git a/termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java b/termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java
+index 2f3b5d1..1c7d985 100644
+--- a/termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java
++++ b/termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java
+@@ -276,7 +276,7 @@ public final class TermuxConstants {
+      */
+ 
+     /** Termux app name */
+-    public static final String TERMUX_APP_NAME = "Termux"; // Default: "Termux"
++    public static final String TERMUX_APP_NAME = "DevShell"; // Default: "Termux"
+     /** Termux package name */
+     public static final String TERMUX_PACKAGE_NAME = "com.termux"; // Default: "com.termux"
+     /** Termux Github repo name */
+@@ -486,13 +486,13 @@ public final class TermuxConstants {
+      */
+ 
+     /** Termux Site */
+-    public static final String TERMUX_SITE = TERMUX_APP_NAME + " Site"; // Default: "Termux Site"
++    public static final String TERMUX_SITE = "Termux Site"; // Default: "Termux Site"
+ 
+     /** Termux Site url */
+     public static final String TERMUX_SITE_URL = "https://termux.dev"; // Default: "https://termux.dev"
+ 
+     /** Termux Wiki */
+-    public static final String TERMUX_WIKI = TERMUX_APP_NAME + " Wiki"; // Default: "Termux Wiki"
++    public static final String TERMUX_WIKI = "Termux Wiki"; // Default: "Termux Wiki"
+ 
+     /** Termux Wiki url */
+     public static final String TERMUX_WIKI_URL = "https://wiki.termux.com"; // Default: "https://wiki.termux.com"
+diff --git a/termux-shared/src/main/java/com/termux/shared/termux/TermuxUtils.java b/termux-shared/src/main/java/com/termux/shared/termux/TermuxUtils.java
+index 0b5fbf8..0275c53 100644
+--- a/termux-shared/src/main/java/com/termux/shared/termux/TermuxUtils.java
++++ b/termux-shared/src/main/java/com/termux/shared/termux/TermuxUtils.java
+@@ -10,6 +10,7 @@ import android.content.pm.ResolveInfo;
+ import androidx.annotation.NonNull;
+ 
+ import com.termux.shared.R;
++import com.termux.shared.fork.DevShellInfo;
+ import com.termux.shared.file.FileUtils;
+ import com.termux.shared.file.TermuxFileUtils;
+ import com.termux.shared.logger.Logger;
+@@ -323,7 +324,8 @@ public class TermuxUtils {
+ 
+         StringBuilder markdownString = new StringBuilder();
+ 
+-        markdownString.append("## Where To Report An Issue");
++        markdownString.append(DevShellInfo.getMarkdownString(context)).append("\n");
++        markdownString.append("## Where To Report An Issue of Termux");
+ 
+         markdownString.append("\n\n").append(context.getString(R.string.msg_report_issue, TermuxConstants.TERMUX_WIKI_URL)).append("\n");
+ 
+@@ -334,7 +336,7 @@ public class TermuxUtils {
+         markdownString.append("\n").append(MarkdownUtils.getLinkMarkdownString(TermuxConstants.TERMUX_REDDIT_SUBREDDIT, TermuxConstants.TERMUX_REDDIT_SUBREDDIT_URL)).append("  ");
+ 
+         markdownString.append("\n\n### Github Issues for Termux apps\n");
+-        markdownString.append("\n").append(MarkdownUtils.getLinkMarkdownString(TermuxConstants.TERMUX_APP_NAME, TermuxConstants.TERMUX_GITHUB_ISSUES_REPO_URL)).append("  ");
++        markdownString.append("\n").append(MarkdownUtils.getLinkMarkdownString("Termux", TermuxConstants.TERMUX_GITHUB_ISSUES_REPO_URL)).append("  ");
+         markdownString.append("\n").append(MarkdownUtils.getLinkMarkdownString(TermuxConstants.TERMUX_API_APP_NAME, TermuxConstants.TERMUX_API_GITHUB_ISSUES_REPO_URL)).append("  ");
+         markdownString.append("\n").append(MarkdownUtils.getLinkMarkdownString(TermuxConstants.TERMUX_BOOT_APP_NAME, TermuxConstants.TERMUX_BOOT_GITHUB_ISSUES_REPO_URL)).append("  ");
+         markdownString.append("\n").append(MarkdownUtils.getLinkMarkdownString(TermuxConstants.TERMUX_FLOAT_APP_NAME, TermuxConstants.TERMUX_FLOAT_GITHUB_ISSUES_REPO_URL)).append("  ");
+@@ -366,10 +368,11 @@ public class TermuxUtils {
+ 
+         StringBuilder markdownString = new StringBuilder();
+ 
+-        markdownString.append("## Important Links");
++        markdownString.append(DevShellInfo.getMarkdownString(context)).append("\n");
++        markdownString.append("## Important Links of Termux");
+ 
+         markdownString.append("\n\n### Github\n");
+-        markdownString.append("\n").append(MarkdownUtils.getLinkMarkdownString(TermuxConstants.TERMUX_APP_NAME, TermuxConstants.TERMUX_GITHUB_REPO_URL)).append("  ");
++        markdownString.append("\n").append(MarkdownUtils.getLinkMarkdownString("Termux", TermuxConstants.TERMUX_GITHUB_REPO_URL)).append("  ");
+         markdownString.append("\n").append(MarkdownUtils.getLinkMarkdownString(TermuxConstants.TERMUX_API_APP_NAME, TermuxConstants.TERMUX_API_GITHUB_REPO_URL)).append("  ");
+         markdownString.append("\n").append(MarkdownUtils.getLinkMarkdownString(TermuxConstants.TERMUX_BOOT_APP_NAME, TermuxConstants.TERMUX_BOOT_GITHUB_REPO_URL)).append("  ");
+         markdownString.append("\n").append(MarkdownUtils.getLinkMarkdownString(TermuxConstants.TERMUX_FLOAT_APP_NAME, TermuxConstants.TERMUX_FLOAT_GITHUB_REPO_URL)).append("  ");
+@@ -386,7 +389,7 @@ public class TermuxUtils {
+ 
+         markdownString.append("\n\n### Wiki\n");
+         markdownString.append("\n").append(MarkdownUtils.getLinkMarkdownString(TermuxConstants.TERMUX_WIKI, TermuxConstants.TERMUX_WIKI_URL)).append("  ");
+-        markdownString.append("\n").append(MarkdownUtils.getLinkMarkdownString(TermuxConstants.TERMUX_APP_NAME, TermuxConstants.TERMUX_GITHUB_WIKI_REPO_URL)).append("  ");
++        markdownString.append("\n").append(MarkdownUtils.getLinkMarkdownString("Termux", TermuxConstants.TERMUX_GITHUB_WIKI_REPO_URL)).append("  ");
+         markdownString.append("\n").append(MarkdownUtils.getLinkMarkdownString(TermuxConstants.TERMUX_PACKAGES_GITHUB_REPO_NAME, TermuxConstants.TERMUX_PACKAGES_GITHUB_WIKI_REPO_URL)).append("  ");
+ 
+         markdownString.append("\n##\n");
+diff --git a/termux-shared/src/main/res/values/strings.xml b/termux-shared/src/main/res/values/strings.xml
+index 06433ec..7c6775d 100644
+--- a/termux-shared/src/main/res/values/strings.xml
++++ b/termux-shared/src/main/res/values/strings.xml
+@@ -2,7 +2,7 @@
+ 
+ <!DOCTYPE resources [
+     <!ENTITY TERMUX_PACKAGE_NAME "com.termux">
+-    <!ENTITY TERMUX_APP_NAME "Termux">
++    <!ENTITY TERMUX_APP_NAME "DevShell">
+     <!ENTITY TERMUX_API_APP_NAME "Termux:API">
+     <!ENTITY TERMUX_BOOT_APP_NAME "Termux:Boot">
+     <!ENTITY TERMUX_FLOAT_APP_NAME "Termux:Float">
+-- 
+2.43.0
+
