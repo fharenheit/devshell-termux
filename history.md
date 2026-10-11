@@ -7,6 +7,14 @@
 - **Added**: 새 기능, **Changed**: 동작·문서·패치 변경, **Fixed**: 버그 수정
 - "패치 갱신" 커밋은 업스트림 파일을 고친 커밋 뒤에 `custom/update-patches.sh`로 `custom/patches/`를 다시 만든 것입니다.
 
+## v0.118.3-ko.30 (2026-10-11)
+
+| 커밋 | 내용 |
+|---|---|
+| [`5206268`](https://github.com/fharenheit/devshell-termux/commit/5206268) | Fixed: PostgreSQL 14+ 접속 실패 수정 — SCRAM-SHA-256 인증 시 Android에 없는 `javax.security.sasl`을 참조하던 pgjdbc를 42.7.4로 올림(`app/build.gradle`) |
+| [`47ee77b`](https://github.com/fharenheit/devshell-termux/commit/47ee77b) | Changed: pgjdbc 42.7.4 변경에 맞춰 패치 갱신(`0035`) |
+| (이 릴리즈 커밋) | Added: v0.118.3-ko.30 릴리즈 노트와 이력 |
+
 ## v0.118.3-ko.29 (2026-10-11)
 
 | 커밋 | 내용 |
