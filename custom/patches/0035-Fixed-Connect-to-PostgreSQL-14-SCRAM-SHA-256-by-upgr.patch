@@ -1,0 +1,34 @@
+From 520626837bcb838a058c400e40c048d49150956f Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?=EA=B9=80=EB=B3=91=EA=B3=A4?= <fharenheit@gmail.com>
+Date: Sun, 11 Oct 2026 13:25:49 +0900
+Subject: [PATCH] Fixed: Connect to PostgreSQL 14+ (SCRAM-SHA-256) by upgrading
+ pgjdbc to 42.7.4
+
+pgjdbc 42.2.29's shaded SCRAM library has ScramException extend
+javax.security.sasl.SaslException, a package absent on Android, so a
+SCRAM-SHA-256 login (the default since PostgreSQL 14) threw
+NoClassDefFoundError and the tab reported "not supported" and closed.
+pgjdbc 42.7+ no longer references javax.security.sasl.
+---
+ app/build.gradle | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/app/build.gradle b/app/build.gradle
+index 333cef3..a43dedc 100644
+--- a/app/build.gradle
++++ b/app/build.gradle
+@@ -127,7 +127,10 @@ android {
+ dependencies {
+     // JDBC drivers of the database client (custom/docs/db-client-plan.md). Bundled in the APK,
+     // since Google Play does not allow downloading executable code.
+-    implementation("org.postgresql:postgresql:42.2.29") {
++    // 42.7+ is needed on Android: its shaded SCRAM library no longer extends
++    // javax.security.sasl.SaslException, which Android lacks, so SCRAM-SHA-256
++    // logins (the default of PostgreSQL 14+) no longer fail with NoClassDefFoundError.
++    implementation("org.postgresql:postgresql:42.7.4") {
+         // Annotations only, which clash with the ones of another library.
+         exclude group: "org.checkerframework", module: "checker-qual"
+     }
+-- 
+2.43.0
+
