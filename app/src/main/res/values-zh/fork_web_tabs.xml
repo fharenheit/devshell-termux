@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="action_new_tab_local_shell">本地 Shell</string>
+    <string name="action_new_tab_ssh">SSH</string>
+    <string name="action_new_tab_web">网页浏览器</string>
+    <string name="action_new_tab_manage_ssh">管理 SSH 主机…</string>
+    <string name="action_web_back">后退</string>
+    <string name="action_web_forward">前进</string>
+    <string name="action_web_reload">刷新</string>
+    <string name="action_web_menu">菜单</string>
+    <string name="action_web_open_external">用其他应用打开</string>
+    <string name="action_web_copy_address">复制地址</string>
+    <string name="action_web_quick_links">快捷链接</string>
+    <string name="action_web_close_tab">关闭标签页</string>
+    <string name="web_address_hint">输入搜索词或地址</string>
+    <string name="web_tab_new">新标签页</string>
+    <string name="web_quick_link_forward">%1$s: %2$s</string>
+    <string name="web_quick_link_manual">DevShell 使用说明</string>
+    <string name="msg_web_max_tabs">最多可以打开 %1$d 个网页标签页</string>
+    <string name="msg_web_no_app">没有可以打开 %1$s 的应用</string>
+    <string name="msg_web_address_copied">已复制地址</string>
+    <string name="msg_web_downloading">正在下载 %1$s</string>
+</resources>

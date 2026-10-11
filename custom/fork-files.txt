@@ -60,3 +60,7 @@ app/src/main/res/values/fork_snippet_defaults.xml
 termux-shared/src/main/java/com/termux/shared/fork
 app/src/main/java/com/termux/app/terminal/welcome
 app/src/main/res/values/fork_shell_welcome.xml
+app/src/main/java/com/termux/app/terminal/web
+app/src/main/res/values/fork_web_tabs.xml
+app/src/test/java/com/termux/app/terminal/tabs
+app/src/test/java/com/termux/app/terminal/web

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="action_new_tab_local_shell">로컬 셸</string>
+    <string name="action_new_tab_ssh">SSH</string>
+    <string name="action_new_tab_web">웹 브라우저</string>
+    <string name="action_new_tab_manage_ssh">SSH 호스트 관리…</string>
+    <string name="action_web_back">뒤로</string>
+    <string name="action_web_forward">앞으로</string>
+    <string name="action_web_reload">새로 고침</string>
+    <string name="action_web_menu">메뉴</string>
+    <string name="action_web_open_external">다른 앱으로 열기</string>
+    <string name="action_web_copy_address">주소 복사</string>
+    <string name="action_web_quick_links">빠른 주소</string>
+    <string name="action_web_close_tab">탭 닫기</string>
+    <string name="web_address_hint">검색어 또는 주소 입력</string>
+    <string name="web_tab_new">새 탭</string>
+    <string name="web_quick_link_forward">%1$s: %2$s</string>
+    <string name="web_quick_link_manual">DevShell 사용 설명서</string>
+    <string name="msg_web_max_tabs">웹 탭은 최대 %1$d개까지 열 수 있습니다</string>
+    <string name="msg_web_no_app">%1$s을(를) 열 수 있는 앱이 없습니다</string>
+    <string name="msg_web_address_copied">주소를 복사했습니다</string>
+    <string name="msg_web_downloading">%1$s 내려받는 중</string>
+</resources>

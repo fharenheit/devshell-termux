@@ -50,7 +50,9 @@ public final class TerminalKeyboardShortcuts {
 
         switch (keyCode) {
             case KeyEvent.KEYCODE_TAB:
-                sessionClient.switchToSession(!shift);
+                // Through the web tabs too.
+                if (activity.getTerminalTabsController() != null) activity.getTerminalTabsController().switchTab(!shift);
+                else sessionClient.switchToSession(!shift);
                 return true;
             case KeyEvent.KEYCODE_EQUALS:
             case KeyEvent.KEYCODE_PLUS:

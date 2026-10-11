@@ -20,6 +20,7 @@
 
 | 내용 | 위치 |
 |---|---|
+| 새 탭(+) 메뉴: 로컬 셸, SSH(앱에 등록한 호스트가 있을 때만, 호스트 목록과 관리), 웹 브라우저. 웹 탭은 터미널 탭 뒤에 🌐 탭으로 보이고, 고르면 터미널·하단 키 대신 주소 줄과 WebView(파일 접근 끔, 다른 스킴은 다른 앱, 내려받기는 DownloadManager, 빠른 주소는 SSH 탭의 로컬 포워딩·최근 주소·설명서, 주소는 앱 설정에 저장) | 포크 전용 파일만 (`app/.../terminal/tabs/NewTabMenu.java`, `app/.../terminal/web/`, `fork_web_tabs.xml`) |
 | 터미널 위에 세션 탭 바(전환, 새로 만들기, 닫기, 이름 바꾸기). 설계는 `custom/docs/terminal-tabs-design.md` | `custom/patches/0004-*.patch` (`activity_termux.xml`, `TermuxActivity.java`, `TermuxTerminalSessionClient.java`) + `app/.../terminal/tabs/`, 탭 리소스 |
 | 세션을 바꿀 때 IME가 조합 중인 글자(한글)를 버림 | `custom/patches/0005-*.patch` (`TerminalView.java`) |
 | 백그라운드 세션의 새 출력(●)과 벨(🔔)을 탭에 표시(앱 화면이 닫혀 있는 동안 생긴 것 포함), 세션 전환/제목 변경 토스트 끔 | `custom/patches/0007-*.patch` (`TermuxService.java`, `TermuxActivity.java`, `TermuxTerminalSessionClient.java`) + `app/.../terminal/tabs/` |

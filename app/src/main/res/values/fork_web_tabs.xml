@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="action_new_tab_local_shell">Local shell</string>
+    <string name="action_new_tab_ssh">SSH</string>
+    <string name="action_new_tab_web">Web browser</string>
+    <string name="action_new_tab_manage_ssh">Manage SSH hosts…</string>
+    <string name="action_web_back">Back</string>
+    <string name="action_web_forward">Forward</string>
+    <string name="action_web_reload">Reload</string>
+    <string name="action_web_menu">Menu</string>
+    <string name="action_web_open_external">Open in another app</string>
+    <string name="action_web_copy_address">Copy address</string>
+    <string name="action_web_quick_links">Quick links</string>
+    <string name="action_web_close_tab">Close tab</string>
+    <string name="web_address_hint">Search or enter address</string>
+    <string name="web_tab_new">New tab</string>
+    <string name="web_quick_link_forward">%1$s: %2$s</string>
+    <string name="web_quick_link_manual">DevShell manual</string>
+    <string name="msg_web_max_tabs">At most %1$d web tabs can be open</string>
+    <string name="msg_web_no_app">No app can open %1$s</string>
+    <string name="msg_web_address_copied">Address copied</string>
+    <string name="msg_web_downloading">Downloading %1$s</string>
+</resources>

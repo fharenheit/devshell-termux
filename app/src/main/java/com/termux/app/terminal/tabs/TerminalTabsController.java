@@ -33,6 +33,7 @@ import com.termux.app.terminal.fonts.TerminalFonts;
 import com.termux.app.terminal.sftp.SftpBrowserActivity;
 import com.termux.app.language.LanguageDialog;
 import com.termux.app.terminal.clipboard.ClipboardHistory;
+import com.termux.app.terminal.web.WebTabs;
 import com.termux.app.terminal.welcome.ShellWelcome;
 import com.termux.app.terminal.search.TerminalSearchBar;
 import com.termux.app.terminal.specialkeys.SpecialKeysPanel;
@@ -66,6 +67,9 @@ public class TerminalTabsController {
     private final LinearLayout mTabsLayout;
 
     /** Sessions closed from a tab while running, to be removed once their process has exited. */
+    private final WebTabs mWebTabs;
+    @Nullable private TerminalSession mLastSession;
+
     private static final Set<TerminalSession> sSessionsToRemoveOnExit = Collections.newSetFromMap(new WeakHashMap<>());
 
     private TerminalSearchBar mSearchBar;
@@ -93,8 +97,46 @@ public class TerminalTabsController {
         mScrollView = activity.findViewById(R.id.terminal_tabs_scroll_view);
         mTabsLayout = activity.findViewById(R.id.terminal_tabs_layout);
 
+        mWebTabs = new WebTabs(activity, new WebTabs.Host() {
+            @Override
+            public void onWebTabsChanged() {
+                refresh(true);
+            }
+
+            @Override
+            public void onWebTabsShown() {
+                if (mSpecialKeysPanel != null) mSpecialKeysPanel.hide();
+                if (mSearchBar != null) mSearchBar.hide();
+            }
+
+            @Override
+            public void switchTab(boolean forward) {
+                TerminalTabsController.this.switchTab(forward);
+            }
+
+            @Override
+            public void openLocalShell() {
+                getSessionClient().addNewSession(false, null);
+            }
+        });
+
         View newSessionButton = activity.findViewById(R.id.terminal_tabs_new_session_button);
-        newSessionButton.setOnClickListener(v -> getSessionClient().addNewSession(false, null));
+        newSessionButton.setOnClickListener(v -> NewTabMenu.show(mActivity, v, new NewTabMenu.Listener() {
+            @Override
+            public void onLocalShell() {
+                getSessionClient().addNewSession(false, null);
+            }
+
+            @Override
+            public void onSsh(@NonNull String hostName) {
+                SshConnector.connect(mActivity, hostName);
+            }
+
+            @Override
+            public void onWeb() {
+                mWebTabs.open(null);
+            }
+        }));
         newSessionButton.setOnLongClickListener(v -> {
             mActivity.showNewNamedSessionDialog();
             return true;
@@ -290,6 +332,9 @@ public class TerminalTabsController {
 
     /** Called when the session displayed in the terminal has changed or may have changed. */
     public void onCurrentSessionChanged(TerminalSession currentSession) {
+        // Switching to another terminal session, like a new one, shows the terminal again.
+        if (currentSession != mLastSession) mWebTabs.hide();
+        mLastSession = currentSession;
         if (mSearchBar != null) mSearchBar.onSessionChanged();
         // Each tab has its own font size on the screen.
         if (mActivity.getTermuxTerminalViewClient() != null)
@@ -311,18 +356,30 @@ public class TerminalTabsController {
         List<TermuxSession> sessions = service == null ? Collections.emptyList() : service.getTermuxSessions();
         TerminalSession currentSession = mActivity.getCurrentSession();
 
-        // Reuse the tab views and only add or remove views when the number of sessions changes.
-        while (mTabsLayout.getChildCount() > sessions.size())
+        List<WebTabs.Tab> webTabs = mWebTabs.getTabs();
+        WebTabs.Tab selectedWebTab = mWebTabs.getSelected();
+        int count = sessions.size() + webTabs.size();
+
+        // Reuse the tab views and only add or remove views when the number of tabs changes.
+        while (mTabsLayout.getChildCount() > count)
             mTabsLayout.removeViewAt(mTabsLayout.getChildCount() - 1);
         LayoutInflater inflater = mActivity.getLayoutInflater();
-        while (mTabsLayout.getChildCount() < sessions.size())
+        while (mTabsLayout.getChildCount() < count)
             mTabsLayout.addView(inflater.inflate(R.layout.item_terminal_tab, mTabsLayout, false));
 
         int selectedIndex = -1;
         for (int i = 0; i < sessions.size(); i++) {
             TerminalSession session = sessions.get(i).getTerminalSession();
-            bindTab(mTabsLayout.getChildAt(i), i, session, session == currentSession);
-            if (session == currentSession) selectedIndex = i;
+            boolean selected = selectedWebTab == null && session == currentSession;
+            bindTab(mTabsLayout.getChildAt(i), i, session, selected);
+            if (selected) selectedIndex = i;
+        }
+        // The web tabs come after the terminal tabs.
+        for (int i = 0; i < webTabs.size(); i++) {
+            int index = sessions.size() + i;
+            WebTabs.Tab tab = webTabs.get(i);
+            bindWebTab(mTabsLayout.getChildAt(index), index, tab, tab == selectedWebTab);
+            if (tab == selectedWebTab) selectedIndex = index;
         }
 
         if (scrollToSelectedTab && selectedIndex >= 0) scrollToTab(selectedIndex);
@@ -364,7 +421,8 @@ public class TerminalTabsController {
         tabView.setContentDescription(stateDescription == null ? titleView.getText() : titleView.getText() + ", " + stateDescription);
         // Tapping the tab of the current session renames it, since it is already displayed.
         tabView.setOnClickListener(v -> {
-            if (session == mActivity.getCurrentSession()) showRenameDialog(session);
+            if (mWebTabs.isShown() && session == mActivity.getCurrentSession()) mWebTabs.hide();
+            else if (session == mActivity.getCurrentSession()) showRenameDialog(session);
             else getSessionClient().setCurrentSession(session);
         });
         tabView.setOnLongClickListener(v -> {
@@ -374,6 +432,50 @@ public class TerminalTabsController {
         View closeButton = tabView.findViewById(R.id.terminal_tab_close_button);
         closeButton.setVisibility(TerminalTabsSettings.shouldShowCloseButton() ? View.VISIBLE : View.GONE);
         closeButton.setOnClickListener(v -> closeSession(session));
+    }
+
+    private void bindWebTab(View tabView, int index, WebTabs.Tab tab, boolean selected) {
+        TextView titleView = tabView.findViewById(R.id.terminal_tab_title);
+        String label = tab.getLabel();
+        titleView.setText((index + 1) + ": 🌐 " + (label.isEmpty() ? mActivity.getString(R.string.web_tab_new) : label));
+        titleView.setPaintFlags(titleView.getPaintFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
+        titleView.setTextColor(ContextCompat.getColor(mActivity, selected ? R.color.terminal_tab_text_selected : R.color.terminal_tab_text));
+        tabView.findViewById(R.id.terminal_tab_indicator).setVisibility(View.GONE);
+        tabView.setActivated(selected);
+        tabView.setContentDescription(titleView.getText());
+        tabView.setOnClickListener(v -> mWebTabs.select(tab));
+        tabView.setOnLongClickListener(v -> {
+            mWebTabs.showTabMenu(tab, index);
+            return true;
+        });
+        View closeButton = tabView.findViewById(R.id.terminal_tab_close_button);
+        closeButton.setVisibility(TerminalTabsSettings.shouldShowCloseButton() ? View.VISIBLE : View.GONE);
+        closeButton.setOnClickListener(v -> mWebTabs.close(tab));
+    }
+
+    /** Go to the next or previous tab, terminal or web, wrapping around. */
+    public void switchTab(boolean forward) {
+        TermuxService service = mActivity.getTermuxService();
+        List<TermuxSession> sessions = service == null ? Collections.emptyList() : new ArrayList<>(service.getTermuxSessions());
+        List<WebTabs.Tab> webTabs = mWebTabs.getTabs();
+        int count = sessions.size() + webTabs.size();
+        if (count == 0) return;
+        int current;
+        if (mWebTabs.getSelected() != null) {
+            current = sessions.size() + webTabs.indexOf(mWebTabs.getSelected());
+        } else {
+            current = -1;
+            for (int i = 0; i < sessions.size(); i++)
+                if (sessions.get(i).getTerminalSession() == mActivity.getCurrentSession()) current = i;
+        }
+        int next = ((current + (forward ? 1 : -1)) % count + count) % count;
+        if (next < sessions.size()) {
+            TerminalSession session = sessions.get(next).getTerminalSession();
+            if (session == mActivity.getCurrentSession()) mWebTabs.hide();
+            else getSessionClient().setCurrentSession(session);
+        } else {
+            mWebTabs.select(webTabs.get(next - sessions.size()));
+        }
     }
 
     /**
