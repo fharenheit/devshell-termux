@@ -22,6 +22,8 @@
 | 세션 탭과 키캡 하단 키 | 특수 키 패널 | 스니펫 |
 | <img src="custom/docs/manual/images/ko/18_ssh_hosts.png" width="240" alt="SSH 호스트"> | <img src="custom/docs/manual/images/ko/25_sftp_browser.png" width="240" alt="SFTP 파일 탐색"> | <img src="custom/docs/manual/images/ko/30_editor_toolbar.png" width="240" alt="텍스트 편집기"> |
 | SSH 호스트 | SFTP 파일 탐색 | 텍스트 편집기 |
+| <img src="custom/docs/manual/images/ko/35_language.png" width="240" alt="앱 언어"> | <img src="custom/docs/manual/images/ko/06_font.png" width="240" alt="글꼴 변경"> | <img src="custom/docs/manual/images/ko/34_export_settings.png" width="240" alt="설정 내보내기/가져오기"> |
+| 앱 언어 | 글꼴 변경 | 설정 내보내기/가져오기 |
 
 더 많은 화면과 사용법은 [사용 설명서](custom/docs/manual/ko/README.md)([English](custom/docs/manual/en/README.md))에 있습니다.
 
