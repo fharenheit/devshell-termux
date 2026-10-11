@@ -7,6 +7,13 @@
 - **Added**: 새 기능, **Changed**: 동작·문서·패치 변경, **Fixed**: 버그 수정
 - "패치 갱신" 커밋은 업스트림 파일을 고친 커밋 뒤에 `custom/update-patches.sh`로 `custom/patches/`를 다시 만든 것입니다.
 
+## v0.118.3-ko.28 (2026-10-11)
+
+| 커밋 | 내용 |
+|---|---|
+| [`c87be65`](https://github.com/fharenheit/devshell-termux/commit/c87be65) | Added: 새 탭(+) 메뉴(로컬 셸, 등록한 호스트가 있을 때 SSH 호스트 목록과 관리, 웹 브라우저). 탭 바의 🌐 웹 탭(주소 줄, 빠른 주소: SSH 로컬 포워딩·최근 주소·설명서, 뒤로/Ctrl+Tab/Ctrl+Shift+W, 내려받기, 주소 저장) |
+| (이 릴리즈 커밋) | Added: v0.118.3-ko.28 릴리즈 노트와 이력 |
+
 ## v0.118.3-ko.27 (2026-10-11)
 
 | 커밋 | 내용 |
@@ -14,7 +21,7 @@
 | [`34d587a`](https://github.com/fharenheit/devshell-termux/commit/34d587a) | Changed: 사용 설명서를 DevShell 이름으로, 셸 첫 화면과 정보·도움말 설명 추가 |
 | [`af4f1e0`](https://github.com/fharenheit/devshell-termux/commit/af4f1e0) | Changed: 저장소 이름 `fharenheit/devshell-termux`(앱 링크, 글꼴 내려받기 주소, 문서), APK 이름 `devshell_<버전>_<ABI>.apk` |
 | [`15b16c9`](https://github.com/fharenheit/devshell-termux/commit/15b16c9) | Changed: 패치 갱신(`0033`) |
-| (이 릴리즈 커밋) | Added: v0.118.3-ko.27 릴리즈 노트와 이력 |
+| [`b3e7bb0`](https://github.com/fharenheit/devshell-termux/commit/b3e7bb0) | Added: v0.118.3-ko.27 릴리즈 노트와 이력 |
 
 ## v0.118.3-ko.26 (2026-10-11)
 
