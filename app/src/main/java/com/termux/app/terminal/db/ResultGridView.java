@@ -68,12 +68,12 @@ public class ResultGridView extends View {
     private final Paint mTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint mBoldPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint mFillPaint = new Paint();
-    private final int mRowHeight;
+    private int mRowHeight;
     private final int mPadding;
     private final int mMinWidth;
     private final int mMaxWidth;
     private final int mResizeSlop;
-    private final float mTextBaseline;
+    private float mTextBaseline;
 
     private int mScrollX;
     private int mScrollY;
@@ -116,6 +116,21 @@ public class ResultGridView extends View {
 
     public void setListener(@Nullable Listener listener) {
         mListener = listener;
+    }
+
+    /** Set the cell text size in pixels, to match the app's configured font size. */
+    public void setTextSize(float px) {
+        if (px <= 0 || px == mTextPaint.getTextSize()) return;
+        mTextPaint.setTextSize(px);
+        mBoldPaint.setTextSize(px);
+        float density = getResources().getDisplayMetrics().density;
+        Paint.FontMetrics metrics = mTextPaint.getFontMetrics();
+        int lineHeight = Math.round(metrics.descent - metrics.ascent);
+        mRowHeight = Math.max(Math.round(22 * density), lineHeight + Math.round(10 * density));
+        mTextBaseline = (mRowHeight - metrics.ascent - metrics.descent) / 2f;
+        measureColumns();
+        requestLayout();
+        invalidate();
     }
 
     public void setMarker(@Nullable Marker marker) {

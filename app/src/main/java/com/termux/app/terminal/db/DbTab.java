@@ -58,6 +58,8 @@ public final class DbTab {
     @NonNull public final java.util.Set<String> expandedTables = new java.util.HashSet<>();
 
     public int panel = PANEL_SQL;
+    /** Whether the results pane is collapsed to give the editor more room. Starts collapsed. */
+    public boolean resultsCollapsed = true;
     public int timeoutSeconds;
     public int pageSize = 200;
 

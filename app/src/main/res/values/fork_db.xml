@@ -183,4 +183,6 @@
     <string name="action_db_new_tab">Database</string>
     <string name="action_db_manage_connections">Manage connections…</string>
     <string name="action_terminal_tabs_menu_database">Database</string>
+    <string name="action_db_expand_results">Expand results</string>
+    <string name="action_db_collapse_results">Collapse results</string>
 </resources>

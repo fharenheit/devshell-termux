@@ -183,4 +183,6 @@
     <string name="action_db_new_tab">数据库</string>
     <string name="action_db_manage_connections">管理连接…</string>
     <string name="action_terminal_tabs_menu_database">数据库</string>
+    <string name="action_db_expand_results">展开结果</string>
+    <string name="action_db_collapse_results">折叠结果</string>
 </resources>

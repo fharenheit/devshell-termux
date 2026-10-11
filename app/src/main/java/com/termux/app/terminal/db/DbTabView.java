@@ -71,6 +71,7 @@ final class DbTabView extends LinearLayout {
     private final TextView mStatus;
     private final Button mRunButton;
     private final Button mRunAllButton;
+    private final Button mToggleResultsButton;
     private final Button mCancelButton;
     private final Button mCommitButton;
     private final Button mRollbackButton;
@@ -139,6 +140,7 @@ final class DbTabView extends LinearLayout {
         toolbar.addView(titles, new LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
         mRunButton = addToolbarButton(toolbar, "▶", R.string.action_db_run, v -> run(false));
         mRunAllButton = addToolbarButton(toolbar, "▶▶", R.string.action_db_run_all, v -> run(true));
+        mToggleResultsButton = addToolbarButton(toolbar, "⌄", R.string.action_db_expand_results, v -> toggleResults());
         mCancelButton = addToolbarButton(toolbar, "■", R.string.action_db_cancel, v -> cancel());
         mCommitButton = addToolbarButton(toolbar, "✓", R.string.action_db_commit, v -> commit(true));
         mRollbackButton = addToolbarButton(toolbar, "↶", R.string.action_db_rollback, v -> commit(false));
@@ -274,8 +276,36 @@ final class DbTabView extends LinearLayout {
             boolean wide = (right - left) / getResources().getDisplayMetrics().density >= WIDE_SCREEN_DP;
             if (wide != mWide || mContent.getChildCount() == 0) post(() -> arrangePanels(wide));
         });
+        applyFontSize();
+        updateToggleButton();
         arrangePanels(context.getResources().getConfiguration().screenWidthDp >= WIDE_SCREEN_DP);
         update();
+    }
+
+    /** Use the app's configured font size for the editor, results and messages. */
+    private void applyFontSize() {
+        if (mActivity.getPreferences() == null) return;
+        float px = mActivity.getPreferences().getFontSize();
+        if (px <= 0) return;
+        mEditor.setTextSize(TypedValue.COMPLEX_UNIT_PX, px);
+        mMessage.setTextSize(TypedValue.COMPLEX_UNIT_PX, px);
+        if (mGrid != null) mGrid.setTextSize(px);
+    }
+
+    /** Collapse or expand the results pane, from the toolbar button. */
+    private void toggleResults() {
+        mTab.resultsCollapsed = !mTab.resultsCollapsed;
+        if (mWide) arrangePanels(true);
+        else showPanel(mTab.resultsCollapsed ? DbTab.PANEL_SQL : DbTab.PANEL_RESULTS);
+        updateToggleButton();
+    }
+
+    /** The toggle button shows a down chevron to expand, an up chevron to collapse. */
+    private void updateToggleButton() {
+        boolean collapsed = mTab.resultsCollapsed;
+        mToggleResultsButton.setText(collapsed ? "⌄" : "⌃");
+        mToggleResultsButton.setContentDescription(getContext().getString(
+            collapsed ? R.string.action_db_expand_results : R.string.action_db_collapse_results));
     }
 
     private int dp(float value) {
@@ -335,17 +365,21 @@ final class DbTabView extends LinearLayout {
             row.addView(line, new LayoutParams(dp(1), ViewGroup.LayoutParams.MATCH_PARENT));
             LinearLayout right = new LinearLayout(getContext());
             right.setOrientation(VERTICAL);
-            right.addView(mEditorPanel, new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 4));
-            View line2 = new View(getContext());
-            line2.setBackgroundColor(0xFF333333);
-            right.addView(line2, new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(1)));
-            right.addView(mResultsPanel, new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 6));
+            // When collapsed, the editor fills the right column and the results pane is hidden.
+            int editorWeight = mTab.resultsCollapsed ? 1 : 4;
+            right.addView(mEditorPanel, new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, editorWeight));
+            if (!mTab.resultsCollapsed) {
+                View line2 = new View(getContext());
+                line2.setBackgroundColor(0xFF333333);
+                right.addView(line2, new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(1)));
+                right.addView(mResultsPanel, new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 6));
+            }
             row.addView(right, new LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 7));
             mContent.addView(row);
             mSegments.setVisibility(GONE);
             mSchemaPanel.setVisibility(VISIBLE);
             mEditorPanel.setVisibility(VISIBLE);
-            mResultsPanel.setVisibility(VISIBLE);
+            mResultsPanel.setVisibility(mTab.resultsCollapsed ? GONE : VISIBLE);
         } else {
             mContent.addView(mSchemaPanel);
             mContent.addView(mEditorPanel);
@@ -366,11 +400,14 @@ final class DbTabView extends LinearLayout {
             mSegmentButtons[i].setTextColor(i == panel ? 0xFF4FC3F7 : 0xFFB0B0B0);
             mSegmentButtons[i].setTypeface(null, i == panel ? Typeface.BOLD : Typeface.NORMAL);
         }
+        mTab.resultsCollapsed = panel != DbTab.PANEL_RESULTS;
+        updateToggleButton();
         if (panel == DbTab.PANEL_SQL) mEditor.requestFocus();
         else hideKeyboard();
     }
 
     void onShown() {
+        applyFontSize();
         if (mTab.connection == null && mTab.state != DbTab.CONNECTING) connect();
         else if (mTab.panel == DbTab.PANEL_SQL || mWide) mEditor.requestFocus();
     }
@@ -752,7 +789,15 @@ final class DbTabView extends LinearLayout {
                         break;
                     }
                 }
-                if (mAttached && !mWide && !tab.results.isEmpty()) showPanel(DbTab.PANEL_RESULTS);
+                if (mAttached && !tab.results.isEmpty()) {
+                    if (!mWide) {
+                        showPanel(DbTab.PANEL_RESULTS);
+                    } else if (mTab.resultsCollapsed) {
+                        mTab.resultsCollapsed = false;
+                        arrangePanels(true);
+                        updateToggleButton();
+                    }
+                }
                 if (refresh) {
                     tab.tables.clear();
                     tab.columns.clear();

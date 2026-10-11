@@ -183,4 +183,6 @@
     <string name="action_db_new_tab">データベース</string>
     <string name="action_db_manage_connections">接続を管理…</string>
     <string name="action_terminal_tabs_menu_database">データベース</string>
+    <string name="action_db_expand_results">結果を展開</string>
+    <string name="action_db_collapse_results">結果を折りたたむ</string>
 </resources>
