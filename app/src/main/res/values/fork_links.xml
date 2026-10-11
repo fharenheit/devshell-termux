@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Strings of opening URLs from the terminal. Kept out of upstream files to keep patches small. -->
 <resources>
-    <string name="action_open_url">Open URL</string>
+    <string name="action_open_url">Open URL (external browser)</string>
+    <string name="action_open_url_tab">Open URL (tab)</string>
 </resources>

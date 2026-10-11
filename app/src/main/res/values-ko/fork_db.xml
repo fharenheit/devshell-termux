@@ -182,4 +182,5 @@
     <string name="msg_db_import_done">%1$d개 행을 가져왔습니다</string>
     <string name="action_db_new_tab">데이터베이스</string>
     <string name="action_db_manage_connections">DB 접속 관리…</string>
+    <string name="action_terminal_tabs_menu_database">데이터베이스</string>
 </resources>

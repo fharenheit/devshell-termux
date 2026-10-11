@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="action_open_url">打开网址</string>
+    <string name="action_open_url">打开网址（外部浏览器）</string>
+    <string name="action_open_url_tab">打开网址（标签页）</string>
 </resources>

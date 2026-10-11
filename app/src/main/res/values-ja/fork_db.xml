@@ -182,4 +182,5 @@
     <string name="msg_db_import_done">%1$d 行をインポートしました</string>
     <string name="action_db_new_tab">データベース</string>
     <string name="action_db_manage_connections">接続を管理…</string>
+    <string name="action_terminal_tabs_menu_database">データベース</string>
 </resources>

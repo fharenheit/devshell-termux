@@ -189,6 +189,7 @@ public final class TermuxActivity extends Activity implements ServiceConnection 
     private static final int CONTEXT_MENU_REPORT_ID = 9;
     private static final int CONTEXT_MENU_OPEN_URL_ID = 12;
     private static final int CONTEXT_MENU_FIND_ID = 13;
+    private static final int CONTEXT_MENU_OPEN_URL_TAB_ID = 14;
 
     private static final String ARG_TERMINAL_TOOLBAR_TEXT_INPUT = "terminal_toolbar_text_input";
 
@@ -636,8 +637,10 @@ public final class TermuxActivity extends Activity implements ServiceConnection 
 
         boolean autoFillEnabled = mTerminalView.isAutoFillEnabled();
 
-        if (!TerminalLinks.findUrls(mTerminalView.getStoredSelectedText()).isEmpty())
+        if (!TerminalLinks.findUrls(mTerminalView.getStoredSelectedText()).isEmpty()) {
             menu.add(Menu.NONE, CONTEXT_MENU_OPEN_URL_ID, Menu.NONE, R.string.action_open_url);
+            menu.add(Menu.NONE, CONTEXT_MENU_OPEN_URL_TAB_ID, Menu.NONE, R.string.action_open_url_tab);
+        }
         menu.add(Menu.NONE, CONTEXT_MENU_FIND_ID, Menu.NONE, R.string.action_terminal_search);
         menu.add(Menu.NONE, CONTEXT_MENU_SELECT_URL_ID, Menu.NONE, R.string.action_select_url);
         menu.add(Menu.NONE, CONTEXT_MENU_SHARE_TRANSCRIPT_ID, Menu.NONE, R.string.action_share_transcript);
@@ -670,6 +673,11 @@ public final class TermuxActivity extends Activity implements ServiceConnection 
         switch (item.getItemId()) {
             case CONTEXT_MENU_OPEN_URL_ID:
                 TerminalLinks.open(this, TerminalLinks.findUrls(mTerminalView.getStoredSelectedText()));
+                return true;
+            case CONTEXT_MENU_OPEN_URL_TAB_ID:
+                if (mTerminalTabsController != null)
+                    TerminalLinks.openInTab(this, TerminalLinks.findUrls(mTerminalView.getStoredSelectedText()),
+                        mTerminalTabsController::openWebTab);
                 return true;
             case CONTEXT_MENU_FIND_ID:
                 if (mTerminalTabsController != null) mTerminalTabsController.getSearchBar().show();

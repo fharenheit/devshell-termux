@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="action_open_url">URL を開く</string>
+    <string name="action_open_url">URL を開く（外部ブラウザ）</string>
+    <string name="action_open_url_tab">URL を開く（タブ）</string>
 </resources>

@@ -96,6 +96,11 @@ public class TerminalTabsController {
         return mSearchBar;
     }
 
+    /** Open a URL in a new web tab, like from the terminal's "Open URL (tab)" menu item. */
+    public void openWebTab(@NonNull String url) {
+        mWebTabs.open(url);
+    }
+
     public TerminalTabsController(@NonNull TermuxActivity activity) {
         ClipboardHistory.attach(activity, activity.getTerminalView());
         ShellWelcome.install(activity);
@@ -245,12 +250,14 @@ public class TerminalTabsController {
     private static final int MENU_FIND = 12;
     private static final int MENU_LANGUAGE = 13;
     private static final int MENU_CLIPBOARD_HISTORY = 14;
+    private static final int MENU_DATABASE = 15;
 
     /** Show the menu of the settings button of the tab bar. */
     private void showMenu(View anchor) {
         PopupMenu popupMenu = new PopupMenu(mActivity, anchor);
         Menu menu = popupMenu.getMenu();
         menu.add(Menu.NONE, MENU_SSH, Menu.NONE, R.string.action_terminal_tabs_menu_ssh);
+        menu.add(Menu.NONE, MENU_DATABASE, Menu.NONE, R.string.action_terminal_tabs_menu_database);
         menu.add(Menu.NONE, MENU_SNIPPETS, Menu.NONE, R.string.title_snippets);
         menu.add(Menu.NONE, MENU_FIND, Menu.NONE, R.string.action_terminal_search);
         menu.add(Menu.NONE, MENU_CLIPBOARD_HISTORY, Menu.NONE, R.string.title_clipboard_history);
@@ -300,6 +307,9 @@ public class TerminalTabsController {
                     return true;
                 case MENU_SSH:
                     SshHostsDialog.show(mActivity);
+                    return true;
+                case MENU_DATABASE:
+                    DbDialogs.showConnections(mActivity, mDbTabs::open);
                     return true;
                 case MENU_FONT:
                     TerminalFontDialog.show(mActivity, () -> {
