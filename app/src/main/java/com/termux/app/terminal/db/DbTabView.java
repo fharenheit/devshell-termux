@@ -40,6 +40,7 @@ import com.termux.app.terminal.sftp.LineNumberEditText;
 import com.termux.app.terminal.sftp.SyntaxHighlighter;
 import com.termux.app.terminal.ssh.SshHostKeyDialog;
 import com.termux.shared.logger.Logger;
+import com.termux.shared.settings.preferences.TermuxAppSharedPreferences;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -284,8 +285,9 @@ final class DbTabView extends LinearLayout {
 
     /** Use the app's configured font size for the editor, results and messages. */
     private void applyFontSize() {
-        if (mActivity.getPreferences() == null) return;
-        float px = mActivity.getPreferences().getFontSize();
+        TermuxAppSharedPreferences preferences = TermuxAppSharedPreferences.build(mActivity, true);
+        if (preferences == null) return;
+        float px = preferences.getFontSize();
         if (px <= 0) return;
         mEditor.setTextSize(TypedValue.COMPLEX_UNIT_PX, px);
         mMessage.setTextSize(TypedValue.COMPLEX_UNIT_PX, px);
