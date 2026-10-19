@@ -68,3 +68,7 @@ app/src/main/res/values/fork_db.xml
 app/src/main/java/com/termux/app/terminal/db
 app/src/test/java/com/termux/app/terminal/db
 app/src/main/java/javax/security/sasl
+terminal-view/src/main/java/com/termux/view/ImeText.java
+terminal-view/src/main/java/com/termux/view/TerminalInputConnection.java
+terminal-view/src/test/java/com/termux/view
+app/src/test/java/com/termux/view
