@@ -7,6 +7,14 @@
 - **Added**: 새 기능, **Changed**: 동작·문서·패치 변경, **Fixed**: 버그 수정
 - "패치 갱신" 커밋은 업스트림 파일을 고친 커밋 뒤에 `custom/update-patches.sh`로 `custom/patches/`를 다시 만든 것입니다.
 
+## v0.118.3-ko.34 (2026-10-19)
+
+| 커밋 | 내용 |
+|---|---|
+| [`9b7ee2c`](https://github.com/fharenheit/devshell-termux/commit/9b7ee2c) | Fixed: 한/영 전환 후 앞에 입력한 한글이 터미널에 다시 입력되던 문제 수정(devshell-app `2d87b27` 이식). IME가 커밋한 텍스트를 입력 연결에 유지하고 바뀐 부분만 백스페이스+문자로 전송, IME를 거치지 않는 키 입력 시 조합 중 글자를 보내고 입력 재시작 |
+| [`c90c753`](https://github.com/fharenheit/devshell-termux/commit/c90c753) | Changed: 위 변경에 맞춰 패치 갱신(`0039`) |
+| (이 릴리즈 커밋) | Added: v0.118.3-ko.34 릴리즈 노트와 이력 |
+
 ## v0.118.3-ko.33 (2026-10-11)
 
 | 커밋 | 내용 |
