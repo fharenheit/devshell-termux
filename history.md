@@ -7,6 +7,14 @@
 - **Added**: 새 기능, **Changed**: 동작·문서·패치 변경, **Fixed**: 버그 수정
 - "패치 갱신" 커밋은 업스트림 파일을 고친 커밋 뒤에 `custom/update-patches.sh`로 `custom/patches/`를 다시 만든 것입니다.
 
+## v0.118.3-ko.35 (2026-10-20)
+
+| 커밋 | 내용 |
+|---|---|
+| [`eedd7ca`](https://github.com/fharenheit/devshell-termux/commit/eedd7ca) | Fixed: 입력 연결·키보드 교체 시 조합 중 글자를 먼저 보내고 이전 연결의 지연 입력(텍스트·Enter)을 차단, 물리 키보드 연결/해제 시 조합 글자를 보낸 뒤 입력 정리. `TerminalInputConnectionTest` 추가 |
+| [`fa2f706`](https://github.com/fharenheit/devshell-termux/commit/fa2f706) | Changed: 위 변경에 맞춰 패치 갱신(`0040`) |
+| (이 릴리즈 커밋) | Added: v0.118.3-ko.35 릴리즈 노트와 이력 |
+
 ## v0.118.3-ko.34 (2026-10-19)
 
 | 커밋 | 내용 |
