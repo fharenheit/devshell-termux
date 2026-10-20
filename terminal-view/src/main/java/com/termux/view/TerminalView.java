@@ -365,7 +365,12 @@ public final class TerminalView extends View {
         // keyboard on Android TV (see https://github.com/termux/termux-app/issues/221).
         outAttrs.imeOptions = EditorInfo.IME_FLAG_NO_FULLSCREEN;
 
-        mInputConnection = new TerminalInputConnection(this, mInputConnectionGeneration);
+        // Android can replace a connection before its delayed close/commit arrives. Only the
+        // newest connection may send text or update the composing preview. Finish a still-current
+        // composition first so switching keyboards does not lose the pending syllable.
+        if (mInputConnection != null) mInputConnection.finishComposingText();
+        mInputConnection = new TerminalInputConnection(this, ++mInputConnectionGeneration);
+        setComposingTextPreview("");
         return mInputConnection;
     }
 
@@ -497,9 +502,8 @@ public final class TerminalView extends View {
         // when it is connected or disconnected, since TermuxActivity handles keyboard config changes.
         if (newConfig.hardKeyboardHidden != mHardKeyboardHidden) {
             mHardKeyboardHidden = newConfig.hardKeyboardHidden;
-            setComposingTextPreview("");
-            InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-            if (imm != null) imm.restartInput(this);
+            if (mInputConnection != null) mInputConnection.finishComposingText();
+            discardComposingText();
         }
     }
 
@@ -761,6 +765,7 @@ public final class TerminalView extends View {
         } else if (event.isSystem() && (!mClient.shouldBackButtonBeMappedToEscape() || keyCode != KeyEvent.KEYCODE_BACK)) {
             return super.onKeyDown(keyCode, event);
         } else if (event.getAction() == KeyEvent.ACTION_MULTIPLE && keyCode == KeyEvent.KEYCODE_UNKNOWN) {
+            finishImeInput();
             mTermSession.write(event.getCharacters());
             return true;
         }

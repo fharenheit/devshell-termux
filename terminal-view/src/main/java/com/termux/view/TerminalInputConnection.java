@@ -29,6 +29,8 @@ final class TerminalInputConnection extends BaseInputConnection {
     /** The {@link TerminalView#mInputConnectionGeneration} this connection was created in. */
     private final int mGeneration;
 
+    private boolean mClosed;
+
     /** The committed text sent to the terminal, which is the editable text without the composing text. */
     private String mSent = "";
 
@@ -40,7 +42,7 @@ final class TerminalInputConnection extends BaseInputConnection {
 
     /** Whether text the IME sends should be dropped, since input was started again after this connection was created. */
     private boolean isDiscarded() {
-        if (mGeneration == mView.mInputConnectionGeneration) return false;
+        if (!mClosed && mGeneration == mView.mInputConnectionGeneration) return false;
         getEditable().clear();
         mSent = "";
         return true;
@@ -49,6 +51,13 @@ final class TerminalInputConnection extends BaseInputConnection {
     /** Whether the IME committed or is composing text since this connection was created, see {@link TerminalView#finishImeInput()}. */
     boolean hasText() {
         return !isDiscarded() && getEditable().length() > 0;
+    }
+
+    @Override
+    public void closeConnection() {
+        // Finish a still-current composition once, then reject any late calls on this connection.
+        super.closeConnection();
+        mClosed = true;
     }
 
     @Override
@@ -151,7 +160,10 @@ final class TerminalInputConnection extends BaseInputConnection {
             // A new line ends what the IME can edit, so start input again with an empty text.
             for (int i = 0; i < added.length(); i++) {
                 if (added.charAt(i) < ' ') {
-                    mView.post(mView::finishImeInput);
+                    mView.post(() -> {
+                        // A delayed reset belongs to this connection, not one created meanwhile.
+                        if (!isDiscarded()) mView.finishImeInput();
+                    });
                     break;
                 }
             }
