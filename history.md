@@ -7,6 +7,14 @@
 - **Added**: 새 기능, **Changed**: 동작·문서·패치 변경, **Fixed**: 버그 수정
 - "패치 갱신" 커밋은 업스트림 파일을 고친 커밋 뒤에 `custom/update-patches.sh`로 `custom/patches/`를 다시 만든 것입니다.
 
+## v0.118.3-ko.36 (2026-10-21)
+
+| 커밋 | 내용 |
+|---|---|
+| [`2df12e0`](https://github.com/fharenheit/devshell-termux/commit/2df12e0) | Fixed: 입력 재시작이 새 입력 연결을 만들지 못할 때(창 포커스 없는 세션 전환·키보드 설정 변경 등) 기존 연결을 버려 모든 IME 입력이 막히고 앱 전환으로도 복구되지 않던 문제 수정. 세대 번호는 새 연결 생성 시에만 올리고, 새 연결이 없으면 기존 연결의 텍스트만 잊음. 기기처럼 `restartInput()`이 새 연결을 만드는 Robolectric 섀도와 테스트 2개 추가 |
+| [`ac1e4fc`](https://github.com/fharenheit/devshell-termux/commit/ac1e4fc) | Changed: 위 변경에 맞춰 패치 갱신(`0041`) |
+| (이 릴리즈 커밋) | Added: v0.118.3-ko.36 릴리즈 노트와 이력 |
+
 ## v0.118.3-ko.35 (2026-10-20)
 
 | 커밋 | 내용 |
