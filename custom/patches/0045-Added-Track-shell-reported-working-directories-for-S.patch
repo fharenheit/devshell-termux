@@ -1,0 +1,100 @@
+From aeb99a5f873a866f8ea44bc63e0b473bed97a9f8 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?=EA=B9=80=EB=B3=91=EA=B3=A4?= <fharenheit@gmail.com>
+Date: Wed, 21 Oct 2026 23:05:18 +0900
+Subject: [PATCH] Added: Track shell-reported working directories for SFTP
+
+Discover Linux SSH login-shell directories through the remote PID and SFTP, with OSC 7 fallback and optional Bash/Zsh hooks. Keep session paths isolated and cover real shell and SFTP behavior in regression tests.
+---
+ .../com/termux/terminal/TerminalEmulator.java | 48 +++++++++++++++++++
+ 1 file changed, 48 insertions(+)
+
+diff --git a/terminal-emulator/src/main/java/com/termux/terminal/TerminalEmulator.java b/terminal-emulator/src/main/java/com/termux/terminal/TerminalEmulator.java
+index 8d7eaa8c..4daec0e1 100644
+--- a/terminal-emulator/src/main/java/com/termux/terminal/TerminalEmulator.java
++++ b/terminal-emulator/src/main/java/com/termux/terminal/TerminalEmulator.java
+@@ -2,6 +2,8 @@ package com.termux.terminal;
+ 
+ import android.util.Base64;
+ 
++import java.net.URI;
++import java.net.URISyntaxException;
+ import java.nio.charset.StandardCharsets;
+ import java.util.Arrays;
+ import java.util.Locale;
+@@ -132,6 +134,8 @@ public final class TerminalEmulator {
+ 
+ 
+     private String mTitle;
++    private String mCurrentWorkingDirectory;
++    private int mRemoteShellPid;
+     private final Stack<String> mTitleStack = new Stack<>();
+ 
+     /** The cursor position. Between (0,0) and (mRows-1, mColumns-1). */
+@@ -2069,6 +2073,21 @@ public final class TerminalEmulator {
+                     if (endOfInput) break;
+                 }
+                 break;
++            case 1337:
++                if (textParameter.startsWith("DevShellShellPid=")) {
++                    String pid = textParameter.substring("DevShellShellPid=".length());
++                    mRemoteShellPid = 0;
++                    try {
++                        if (pid.matches("[0-9]{1,10}")) mRemoteShellPid = Integer.parseInt(pid);
++                    } catch (NumberFormatException ignored) {
++                        // Reject overflow as well as shell syntax; the value is used in a proc path.
++                    }
++                    if (mRemoteShellPid == 0) mCurrentWorkingDirectory = null;
++                }
++                break;
++            case 7: // The shell's current directory, as a file URI.
++                setCurrentWorkingDirectory(textParameter);
++                break;
+             case 10: // Set foreground color.
+             case 11: // Set background color.
+             case 12: // Set cursor color.
+@@ -2524,6 +2543,7 @@ public final class TerminalEmulator {
+ 
+     /** Reset terminal state so user can interact with it regardless of present state. */
+     public void reset() {
++        mCurrentWorkingDirectory = null;
+         setCursorStyle();
+         mArgIndex = 0;
+         mContinueSequence = false;
+@@ -2564,6 +2584,34 @@ public final class TerminalEmulator {
+         return mTitle;
+     }
+ 
++    /** The directory most recently reported by this terminal's shell, or null if unknown. */
++    public String getCurrentWorkingDirectory() {
++        return mCurrentWorkingDirectory;
++    }
++
++    /** The remote login shell's process id, or zero until the SSH bootstrap reports it. */
++    public int getRemoteShellPid() {
++        return mRemoteShellPid;
++    }
++
++    private void setCurrentWorkingDirectory(String report) {
++        mCurrentWorkingDirectory = null;
++        try {
++            URI uri = new URI(report);
++            if (!"file".equalsIgnoreCase(uri.getScheme()) || uri.getRawQuery() != null || uri.getRawFragment() != null)
++                return;
++            // URI.getPath decodes percent escapes once and preserves literal '+'.
++            String path = uri.getPath();
++            if (path == null || !path.startsWith("/")) return;
++            for (int i = 0; i < path.length(); i++) {
++                if (Character.isISOControl(path.charAt(i))) return;
++            }
++            mCurrentWorkingDirectory = path;
++        } catch (URISyntaxException ignored) {
++            // An invalid report must not leave a stale directory attached to the tab.
++        }
++    }
++
+     /** Change the terminal session's title. */
+     private void setTitle(String newTitle) {
+         String oldTitle = mTitle;
+-- 
+2.43.0
+
