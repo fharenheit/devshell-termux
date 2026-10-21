@@ -7,6 +7,16 @@
 - **Added**: 새 기능, **Changed**: 동작·문서·패치 변경, **Fixed**: 버그 수정
 - "패치 갱신" 커밋은 업스트림 파일을 고친 커밋 뒤에 `custom/update-patches.sh`로 `custom/patches/`를 다시 만든 것입니다.
 
+## v0.118.3-ko.37 (2026-10-21)
+
+| 커밋 | 내용 |
+|---|---|
+| [`7d3b542`](https://github.com/fharenheit/devshell-termux/commit/7d3b542) | Reverted: ko.34~ko.36의 IME 변경(`9b7ee2c`, `eedd7ca`, `2df12e0`)을 되돌려 `TerminalView`와 포크 전용 파일을 `c0f03f7`(ko.33) 상태로 복원. 키를 누를 때마다 입력 연결을 재시작해 입력이 아예 안 되는 증상이 잦아졌기 때문 |
+| [`7059e64`](https://github.com/fharenheit/devshell-termux/commit/7059e64) | Changed: 위 변경에 맞춰 패치 갱신(`0042`) |
+| [`40341a5`](https://github.com/fharenheit/devshell-termux/commit/40341a5) | Fixed: 하드웨어 키보드에서 Enter·방향키·영어 글자 등 IME를 거치지 않는 키를 누르면 조합 중인 마지막 음절이 그 뒤에(다음 줄에) 입력되던 문제 수정. 키를 보내기 전에 조합 중 글자를 먼저 보내고 기억해 두었다가, IME가 커밋하는 글자는 보낸 것과의 차이만 전송. 입력 재시작 없음. `TerminalViewImeTest` 추가 |
+| [`3f3d3d4`](https://github.com/fharenheit/devshell-termux/commit/3f3d3d4) | Changed: 위 변경에 맞춰 패치 갱신(`0043`) |
+| (이 릴리즈 커밋) | Added: v0.118.3-ko.37 릴리즈 노트와 이력 |
+
 ## v0.118.3-ko.36 (2026-10-21)
 
 | 커밋 | 내용 |
