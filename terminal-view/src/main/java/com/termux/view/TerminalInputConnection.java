@@ -40,12 +40,29 @@ final class TerminalInputConnection extends BaseInputConnection {
         mGeneration = generation;
     }
 
-    /** Whether text the IME sends should be dropped, since input was started again after this connection was created. */
+    /** Whether text the IME sends should be dropped, since this connection was closed or replaced by a newer one. */
     private boolean isDiscarded() {
         if (!mClosed && mGeneration == mView.mInputConnectionGeneration) return false;
+        if (TerminalView.TERMINAL_VIEW_KEY_LOGGING_ENABLED) {
+            mView.mClient.logInfo(LOG_TAG, "IME: discarded (closed=" + mClosed + ", generation=" + mGeneration + "/" + mView.mInputConnectionGeneration + ")");
+        }
         getEditable().clear();
         mSent = "";
         return true;
+    }
+
+    /**
+     * Forget the text the IME committed or is composing, without sending anything, while keeping
+     * on accepting input: the text before the cursor is no longer the IME's, e.g. after other keys
+     * were sent or the session was switched, but the IME keeps using this connection.
+     */
+    void forgetText() {
+        if (TerminalView.TERMINAL_VIEW_KEY_LOGGING_ENABLED) mView.mClient.logInfo(LOG_TAG, "IME: forgetText()");
+        Editable content = getEditable();
+        removeComposingSpans(content);
+        content.clear();
+        mSent = "";
+        mView.setComposingTextPreview("");
     }
 
     /** Whether the IME committed or is composing text since this connection was created, see {@link TerminalView#finishImeInput()}. */

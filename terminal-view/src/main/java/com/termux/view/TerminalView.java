@@ -94,8 +94,8 @@ public final class TerminalView extends View {
     CharSequence mComposingText = "";
 
     /**
-     * Incremented to make the input connections created before it was incremented ignore text the
-     * IME still sends them, see {@link #discardComposingText()}.
+     * Incremented by {@link #onCreateInputConnection(EditorInfo)} to make the input connections
+     * created before ignore text the IME still sends them, see {@link #restartImeInput()}.
      */
     int mInputConnectionGeneration = 0;
 
@@ -471,6 +471,7 @@ public final class TerminalView extends View {
      * commit to it while finishing the old input.
      */
     void discardComposingText() {
+        if (mInputConnection != null) mInputConnection.forgetText();
         setComposingTextPreview("");
         restartImeInput();
     }
@@ -488,11 +489,25 @@ public final class TerminalView extends View {
         restartImeInput();
     }
 
-    /** Start input again, with the current input connection ignoring the text the IME may still send it. */
+    /**
+     * Start input again, so the IME forgets the text before the cursor. The new input connection
+     * {@link #onCreateInputConnection(EditorInfo)} then creates makes the current one ignore the
+     * text the IME may still send it.
+     * <p>
+     * {@link InputMethodManager#restartInput(View)} creates no new connection while this view is
+     * not the one the IME serves, e.g. while the window has no focus, and the IME then keeps using
+     * the current connection. It must not be discarded in that case, since all input the IME sends
+     * from then on would be dropped, which is not recovered from until a new connection is created.
+     * Its text is forgotten instead, which keeps input working.
+     */
     private void restartImeInput() {
-        mInputConnectionGeneration++;
+        TerminalInputConnection connection = mInputConnection;
         InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
         if (imm != null) imm.restartInput(this);
+        if (connection != null && mInputConnection == connection) {
+            if (TERMINAL_VIEW_KEY_LOGGING_ENABLED) mClient.logInfo(LOG_TAG, "restartInput() created no new input connection, keeping the current one");
+            connection.forgetText();
+        }
     }
 
     @Override
