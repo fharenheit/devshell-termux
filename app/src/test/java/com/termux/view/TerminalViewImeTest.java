@@ -2,6 +2,7 @@ package com.termux.view;
 
 import android.os.Build;
 import android.view.KeyEvent;
+import android.view.autofill.AutofillValue;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 
@@ -115,6 +116,202 @@ public class TerminalViewImeTest {
         connection.commitText("하", 1);
         Assert.assertEquals("안녕하", wire());
         Assert.assertEquals("", mView.mComposingText.toString());
+    }
+
+    @Test
+    public void testRecomposingCommittedHangulDoesNotRepeatThePreviousWord() throws Exception {
+        InputConnection connection = connect();
+        connection.commitText("안녕", 1);
+
+        // Korean IMEs can reopen the previous word after a language switch.
+        connection.setComposingRegion(0, 2);
+        connection.setComposingText("안녕하", 1);
+        connection.commitText("안녕하", 1);
+        Assert.assertEquals("안녕하", wire());
+
+        connection.setComposingRegion(0, 3);
+        connection.setComposingText("안녕하세요", 1);
+        connection.finishComposingText();
+        connection.finishComposingText();
+        Assert.assertEquals("안녕하세요", wire());
+    }
+
+    @Test
+    public void testRawEnglishKeysRemainInTheContextUsedForRecomposition() throws Exception {
+        InputConnection connection = connect();
+        connection.commitText("안", 1);
+        connection.setComposingText("녕", 1);
+        mView.inputCodePoint('a', false, false);
+        connection.commitText("녕", 1);
+        Assert.assertEquals("안녕a", wire());
+
+        connection.setComposingRegion(0, 3);
+        connection.setComposingText("안녕a하", 1);
+        connection.commitText("안녕a하", 1);
+        Assert.assertEquals("안녕a하", wire());
+    }
+
+    @Test
+    public void testBackspaceUpdatesTheContextBeforeRecomposition() throws Exception {
+        InputConnection connection = connect();
+        connection.commitText("안녕", 1);
+        connection.deleteSurroundingText(1, 0);
+        Assert.assertEquals("안녕" + DEL, wire());
+
+        connection.setComposingRegion(0, 1);
+        connection.setComposingText("안하", 1);
+        connection.commitText("안하", 1);
+        Assert.assertEquals("안녕" + DEL + "하", wire());
+    }
+
+    @Test
+    public void testDeletionBeforeCompositionReachesTextOutsideImeContext() throws Exception {
+        InputConnection connection = connect();
+        connection.commitText("a", 1);
+        connection.setComposingText("하", 1);
+        connection.deleteSurroundingText(2, 0);
+        Assert.assertEquals("a" + DEL + DEL, wire());
+        Assert.assertEquals("하", mView.mComposingText.toString());
+    }
+
+    @Test
+    public void testCodePointDeletionBeforeCompositionCountsSupplementaryCharactersOnce() throws Exception {
+        InputConnection connection = connect();
+        connection.commitText("\ud83d\ude00", 1);
+        connection.setComposingText("하", 1);
+        connection.deleteSurroundingTextInCodePoints(2, 0);
+        Assert.assertEquals("\ud83d\ude00" + DEL + DEL, wire());
+        Assert.assertEquals("하", mView.mComposingText.toString());
+    }
+
+    @Test
+    public void testEnterClearsThePreviousLineFromImeContext() throws Exception {
+        InputConnection connection = connect();
+        connection.commitText("이전", 1);
+        connection.setComposingText("줄", 1);
+        pressKey(KeyEvent.KEYCODE_ENTER);
+        connection.commitText("줄", 1);
+        Assert.assertEquals("이전줄\r", wire());
+        Assert.assertEquals("", connection.getTextBeforeCursor(100, 0).toString());
+
+        connection.commitText("다음", 1);
+        connection.setComposingRegion(0, 2);
+        connection.setComposingText("다음줄", 1);
+        connection.commitText("다음줄", 1);
+        Assert.assertEquals("이전줄\r다음줄", wire());
+    }
+
+    @Test
+    public void testSoftEnterClearsThePreviousLineFromImeContext() throws Exception {
+        InputConnection connection = connect();
+        connection.commitText("이전\n", 1);
+        Assert.assertEquals("이전\r", wire());
+        Assert.assertEquals("", connection.getTextBeforeCursor(100, 0).toString());
+        connection.commitText("다음", 1);
+        Assert.assertEquals("이전\r다음", wire());
+    }
+
+    @Test
+    public void testSoftEnterInTheMiddleDoesNotEraseTheRestOfTheLine() throws Exception {
+        InputConnection connection = connect();
+        connection.commitText("앞뒤", 1);
+        connection.setSelection(1, 1);
+        connection.commitText("\n", 1);
+        Assert.assertEquals("앞뒤\r", wire());
+        Assert.assertEquals("", connection.getTextBeforeCursor(100, 0).toString());
+    }
+
+    @Test
+    public void testSoftEnterAfterLeftDoesNotDeleteTheFlushedComposition() throws Exception {
+        InputConnection connection = connect();
+        connection.commitText("앞", 1);
+        connection.setComposingText("뒤", 1);
+        pressKey(KeyEvent.KEYCODE_DPAD_LEFT);
+        connection.commitText("\n", 1);
+        Assert.assertEquals("앞뒤\u001b[D\r", wire());
+    }
+
+    @Test
+    public void testCommitEndingInEnterKeepsTextAfterTheComposingRegion() throws Exception {
+        InputConnection connection = connect();
+        connection.commitText("앞뒤", 1);
+        connection.setComposingRegion(0, 1);
+        connection.commitText("앞\n", 1);
+        Assert.assertEquals("앞뒤\r", wire());
+    }
+
+    @Test
+    public void testMultilineCommitInTheMiddleKeepsEachLineBeforeItsEnter() throws Exception {
+        InputConnection connection = connect();
+        connection.commitText("앞뒤", 1);
+        connection.setSelection(1, 1);
+        connection.commitText("중간\n다음\n끝", 1);
+        Assert.assertEquals("앞뒤" + DEL + "중간뒤\r다음\r끝", wire());
+        Assert.assertEquals("끝", connection.getTextBeforeCursor(100, 0).toString());
+    }
+
+    @Test
+    public void testSoftCarriageReturnFlushesTheCompositionBeforeEnter() throws Exception {
+        InputConnection connection = connect();
+        connection.commitText("앞", 1);
+        connection.setComposingText("뒤", 1);
+        connection.commitText("\r", 1);
+        Assert.assertEquals("앞뒤\r", wire());
+    }
+
+    @Test
+    public void testHardwareEnterAfterLeftKeepsTheWholeLine() throws Exception {
+        InputConnection connection = connect();
+        connection.commitText("앞", 1);
+        connection.setComposingText("뒤", 1);
+        pressKey(KeyEvent.KEYCODE_DPAD_LEFT);
+        pressKey(KeyEvent.KEYCODE_ENTER);
+        connection.commitText("뒤", 1);
+        Assert.assertEquals("앞뒤\u001b[D\r", wire());
+    }
+
+    @Test
+    public void testSwitchingSessionsDiscardsCommittedContextAsWell() throws Exception {
+        InputConnection oldConnection = connect();
+        oldConnection.commitText("이전", 1);
+        attach(newSession());
+        oldConnection.setComposingRegion(0, 2);
+        oldConnection.commitText("이전줄", 1);
+        Assert.assertEquals("", wire());
+        connect().commitText("새", 1);
+        Assert.assertEquals("새", wire());
+    }
+
+    @Test
+    public void testAutofillDoesNotLeaveContextThatCanEraseUntrackedInput() throws Exception {
+        InputConnection connection = connect();
+        connection.commitText("abc", 1);
+        mView.autofill(AutofillValue.forText("XYZ"));
+        connection.setComposingRegion(0, 3);
+        connection.commitText("abd", 1);
+        Assert.assertEquals("abcXYZabd", wire());
+    }
+
+    @Test
+    public void testClientConsumedKeyEndsThePreviousImeContext() throws Exception {
+        InputConnection connection = connect();
+        connection.commitText("abc", 1);
+        mView.mClient = (TerminalViewClient) Proxy.newProxyInstance(
+            TerminalViewClient.class.getClassLoader(), new Class<?>[]{TerminalViewClient.class}, (proxy, method, args) -> {
+                if (method.getName().equals("onCodePoint") && (int) args[0] == 'h') {
+                    // The virtual Fn+h shortcut writes directly instead of returning a character.
+                    mView.mTermSession.writeCodePoint(false, '~');
+                    return true;
+                }
+                if (method.getReturnType() == boolean.class) return false;
+                if (method.getReturnType() == float.class) return 1f;
+                if (method.getReturnType() == int.class) return 0;
+                return null;
+            });
+        mView.inputCodePoint('h', false, false);
+        connection.setComposingRegion(0, 3);
+        connection.commitText("abd", 1);
+        Assert.assertEquals("abc~abd", wire());
     }
 
     @Test

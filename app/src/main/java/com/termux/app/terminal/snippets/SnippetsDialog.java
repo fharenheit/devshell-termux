@@ -235,6 +235,7 @@ public final class SnippetsDialog {
             Toast.makeText(activity, R.string.msg_snippet_no_session, Toast.LENGTH_SHORT).show();
             return;
         }
+        activity.getTerminalView().prepareForExternalInput();
         session.write(snippet.getInput());
     }
 

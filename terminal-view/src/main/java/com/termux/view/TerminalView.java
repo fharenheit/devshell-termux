@@ -15,6 +15,7 @@ import android.os.Looper;
 import android.os.SystemClock;
 import android.text.Editable;
 import android.text.InputType;
+import android.text.Selection;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.ActionMode;
@@ -95,13 +96,8 @@ public final class TerminalView extends View {
      */
     CharSequence mComposingText = "";
 
-    /**
-     * The text the IME was composing that {@link #flushComposingText()} already sent to the
-     * terminal ahead of a key not going through the IME, and that the IME has not committed yet.
-     * What the IME then commits or composes is sent as the difference from it, so it is not sent
-     * twice.
-     */
-    private String mComposingTextSent = "";
+    /** The editable context shared with the IME, including text already sent to the terminal. */
+    private TerminalInputConnection mInputConnection;
 
     /**
      * Incremented to make the input connections created before it was incremented ignore text the
@@ -312,7 +308,7 @@ public final class TerminalView extends View {
         mTopRow = 0;
 
         // Text being composed for the previous session is discarded and not sent to the new one.
-        if (mComposingText.length() > 0 || mComposingTextSent.length() > 0) discardComposingText();
+        if (mInputConnection != null || mComposingText.length() > 0) discardComposingText();
 
         mTermSession = session;
         mEmulator = null;
@@ -371,102 +367,218 @@ public final class TerminalView extends View {
         // keyboard on Android TV (see https://github.com/termux/termux-app/issues/221).
         outAttrs.imeOptions = EditorInfo.IME_FLAG_NO_FULLSCREEN;
 
-        final int inputConnectionGeneration = mInputConnectionGeneration;
-
-        return new BaseInputConnection(this, true) {
-
-            /** Whether text the IME sends should be dropped, since it was discarded by {@link #discardComposingText()}. */
-            boolean isDiscarded() {
-                if (inputConnectionGeneration == mInputConnectionGeneration) return false;
-                getEditable().clear();
-                return true;
-            }
-
-            @Override
-            public boolean finishComposingText() {
-                if (TERMINAL_VIEW_KEY_LOGGING_ENABLED) mClient.logInfo(LOG_TAG, "IME: finishComposingText()");
-                if (isDiscarded()) return true;
-                super.finishComposingText();
-                setComposingTextPreview("");
-
-                sendCommittedText(getEditable());
-                getEditable().clear();
-                return true;
-            }
-
-            @Override
-            public boolean commitText(CharSequence text, int newCursorPosition) {
-                if (TERMINAL_VIEW_KEY_LOGGING_ENABLED) {
-                    mClient.logInfo(LOG_TAG, "IME: commitText(\"" + text + "\", " + newCursorPosition + ")");
-                }
-                if (isDiscarded()) return true;
-                super.commitText(text, newCursorPosition);
-                setComposingTextPreview("");
-
-                if (mEmulator == null) return true;
-
-                Editable content = getEditable();
-                sendCommittedText(content);
-                content.clear();
-                return true;
-            }
-
-            @Override
-            public boolean setComposingText(CharSequence text, int newCursorPosition) {
-                if (TERMINAL_VIEW_KEY_LOGGING_ENABLED) {
-                    mClient.logInfo(LOG_TAG, "IME: setComposingText(\"" + text + "\", " + newCursorPosition + ")");
-                }
-                if (isDiscarded()) return true;
-                super.setComposingText(text, newCursorPosition);
-                if (mComposingTextSent.length() > 0) {
-                    // The composing text was already sent ahead of a key, so the terminal is kept
-                    // up to date with it instead of drawing it over the cursor.
-                    sendTextChange(text);
-                } else {
-                    setComposingTextPreview(text);
-                }
-                return true;
-            }
-
-            @Override
-            public boolean deleteSurroundingText(int leftLength, int rightLength) {
-                if (TERMINAL_VIEW_KEY_LOGGING_ENABLED) {
-                    mClient.logInfo(LOG_TAG, "IME: deleteSurroundingText(" + leftLength + ", " + rightLength + ")");
-                }
-                // The stock Samsung keyboard with 'Auto check spelling' enabled sends leftLength > 1.
-                KeyEvent deleteKey = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DEL);
-                for (int i = 0; i < leftLength; i++) sendKeyEvent(deleteKey);
-                return super.deleteSurroundingText(leftLength, rightLength);
-            }
-
-        };
-    }
-
-    /** Send text the IME committed, less the part of it {@link #flushComposingText()} already sent. */
-    void sendCommittedText(CharSequence text) {
-        if (mComposingTextSent.length() > 0) {
-            sendTextChange(text);
-            mComposingTextSent = "";
-        } else {
-            sendImeText(text);
-        }
+        if (mInputConnection != null) mInputConnection.finishComposingText();
+        mInputConnection = new TerminalInputConnection(++mInputConnectionGeneration);
+        return mInputConnection;
     }
 
     /**
-     * Send the backspaces and text that turn {@link #mComposingTextSent} into {@code text}, which
-     * is the composing text now, and remember {@code text} as sent.
+     * Keep the text the IME can recompose, and send only its changes. Clearing committed text here
+     * makes a language switch that reopens a previous word insert the whole word again.
      */
-    private void sendTextChange(CharSequence text) {
-        String newText = text.toString();
-        int common = commonPrefixLength(mComposingTextSent, newText);
-        int backspaces = Character.codePointCount(mComposingTextSent, common, mComposingTextSent.length());
-        if (backspaces > 0 && mTermSession != null) {
-            stopTextSelectionMode();
-            String backspace = KeyHandler.getCode(KeyEvent.KEYCODE_DEL, 0, false, false);
-            for (int i = 0; i < backspaces; i++) mTermSession.write(backspace);
+    private final class TerminalInputConnection extends BaseInputConnection {
+        private final int mGeneration;
+        private String mSentText = "";
+        private boolean mCompositionSent;
+        private boolean mForgetAfterCommit;
+
+        TerminalInputConnection(int generation) {
+            super(TerminalView.this, true);
+            mGeneration = generation;
         }
+
+        private boolean isDiscarded() {
+            if (mGeneration == mInputConnectionGeneration) return false;
+            forgetText();
+            return true;
+        }
+
+        private void forgetText() {
+            Editable content = getEditable();
+            content.clear();
+            removeComposingSpans(content);
+            Selection.setSelection(content, 0);
+            mSentText = "";
+            mCompositionSent = false;
+            mForgetAfterCommit = false;
+        }
+
+        private void sendChanges(String text) {
+            if (mEmulator == null) return;
+            sendTextChange(mSentText, text);
+            mSentText = text;
+        }
+
+        private void updateComposingText() {
+            Editable content = getEditable();
+            int start = getComposingSpanStart(content);
+            int end = getComposingSpanEnd(content);
+            if (start < 0 || end <= start) {
+                sendChanges(content.toString());
+                setComposingTextPreview("");
+                mCompositionSent = false;
+                return;
+            }
+            if (mCompositionSent) {
+                sendChanges(content.toString());
+                setComposingTextPreview("");
+            } else {
+                sendChanges(content.subSequence(0, start).toString() + content.subSequence(end, content.length()));
+                setComposingTextPreview(content.subSequence(start, end));
+            }
+        }
+
+        @Override
+        public boolean finishComposingText() {
+            if (TERMINAL_VIEW_KEY_LOGGING_ENABLED) mClient.logInfo(LOG_TAG, "IME: finishComposingText()");
+            if (isDiscarded()) return true;
+            super.finishComposingText();
+            updateComposingText();
+            if (mForgetAfterCommit) forgetText();
+            return true;
+        }
+
+        @Override
+        public boolean commitText(CharSequence text, int newCursorPosition) {
+            if (TERMINAL_VIEW_KEY_LOGGING_ENABLED)
+                mClient.logInfo(LOG_TAG, "IME: commitText(\"" + text + "\", " + newCursorPosition + ")");
+            if (isDiscarded()) return true;
+
+            // Enter is a terminal action, not an edit inside the IME's retained line. Diffing a
+            // newline inserted in the middle would erase the suffix, submit only the prefix,
+            // then send the suffix as input for the next line. Finish each text segment first.
+            int segmentStart = 0;
+            for (int i = 0; i < text.length(); i++) {
+                char c = text.charAt(i);
+                if (c != '\n' && c != '\r') continue;
+                if (i > segmentStart) commitText(text.subSequence(segmentStart, i), 1);
+                flush();
+                sendImeText(text.subSequence(i, i + 1));
+                forgetText();
+                segmentStart = i + 1;
+            }
+            if (segmentStart > 0) {
+                if (segmentStart < text.length()) commitText(text.subSequence(segmentStart, text.length()), newCursorPosition);
+                return true;
+            }
+
+            boolean hasTrailingKeyText = mCompositionSent && getComposingSpanEnd(getEditable()) < getEditable().length();
+            super.commitText(text, newCursorPosition);
+            if (hasTrailingKeyText) Selection.setSelection(getEditable(), getEditable().length());
+            updateComposingText();
+            // A new line or control sequence ends the terminal context the IME can edit.
+            if (mForgetAfterCommit || containsControlCharacter(text)) forgetText();
+            return true;
+        }
+
+        @Override
+        public boolean setComposingText(CharSequence text, int newCursorPosition) {
+            if (TERMINAL_VIEW_KEY_LOGGING_ENABLED)
+                mClient.logInfo(LOG_TAG, "IME: setComposingText(\"" + text + "\", " + newCursorPosition + ")");
+            if (isDiscarded()) return true;
+            super.setComposingText(text, newCursorPosition);
+            updateComposingText();
+            return true;
+        }
+
+        @Override
+        public boolean setComposingRegion(int start, int end) {
+            if (isDiscarded()) return true;
+            super.setComposingRegion(start, end);
+            // A region reopened inside committed text is already visible in the terminal.
+            int composingStart = getComposingSpanStart(getEditable());
+            mCompositionSent = composingStart >= 0 && composingStart < mSentText.length();
+            updateComposingText();
+            return true;
+        }
+
+        @Override
+        public boolean deleteSurroundingText(int beforeLength, int afterLength) {
+            if (isDiscarded()) return true;
+            int beyond = Math.max(0, beforeLength - deletionStart());
+            super.deleteSurroundingText(beforeLength, afterLength);
+            updateComposingText();
+            sendBackspaces(beyond);
+            return true;
+        }
+
+        @Override
+        public boolean deleteSurroundingTextInCodePoints(int beforeLength, int afterLength) {
+            if (isDiscarded()) return true;
+            Editable content = getEditable();
+            int beyond = Math.max(0, beforeLength - Character.codePointCount(content, 0, deletionStart()));
+            super.deleteSurroundingTextInCodePoints(beforeLength, afterLength);
+            updateComposingText();
+            sendBackspaces(beyond);
+            return true;
+        }
+
+        /** Android deletes before the selection and composing region, excluding both. */
+        private int deletionStart() {
+            Editable content = getEditable();
+            int start = Math.max(0, Math.min(Selection.getSelectionStart(content), Selection.getSelectionEnd(content)));
+            int composingStart = getComposingSpanStart(content);
+            if (composingStart >= 0) start = Math.min(start, composingStart);
+            return start;
+        }
+
+        void flush() {
+            if (isDiscarded()) return;
+            if (getComposingSpanStart(getEditable()) >= 0) mCompositionSent = true;
+            sendChanges(getEditable().toString());
+            setComposingTextPreview("");
+        }
+
+        /** Mirror a printable key that the IME passed through, including any pending composition. */
+        void recordCodePoint(int codePoint) {
+            if (isDiscarded()) return;
+            String text = new String(Character.toChars(codePoint));
+            Editable content = getEditable();
+            content.append(text);
+            Selection.setSelection(content, content.length());
+            mSentText += text;
+        }
+
+        /** Forget context across terminal navigation, retaining only a syllable awaiting its late commit. */
+        void endTerminalContext() {
+            if (isDiscarded()) return;
+            Editable content = getEditable();
+            int start = getComposingSpanStart(content);
+            int end = getComposingSpanEnd(content);
+            if (start >= 0 && end > start) {
+                String composing = content.subSequence(start, end).toString();
+                content.delete(end, content.length());
+                content.delete(0, start);
+                Selection.setSelection(content, content.length());
+                mSentText = composing;
+                mForgetAfterCommit = true;
+            } else {
+                forgetText();
+            }
+        }
+    }
+
+    private static boolean containsControlCharacter(CharSequence text) {
+        for (int i = 0; i < text.length(); i++) {
+            char c = text.charAt(i);
+            if (c < 32 || c == 127) return true;
+        }
+        return false;
+    }
+
+    private void sendBackspaces(int count) {
+        if (count <= 0 || mTermSession == null) return;
+        stopTextSelectionMode();
+        String backspace = KeyHandler.getCode(KeyEvent.KEYCODE_DEL, 0, false, false);
+        for (int i = 0; i < count; i++) mTermSession.write(backspace);
+    }
+
+    /** Send only the difference between the editable context and what the terminal already received. */
+    private void sendTextChange(String previousText, CharSequence text) {
+        String newText = text.toString();
+        int common = commonPrefixLength(previousText, newText);
+        sendBackspaces(Character.codePointCount(previousText, common, previousText.length()));
         sendImeText(newText.substring(common));
-        mComposingTextSent = newText;
     }
 
     /** The length of the common start of {@code a} and {@code b}, not ending between the two chars of a surrogate pair. */
@@ -478,17 +590,15 @@ public final class TerminalView extends View {
         return length;
     }
 
-    /**
-     * Send the text the IME is composing to the terminal before a key that does not go through the
-     * IME, e.g. Enter on a hardware keyboard: IMEs commit the last syllable only after passing such
-     * a key on, which put it after the new line. The IME keeps composing it, so what it commits is
-     * sent as the difference from the text sent here, see {@link #mComposingTextSent}.
-     */
+    /** Send a pending syllable before a key that bypasses the IME, without restarting input. */
     void flushComposingText() {
-        if (mComposingText.length() == 0) return;
-        String text = mComposingText.toString();
-        setComposingTextPreview("");
-        sendTextChange(text);
+        if (mInputConnection != null) mInputConnection.flush();
+    }
+
+    /** End the IME's editable context before pasting or writing input through another source. */
+    public void prepareForExternalInput() {
+        flushComposingText();
+        if (mInputConnection != null) mInputConnection.endTerminalContext();
     }
 
     /** Send text from the IME to the terminal, code point by code point. */
@@ -646,7 +756,7 @@ public final class TerminalView extends View {
      */
     void discardComposingText() {
         setComposingTextPreview("");
-        mComposingTextSent = "";
+        if (mInputConnection != null) mInputConnection.forgetText();
         mInputConnectionGeneration++;
         InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
         if (imm != null) imm.restartInput(this);
@@ -765,7 +875,10 @@ public final class TerminalView extends View {
                     ClipData.Item clipItem = clipData.getItemAt(0);
                     if (clipItem != null) {
                         CharSequence text = clipItem.coerceToText(getContext());
-                        if (!TextUtils.isEmpty(text)) mEmulator.paste(text.toString());
+                        if (!TextUtils.isEmpty(text)) {
+                            prepareForExternalInput();
+                            mEmulator.paste(text.toString());
+                        }
                     }
                 }
             } else if (mEmulator.isMouseTrackingActive()) { // BUTTON_PRIMARY.
@@ -924,6 +1037,7 @@ public final class TerminalView extends View {
             return super.onKeyDown(keyCode, event);
         } else if (event.getAction() == KeyEvent.ACTION_MULTIPLE && keyCode == KeyEvent.KEYCODE_UNKNOWN) {
             flushComposingText();
+            if (mInputConnection != null) mInputConnection.endTerminalContext();
             mTermSession.write(event.getCharacters());
             return true;
         }
@@ -1010,7 +1124,10 @@ public final class TerminalView extends View {
 
         if (!fromIme) flushComposingText();
 
-        if (mClient.onCodePoint(codePoint, controlDown, mTermSession)) return;
+        if (mClient.onCodePoint(codePoint, controlDown, mTermSession)) {
+            if (!fromIme && mInputConnection != null) mInputConnection.endTerminalContext();
+            return;
+        }
 
         if (controlDown) {
             if (codePoint >= 'a' && codePoint <= 'z') {
@@ -1054,6 +1171,13 @@ public final class TerminalView extends View {
 
             // If left alt, send escape before the code point to make e.g. Alt+B and Alt+F work in readline:
             mTermSession.writeCodePoint(altDown, codePoint);
+            if (!fromIme && mInputConnection != null) {
+                if (!controlDown && !altDown && codePoint >= 32 && codePoint != 127) {
+                    mInputConnection.recordCodePoint(codePoint);
+                } else {
+                    mInputConnection.endTerminalContext();
+                }
+            }
         }
     }
 
@@ -1070,6 +1194,7 @@ public final class TerminalView extends View {
         String code = KeyHandler.getCode(keyCode, keyMod, term.isCursorKeysApplicationMode(), term.isKeypadApplicationMode());
         if (code == null) return false;
         flushComposingText();
+        if (mInputConnection != null) mInputConnection.endTerminalContext();
         mTermSession.write(code);
         return true;
     }
@@ -1241,6 +1366,7 @@ public final class TerminalView extends View {
     @Override
     public void autofill(AutofillValue value) {
         if (value.isText()) {
+            prepareForExternalInput();
             mTermSession.write(value.getTextValue().toString());
         }
 

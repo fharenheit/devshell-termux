@@ -158,6 +158,7 @@ public final class ClipboardHistory {
         TerminalView terminalView = activity.getTerminalView();
         TerminalSession session = activity.getCurrentSession();
         if (session == null || !session.isRunning() || terminalView.mEmulator == null) return;
+        terminalView.prepareForExternalInput();
         terminalView.mEmulator.paste(text);
         // Pasting a text moves it up, like copying it again would.
         add(text);

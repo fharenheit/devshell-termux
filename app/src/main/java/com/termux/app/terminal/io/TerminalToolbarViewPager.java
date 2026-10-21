@@ -70,6 +70,7 @@ public class TerminalToolbarViewPager {
                         if (session.isRunning()) {
                             String textToSend = editText.getText().toString();
                             if (textToSend.length() == 0) textToSend = "\r";
+                            mActivity.getTerminalView().prepareForExternalInput();
                             session.write(textToSend);
                         } else {
                             mActivity.getTermuxTerminalSessionClient().removeFinishedSession(session);

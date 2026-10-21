@@ -811,8 +811,10 @@ public class TermuxTerminalViewClient extends TermuxTerminalViewClientBase {
         if (!session.isRunning()) return;
 
         String text = ShareUtils.getTextStringFromClipboardIfSet(mActivity, true);
-        if (text != null)
+        if (text != null) {
+            mActivity.getTerminalView().prepareForExternalInput();
             session.getEmulator().paste(text);
+        }
     }
 
 }
