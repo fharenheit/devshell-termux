@@ -27,7 +27,7 @@ Claude-Session: https://claude.ai/code/session_01GLNsTPnn2xKUQ4uFcevT6G
  3 files changed, 9 insertions(+), 1 deletion(-)
 
 diff --git a/app/src/main/java/com/termux/app/terminal/io/TermuxTerminalExtraKeys.java b/app/src/main/java/com/termux/app/terminal/io/TermuxTerminalExtraKeys.java
-index 56ccbf9..b120256 100644
+index 56ccbf97..b1202560 100644
 --- a/app/src/main/java/com/termux/app/terminal/io/TermuxTerminalExtraKeys.java
 +++ b/app/src/main/java/com/termux/app/terminal/io/TermuxTerminalExtraKeys.java
 @@ -9,6 +9,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
@@ -51,7 +51,7 @@ index 56ccbf9..b120256 100644
              if (mTermuxTerminalViewClient != null)
                  SnippetsDialog.show(mTermuxTerminalViewClient.getActivity());
 diff --git a/termux-shared/src/main/java/com/termux/shared/settings/properties/TermuxPropertyConstants.java b/termux-shared/src/main/java/com/termux/shared/settings/properties/TermuxPropertyConstants.java
-index 56bb03c..09a77bf 100644
+index 56bb03c1..09a77bfc 100644
 --- a/termux-shared/src/main/java/com/termux/shared/settings/properties/TermuxPropertyConstants.java
 +++ b/termux-shared/src/main/java/com/termux/shared/settings/properties/TermuxPropertyConstants.java
 @@ -282,7 +282,7 @@ public final class TermuxPropertyConstants {
@@ -64,7 +64,7 @@ index 56bb03c..09a77bf 100644
      /** Defines the key for extra keys style */
      public static final String KEY_EXTRA_KEYS_STYLE =  "extra-keys-style"; // Default: "extra-keys-style"
 diff --git a/termux-shared/src/main/java/com/termux/shared/terminal/io/extrakeys/ExtraKeysConstants.java b/termux-shared/src/main/java/com/termux/shared/terminal/io/extrakeys/ExtraKeysConstants.java
-index ffc431f..c2ab7e0 100644
+index ffc431f5..c2ab7e0a 100644
 --- a/termux-shared/src/main/java/com/termux/shared/terminal/io/extrakeys/ExtraKeysConstants.java
 +++ b/termux-shared/src/main/java/com/termux/shared/terminal/io/extrakeys/ExtraKeysConstants.java
 @@ -127,6 +127,8 @@ public class ExtraKeysConstants {

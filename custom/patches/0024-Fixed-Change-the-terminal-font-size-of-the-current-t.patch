@@ -16,7 +16,7 @@ Claude-Session: https://claude.ai/code/session_01GLNsTPnn2xKUQ4uFcevT6G
  1 file changed, 35 insertions(+), 8 deletions(-)
 
 diff --git a/app/src/main/java/com/termux/app/terminal/TermuxTerminalViewClient.java b/app/src/main/java/com/termux/app/terminal/TermuxTerminalViewClient.java
-index c32eb61..1f4fb37 100644
+index c32eb618..1f4fb37e 100644
 --- a/app/src/main/java/com/termux/app/terminal/TermuxTerminalViewClient.java
 +++ b/app/src/main/java/com/termux/app/terminal/TermuxTerminalViewClient.java
 @@ -47,6 +47,7 @@ import com.termux.terminal.KeyHandler;

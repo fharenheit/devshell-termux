@@ -24,7 +24,7 @@ Claude-Session: https://claude.ai/code/session_01GLNsTPnn2xKUQ4uFcevT6G
  3 files changed, 13 insertions(+)
 
 diff --git a/app/src/main/java/com/termux/app/fragments/settings/termux/TerminalViewPreferencesFragment.java b/app/src/main/java/com/termux/app/fragments/settings/termux/TerminalViewPreferencesFragment.java
-index ed10d18..cb39fa1 100644
+index ed10d18a..cb39fa1b 100644
 --- a/app/src/main/java/com/termux/app/fragments/settings/termux/TerminalViewPreferencesFragment.java
 +++ b/app/src/main/java/com/termux/app/fragments/settings/termux/TerminalViewPreferencesFragment.java
 @@ -9,6 +9,7 @@ import androidx.preference.PreferenceFragmentCompat;
@@ -46,7 +46,7 @@ index ed10d18..cb39fa1 100644
  
  }
 diff --git a/app/src/main/java/com/termux/app/terminal/TermuxTerminalSessionClient.java b/app/src/main/java/com/termux/app/terminal/TermuxTerminalSessionClient.java
-index f56de6a..48bd9b5 100644
+index f56de6ae..48bd9b52 100644
 --- a/app/src/main/java/com/termux/app/terminal/TermuxTerminalSessionClient.java
 +++ b/app/src/main/java/com/termux/app/terminal/TermuxTerminalSessionClient.java
 @@ -17,6 +17,7 @@ import com.termux.shared.shell.TermuxSession;
@@ -69,7 +69,7 @@ index f56de6a..48bd9b5 100644
          // Get the session stored in shared preferences stored by {@link #onStop} if its valid,
          // otherwise get the last session currently running.
 diff --git a/app/src/main/res/xml/termux_terminal_view_preferences.xml b/app/src/main/res/xml/termux_terminal_view_preferences.xml
-index 3f66863..cf56f81 100644
+index 3f668633..cf56f816 100644
 --- a/app/src/main/res/xml/termux_terminal_view_preferences.xml
 +++ b/app/src/main/res/xml/termux_terminal_view_preferences.xml
 @@ -10,6 +10,10 @@

@@ -18,7 +18,7 @@ Claude-Session: https://claude.ai/code/session_01GLNsTPnn2xKUQ4uFcevT6G
  4 files changed, 5 insertions(+), 5 deletions(-)
 
 diff --git a/.github/workflows/attach_debug_apks_to_release.yml b/.github/workflows/attach_debug_apks_to_release.yml
-index abb57a1..f1935bb 100644
+index abb57a1d..f1935bb7 100644
 --- a/.github/workflows/attach_debug_apks_to_release.yml
 +++ b/.github/workflows/attach_debug_apks_to_release.yml
 @@ -35,7 +35,7 @@ jobs:
@@ -31,7 +31,7 @@ index abb57a1..f1935bb 100644
            echo "Building APKs for '$RELEASE_VERSION_NAME' release"
            export TERMUX_APK_VERSION_TAG="$APK_VERSION_TAG" # Used by app/build.gradle
 diff --git a/.github/workflows/debug_build.yml b/.github/workflows/debug_build.yml
-index a4906e1..4d53c37 100644
+index a4906e1d..4d53c374 100644
 --- a/.github/workflows/debug_build.yml
 +++ b/.github/workflows/debug_build.yml
 @@ -32,7 +32,7 @@ jobs:
@@ -44,7 +44,7 @@ index a4906e1..4d53c37 100644
            # Used by attachment steps later
            echo "APK_DIR_PATH=$APK_DIR_PATH" >> $GITHUB_ENV
 diff --git a/README.md b/README.md
-index 67c7ab1..f765c09 100644
+index 67c7ab11..f765c095 100644
 --- a/README.md
 +++ b/README.md
 @@ -4,7 +4,7 @@
@@ -57,7 +57,7 @@ index 67c7ab1..f765c09 100644
  > - 입력: 블루투스·하드웨어 키보드로 한국어·일본어·중국어 등 조합 입력, 키캡 모양 하단 키, 특수 키 패널(Ctrl·Fn·tmux·vim 키), 키보드 단축키
  > - 화면: 앱 언어 선택(한국어, English, 日本語, 中文), 글꼴 목록과 미리보기, 탭별 글자 크기, 출력에서 찾기, URL 열기
 diff --git a/app/build.gradle b/app/build.gradle
-index 386c568..cf2f2d5 100644
+index 386c5682..cf2f2d54 100644
 --- a/app/build.gradle
 +++ b/app/build.gradle
 @@ -114,10 +114,10 @@ android {

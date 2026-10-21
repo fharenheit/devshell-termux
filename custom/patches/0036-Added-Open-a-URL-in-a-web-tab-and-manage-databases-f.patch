@@ -13,7 +13,7 @@ below "SSH" that opens the saved-connection manager, like SSH hosts.
  1 file changed, 9 insertions(+), 1 deletion(-)
 
 diff --git a/app/src/main/java/com/termux/app/TermuxActivity.java b/app/src/main/java/com/termux/app/TermuxActivity.java
-index 204ef14..32df2df 100644
+index 204ef148..32df2df9 100644
 --- a/app/src/main/java/com/termux/app/TermuxActivity.java
 +++ b/app/src/main/java/com/termux/app/TermuxActivity.java
 @@ -189,6 +189,7 @@ public final class TermuxActivity extends Activity implements ServiceConnection

@@ -24,7 +24,7 @@ Claude-Session: https://claude.ai/code/session_01GLNsTPnn2xKUQ4uFcevT6G
  1 file changed, 8 insertions(+)
 
 diff --git a/app/build.gradle b/app/build.gradle
-index cf2f2d5..333cef3 100644
+index cf2f2d54..333cef3b 100644
 --- a/app/build.gradle
 +++ b/app/build.gradle
 @@ -125,6 +125,14 @@ android {

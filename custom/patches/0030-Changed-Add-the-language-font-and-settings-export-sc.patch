@@ -11,7 +11,7 @@ Claude-Session: https://claude.ai/code/session_01GLNsTPnn2xKUQ4uFcevT6G
  1 file changed, 2 insertions(+)
 
 diff --git a/README.md b/README.md
-index fa0d993..9b101dd 100644
+index fa0d993a..9b101dd0 100644
 --- a/README.md
 +++ b/README.md
 @@ -22,6 +22,8 @@

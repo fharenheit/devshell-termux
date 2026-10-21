@@ -19,7 +19,7 @@ Claude-Session: https://claude.ai/code/session_01GLNsTPnn2xKUQ4uFcevT6G
  1 file changed, 4 insertions(+)
 
 diff --git a/app/src/main/AndroidManifest.xml b/app/src/main/AndroidManifest.xml
-index 485da2b..e3b1fa0 100644
+index 485da2b0..e3b1fa0f 100644
 --- a/app/src/main/AndroidManifest.xml
 +++ b/app/src/main/AndroidManifest.xml
 @@ -176,6 +176,10 @@

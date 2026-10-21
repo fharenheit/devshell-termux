@@ -14,7 +14,7 @@ pgjdbc 42.7+ no longer references javax.security.sasl.
  1 file changed, 4 insertions(+), 1 deletion(-)
 
 diff --git a/app/build.gradle b/app/build.gradle
-index 333cef3..a43dedc 100644
+index 333cef3b..a43dedc1 100644
 --- a/app/build.gradle
 +++ b/app/build.gradle
 @@ -127,7 +127,10 @@ android {

@@ -17,7 +17,7 @@ Claude-Session: https://claude.ai/code/session_01GLNsTPnn2xKUQ4uFcevT6G
  1 file changed, 4 insertions(+)
 
 diff --git a/app/src/main/java/com/termux/app/terminal/TermuxTerminalViewClient.java b/app/src/main/java/com/termux/app/terminal/TermuxTerminalViewClient.java
-index 9a3f3ff..c32eb61 100644
+index 9a3f3ff8..c32eb618 100644
 --- a/app/src/main/java/com/termux/app/terminal/TermuxTerminalViewClient.java
 +++ b/app/src/main/java/com/termux/app/terminal/TermuxTerminalViewClient.java
 @@ -34,6 +34,7 @@ import com.termux.shared.activities.ReportActivity;

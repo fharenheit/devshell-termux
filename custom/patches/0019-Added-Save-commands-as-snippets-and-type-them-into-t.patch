@@ -18,7 +18,7 @@ Claude-Session: https://claude.ai/code/session_01GLNsTPnn2xKUQ4uFcevT6G
  2 files changed, 5 insertions(+)
 
 diff --git a/app/src/main/java/com/termux/app/terminal/io/TermuxTerminalExtraKeys.java b/app/src/main/java/com/termux/app/terminal/io/TermuxTerminalExtraKeys.java
-index cd042c4..56ccbf9 100644
+index cd042c46..56ccbf97 100644
 --- a/app/src/main/java/com/termux/app/terminal/io/TermuxTerminalExtraKeys.java
 +++ b/app/src/main/java/com/termux/app/terminal/io/TermuxTerminalExtraKeys.java
 @@ -9,6 +9,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
@@ -40,7 +40,7 @@ index cd042c4..56ccbf9 100644
              if(mTermuxTerminalSessionClient != null)
                  mTermuxTerminalSessionClient.onPasteTextFromClipboard(null);
 diff --git a/termux-shared/src/main/java/com/termux/shared/terminal/io/extrakeys/ExtraKeysConstants.java b/termux-shared/src/main/java/com/termux/shared/terminal/io/extrakeys/ExtraKeysConstants.java
-index 7eb3492..ffc431f 100644
+index 7eb34926..ffc431f5 100644
 --- a/termux-shared/src/main/java/com/termux/shared/terminal/io/extrakeys/ExtraKeysConstants.java
 +++ b/termux-shared/src/main/java/com/termux/shared/terminal/io/extrakeys/ExtraKeysConstants.java
 @@ -126,6 +126,7 @@ public class ExtraKeysConstants {

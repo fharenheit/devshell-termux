@@ -18,7 +18,7 @@ Claude-Session: https://claude.ai/code/session_01GLNsTPnn2xKUQ4uFcevT6G
  3 files changed, 50 insertions(+), 11 deletions(-)
 
 diff --git a/app/src/main/java/com/termux/app/TermuxActivity.java b/app/src/main/java/com/termux/app/TermuxActivity.java
-index 243e170..414277d 100644
+index 243e1709..414277d3 100644
 --- a/app/src/main/java/com/termux/app/TermuxActivity.java
 +++ b/app/src/main/java/com/termux/app/TermuxActivity.java
 @@ -41,6 +41,7 @@ import com.termux.app.activities.HelpActivity;
@@ -87,7 +87,7 @@ index 243e170..414277d 100644
  
      public boolean isVisible() {
 diff --git a/app/src/main/java/com/termux/app/terminal/TermuxTerminalSessionClient.java b/app/src/main/java/com/termux/app/terminal/TermuxTerminalSessionClient.java
-index 78a253a..96225ba 100644
+index 78a253a4..96225ba4 100644
 --- a/app/src/main/java/com/termux/app/terminal/TermuxTerminalSessionClient.java
 +++ b/app/src/main/java/com/termux/app/terminal/TermuxTerminalSessionClient.java
 @@ -17,6 +17,7 @@ import com.termux.shared.shell.TermuxSession;
@@ -130,7 +130,7 @@ index 78a253a..96225ba 100644
      }
  
 diff --git a/app/src/main/res/layout/activity_termux.xml b/app/src/main/res/layout/activity_termux.xml
-index c30354e..bb738f2 100644
+index c30354ef..bb738f24 100644
 --- a/app/src/main/res/layout/activity_termux.xml
 +++ b/app/src/main/res/layout/activity_termux.xml
 @@ -23,15 +23,25 @@

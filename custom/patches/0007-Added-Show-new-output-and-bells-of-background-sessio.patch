@@ -20,7 +20,7 @@ Claude-Session: https://claude.ai/code/session_01GLNsTPnn2xKUQ4uFcevT6G
  3 files changed, 23 insertions(+), 4 deletions(-)
 
 diff --git a/app/src/main/java/com/termux/app/TermuxActivity.java b/app/src/main/java/com/termux/app/TermuxActivity.java
-index 414277d..9f1d444 100644
+index 414277d3..9f1d444f 100644
 --- a/app/src/main/java/com/termux/app/TermuxActivity.java
 +++ b/app/src/main/java/com/termux/app/TermuxActivity.java
 @@ -800,6 +800,16 @@ public final class TermuxActivity extends Activity implements ServiceConnection
@@ -41,7 +41,7 @@ index 414277d..9f1d444 100644
          return mIsVisible;
      }
 diff --git a/app/src/main/java/com/termux/app/TermuxService.java b/app/src/main/java/com/termux/app/TermuxService.java
-index f7034e2..3e87fc2 100644
+index f7034e28..3e87fc29 100644
 --- a/app/src/main/java/com/termux/app/TermuxService.java
 +++ b/app/src/main/java/com/termux/app/TermuxService.java
 @@ -24,6 +24,7 @@ import androidx.annotation.Nullable;
@@ -62,7 +62,7 @@ index f7034e2..3e87fc2 100644
      /** The wake lock and wifi lock are always acquired and released together. */
      private PowerManager.WakeLock mWakeLock;
 diff --git a/app/src/main/java/com/termux/app/terminal/TermuxTerminalSessionClient.java b/app/src/main/java/com/termux/app/terminal/TermuxTerminalSessionClient.java
-index 96225ba..b92cd19 100644
+index 96225ba4..b92cd192 100644
 --- a/app/src/main/java/com/termux/app/terminal/TermuxTerminalSessionClient.java
 +++ b/app/src/main/java/com/termux/app/terminal/TermuxTerminalSessionClient.java
 @@ -17,6 +17,7 @@ import com.termux.shared.shell.TermuxSession;

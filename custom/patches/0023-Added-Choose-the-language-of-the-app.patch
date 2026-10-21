@@ -26,7 +26,7 @@ Claude-Session: https://claude.ai/code/session_01GLNsTPnn2xKUQ4uFcevT6G
  9 files changed, 69 insertions(+)
 
 diff --git a/app/src/main/java/com/termux/app/TermuxActivity.java b/app/src/main/java/com/termux/app/TermuxActivity.java
-index 4d9fa9a..204ef14 100644
+index 4d9fa9a6..204ef148 100644
 --- a/app/src/main/java/com/termux/app/TermuxActivity.java
 +++ b/app/src/main/java/com/termux/app/TermuxActivity.java
 @@ -1,5 +1,6 @@
@@ -60,7 +60,7 @@ index 4d9fa9a..204ef14 100644
  
          if (mIsInvalidState) return;
 diff --git a/app/src/main/java/com/termux/app/TermuxApplication.java b/app/src/main/java/com/termux/app/TermuxApplication.java
-index b7f2898..602684b 100644
+index b7f28980..602684b8 100644
 --- a/app/src/main/java/com/termux/app/TermuxApplication.java
 +++ b/app/src/main/java/com/termux/app/TermuxApplication.java
 @@ -1,5 +1,7 @@
@@ -85,7 +85,7 @@ index b7f2898..602684b 100644
          super.onCreate();
  
 diff --git a/app/src/main/java/com/termux/app/TermuxService.java b/app/src/main/java/com/termux/app/TermuxService.java
-index 5031253..05afc41 100644
+index 50312539..05afc412 100644
 --- a/app/src/main/java/com/termux/app/TermuxService.java
 +++ b/app/src/main/java/com/termux/app/TermuxService.java
 @@ -1,5 +1,6 @@
@@ -109,7 +109,7 @@ index 5031253..05afc41 100644
  
      /** This service is only bound from inside the same process and never uses IPC. */
 diff --git a/app/src/main/java/com/termux/app/activities/HelpActivity.java b/app/src/main/java/com/termux/app/activities/HelpActivity.java
-index facbf36..0d046c8 100644
+index facbf36e..0d046c8d 100644
 --- a/app/src/main/java/com/termux/app/activities/HelpActivity.java
 +++ b/app/src/main/java/com/termux/app/activities/HelpActivity.java
 @@ -1,5 +1,7 @@
@@ -134,7 +134,7 @@ index facbf36..0d046c8 100644
  
      @Override
 diff --git a/app/src/main/java/com/termux/app/activities/SettingsActivity.java b/app/src/main/java/com/termux/app/activities/SettingsActivity.java
-index 3ffbaad..fcd9731 100644
+index 3ffbaad9..fcd97313 100644
 --- a/app/src/main/java/com/termux/app/activities/SettingsActivity.java
 +++ b/app/src/main/java/com/termux/app/activities/SettingsActivity.java
 @@ -1,5 +1,7 @@
@@ -167,7 +167,7 @@ index 3ffbaad..fcd9731 100644
              configureTermuxAPIPreference(context);
              configureTermuxFloatPreference(context);
 diff --git a/app/src/main/java/com/termux/filepicker/TermuxFileReceiverActivity.java b/app/src/main/java/com/termux/filepicker/TermuxFileReceiverActivity.java
-index b4807e5..5c09b54 100644
+index b4807e53..5c09b545 100644
 --- a/app/src/main/java/com/termux/filepicker/TermuxFileReceiverActivity.java
 +++ b/app/src/main/java/com/termux/filepicker/TermuxFileReceiverActivity.java
 @@ -1,5 +1,7 @@
@@ -192,7 +192,7 @@ index b4807e5..5c09b54 100644
      static final String EDITOR_PROGRAM = TermuxConstants.TERMUX_HOME_DIR_PATH + "/bin/termux-file-editor";
      static final String URL_OPENER_PROGRAM = TermuxConstants.TERMUX_HOME_DIR_PATH + "/bin/termux-url-opener";
 diff --git a/app/src/main/res/xml/root_preferences.xml b/app/src/main/res/xml/root_preferences.xml
-index 0ec8b14..fbc8fec 100644
+index 0ec8b14d..fbc8fecf 100644
 --- a/app/src/main/res/xml/root_preferences.xml
 +++ b/app/src/main/res/xml/root_preferences.xml
 @@ -1,5 +1,10 @@
@@ -207,7 +207,7 @@ index 0ec8b14..fbc8fec 100644
          app:key="termux"
          app:title="@string/termux_preferences_title"
 diff --git a/termux-shared/src/main/java/com/termux/shared/activities/ReportActivity.java b/termux-shared/src/main/java/com/termux/shared/activities/ReportActivity.java
-index 95f5b33..6bdaa4d 100644
+index 95f5b338..6bdaa4d4 100644
 --- a/termux-shared/src/main/java/com/termux/shared/activities/ReportActivity.java
 +++ b/termux-shared/src/main/java/com/termux/shared/activities/ReportActivity.java
 @@ -1,5 +1,6 @@
@@ -231,7 +231,7 @@ index 95f5b33..6bdaa4d 100644
      private static final String ACTION_DELETE_REPORT_INFO_OBJECT_FILE = CLASS_NAME + ".ACTION_DELETE_REPORT_INFO_OBJECT_FILE";
  
 diff --git a/termux-shared/src/main/java/com/termux/shared/activities/TextIOActivity.java b/termux-shared/src/main/java/com/termux/shared/activities/TextIOActivity.java
-index 7cdf6ab..632dc7b 100644
+index 7cdf6ab0..632dc7b7 100644
 --- a/termux-shared/src/main/java/com/termux/shared/activities/TextIOActivity.java
 +++ b/termux-shared/src/main/java/com/termux/shared/activities/TextIOActivity.java
 @@ -1,5 +1,6 @@

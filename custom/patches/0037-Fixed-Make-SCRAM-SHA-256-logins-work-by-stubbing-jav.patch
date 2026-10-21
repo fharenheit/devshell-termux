@@ -14,7 +14,7 @@ which broke :app:mergeExtDexDebug.
  1 file changed, 7 insertions(+), 4 deletions(-)
 
 diff --git a/app/build.gradle b/app/build.gradle
-index a43dedc..3f211cb 100644
+index a43dedc1..3f211cbe 100644
 --- a/app/build.gradle
 +++ b/app/build.gradle
 @@ -127,10 +127,13 @@ android {

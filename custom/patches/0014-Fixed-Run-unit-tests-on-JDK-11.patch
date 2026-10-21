@@ -13,7 +13,7 @@ Claude-Session: https://claude.ai/code/session_01GLNsTPnn2xKUQ4uFcevT6G
  1 file changed, 6 insertions(+)
 
 diff --git a/.github/workflows/run_tests.yml b/.github/workflows/run_tests.yml
-index f8d33fd..2534cd8 100644
+index f8d33fd4..2534cd83 100644
 --- a/.github/workflows/run_tests.yml
 +++ b/.github/workflows/run_tests.yml
 @@ -16,6 +16,12 @@ jobs:

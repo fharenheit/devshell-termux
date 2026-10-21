@@ -22,7 +22,7 @@ Claude-Session: https://claude.ai/code/session_01GLNsTPnn2xKUQ4uFcevT6G
  2 files changed, 26 insertions(+)
 
 diff --git a/app/src/main/java/com/termux/app/TermuxActivity.java b/app/src/main/java/com/termux/app/TermuxActivity.java
-index d3d7b0e..4d9fa9a 100644
+index d3d7b0eb..4d9fa9a6 100644
 --- a/app/src/main/java/com/termux/app/TermuxActivity.java
 +++ b/app/src/main/java/com/termux/app/TermuxActivity.java
 @@ -181,6 +181,7 @@ public final class TermuxActivity extends Activity implements ServiceConnection
@@ -52,7 +52,7 @@ index d3d7b0e..4d9fa9a 100644
                  mTermuxTerminalViewClient.showUrlSelection();
                  return true;
 diff --git a/terminal-view/src/main/java/com/termux/view/TerminalView.java b/terminal-view/src/main/java/com/termux/view/TerminalView.java
-index 012d965..e34907e 100644
+index 012d9651..e34907e9 100644
 --- a/terminal-view/src/main/java/com/termux/view/TerminalView.java
 +++ b/terminal-view/src/main/java/com/termux/view/TerminalView.java
 @@ -1091,6 +1091,10 @@ public final class TerminalView extends View {

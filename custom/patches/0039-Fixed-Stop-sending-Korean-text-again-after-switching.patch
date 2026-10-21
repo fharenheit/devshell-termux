@@ -31,7 +31,7 @@ and switching sessions after the IME committed text.
  1 file changed, 46 insertions(+), 125 deletions(-)
 
 diff --git a/terminal-view/src/main/java/com/termux/view/TerminalView.java b/terminal-view/src/main/java/com/termux/view/TerminalView.java
-index e34907e..eadb074 100644
+index e34907e9..eadb0749 100644
 --- a/terminal-view/src/main/java/com/termux/view/TerminalView.java
 +++ b/terminal-view/src/main/java/com/termux/view/TerminalView.java
 @@ -13,7 +13,6 @@ import android.os.Build;

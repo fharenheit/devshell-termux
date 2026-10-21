@@ -27,7 +27,7 @@ Claude-Session: https://claude.ai/code/session_01GLNsTPnn2xKUQ4uFcevT6G
  create mode 100644 app/src/test/java/com/termux/app/terminal/welcome/ShellWelcomeTest.java
 
 diff --git a/app/src/main/java/com/termux/app/activities/HelpActivity.java b/app/src/main/java/com/termux/app/activities/HelpActivity.java
-index 0d046c8..aa0bff7 100644
+index 0d046c8d..aa0bff71 100644
 --- a/app/src/main/java/com/termux/app/activities/HelpActivity.java
 +++ b/app/src/main/java/com/termux/app/activities/HelpActivity.java
 @@ -14,7 +14,7 @@ import android.webkit.WebViewClient;
@@ -59,7 +59,7 @@ index 0d046c8..aa0bff7 100644
  
      @Override
 diff --git a/app/src/main/java/com/termux/app/activities/SettingsActivity.java b/app/src/main/java/com/termux/app/activities/SettingsActivity.java
-index fcd9731..1e3e921 100644
+index fcd97313..1e3e9217 100644
 --- a/app/src/main/java/com/termux/app/activities/SettingsActivity.java
 +++ b/app/src/main/java/com/termux/app/activities/SettingsActivity.java
 @@ -24,6 +24,7 @@ import com.termux.shared.settings.preferences.TermuxFloatAppSharedPreferences;
@@ -88,7 +88,7 @@ index fcd9731..1e3e921 100644
  
                              String termuxPluginAppsInfo =  TermuxUtils.getTermuxPluginAppsInfoMarkdownString(context);
 diff --git a/app/src/main/res/values/strings.xml b/app/src/main/res/values/strings.xml
-index 3d58b1f..b7882d4 100644
+index 3d58b1f4..b7882d46 100644
 --- a/app/src/main/res/values/strings.xml
 +++ b/app/src/main/res/values/strings.xml
 @@ -2,7 +2,7 @@
@@ -102,7 +102,7 @@ index 3d58b1f..b7882d4 100644
      <!ENTITY TERMUX_FLOAT_APP_NAME "Termux:Float">
 diff --git a/app/src/test/java/com/termux/app/terminal/welcome/ShellWelcomeTest.java b/app/src/test/java/com/termux/app/terminal/welcome/ShellWelcomeTest.java
 new file mode 100644
-index 0000000..cc4ead5
+index 00000000..cc4ead52
 --- /dev/null
 +++ b/app/src/test/java/com/termux/app/terminal/welcome/ShellWelcomeTest.java
 @@ -0,0 +1,45 @@
@@ -152,7 +152,7 @@ index 0000000..cc4ead5
 +
 +}
 diff --git a/termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java b/termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java
-index 2f3b5d1..1c7d985 100644
+index 2f3b5d1d..1c7d9858 100644
 --- a/termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java
 +++ b/termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java
 @@ -276,7 +276,7 @@ public final class TermuxConstants {
@@ -181,7 +181,7 @@ index 2f3b5d1..1c7d985 100644
      /** Termux Wiki url */
      public static final String TERMUX_WIKI_URL = "https://wiki.termux.com"; // Default: "https://wiki.termux.com"
 diff --git a/termux-shared/src/main/java/com/termux/shared/termux/TermuxUtils.java b/termux-shared/src/main/java/com/termux/shared/termux/TermuxUtils.java
-index 0b5fbf8..0275c53 100644
+index 0b5fbf82..0275c533 100644
 --- a/termux-shared/src/main/java/com/termux/shared/termux/TermuxUtils.java
 +++ b/termux-shared/src/main/java/com/termux/shared/termux/TermuxUtils.java
 @@ -10,6 +10,7 @@ import android.content.pm.ResolveInfo;
@@ -235,7 +235,7 @@ index 0b5fbf8..0275c53 100644
  
          markdownString.append("\n##\n");
 diff --git a/termux-shared/src/main/res/values/strings.xml b/termux-shared/src/main/res/values/strings.xml
-index 06433ec..7c6775d 100644
+index 06433ecb..7c6775d7 100644
 --- a/termux-shared/src/main/res/values/strings.xml
 +++ b/termux-shared/src/main/res/values/strings.xml
 @@ -2,7 +2,7 @@

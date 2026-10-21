@@ -16,7 +16,7 @@ Claude-Session: https://claude.ai/code/session_01GLNsTPnn2xKUQ4uFcevT6G
  2 files changed, 32 insertions(+), 4 deletions(-)
 
 diff --git a/app/src/main/java/com/termux/app/TermuxActivity.java b/app/src/main/java/com/termux/app/TermuxActivity.java
-index 7372052..d3d7b0e 100644
+index 73720522..d3d7b0eb 100644
 --- a/app/src/main/java/com/termux/app/TermuxActivity.java
 +++ b/app/src/main/java/com/termux/app/TermuxActivity.java
 @@ -42,6 +42,7 @@ import com.termux.app.activities.SettingsActivity;
@@ -55,7 +55,7 @@ index 7372052..d3d7b0e 100644
                  mTermuxTerminalViewClient.showUrlSelection();
                  return true;
 diff --git a/terminal-view/src/main/java/com/termux/view/textselection/TextSelectionCursorController.java b/terminal-view/src/main/java/com/termux/view/textselection/TextSelectionCursorController.java
-index 714d56e..fed376e 100644
+index 714d56e4..fed376ed 100644
 --- a/terminal-view/src/main/java/com/termux/view/textselection/TextSelectionCursorController.java
 +++ b/terminal-view/src/main/java/com/termux/view/textselection/TextSelectionCursorController.java
 @@ -99,11 +99,32 @@ public class TextSelectionCursorController implements CursorController {
