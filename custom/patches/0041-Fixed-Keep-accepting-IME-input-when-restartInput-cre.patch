@@ -5,9 +5,201 @@ Subject: [PATCH] Fixed: Keep accepting IME input when restartInput creates no
  new connection
 
 ---
- .../java/com/termux/view/TerminalView.java    | 23 +++++++++++++++----
- 1 file changed, 19 insertions(+), 4 deletions(-)
+ .../view/TerminalInputConnectionTest.java     | 100 ++++++++++++++++--
+ .../termux/view/TerminalInputConnection.java  |  19 +++-
+ .../java/com/termux/view/TerminalView.java    |  23 +++-
+ 3 files changed, 129 insertions(+), 13 deletions(-)
 
+diff --git a/app/src/test/java/com/termux/view/TerminalInputConnectionTest.java b/app/src/test/java/com/termux/view/TerminalInputConnectionTest.java
+index 93e5f2e3..1c8c80fb 100644
+--- a/app/src/test/java/com/termux/view/TerminalInputConnectionTest.java
++++ b/app/src/test/java/com/termux/view/TerminalInputConnectionTest.java
+@@ -3,8 +3,10 @@ package com.termux.view;
+ import android.content.res.Configuration;
+ import android.os.Build;
+ import android.view.KeyEvent;
++import android.view.View;
+ import android.view.inputmethod.EditorInfo;
+ import android.view.inputmethod.InputConnection;
++import android.view.inputmethod.InputMethodManager;
+ 
+ import com.termux.terminal.TerminalEmulator;
+ import com.termux.terminal.TerminalSession;
+@@ -18,7 +20,10 @@ import org.robolectric.Robolectric;
+ import org.robolectric.RobolectricTestRunner;
+ import org.robolectric.RuntimeEnvironment;
+ import org.robolectric.annotation.Config;
++import org.robolectric.annotation.Implementation;
++import org.robolectric.annotation.Implements;
+ import org.robolectric.annotation.LooperMode;
++import org.robolectric.shadows.ShadowInputMethodManager;
+ 
+ import java.lang.reflect.Field;
+ import java.lang.reflect.Method;
+@@ -27,9 +32,25 @@ import java.nio.charset.StandardCharsets;
+ 
+ /** What the input connection of {@link TerminalView} sends to the terminal for what an IME does. */
+ @RunWith(RobolectricTestRunner.class)
+-@Config(sdk = Build.VERSION_CODES.P)
++@Config(sdk = Build.VERSION_CODES.P, shadows = TerminalInputConnectionTest.ShadowRestartingInputMethodManager.class)
+ public class TerminalInputConnectionTest {
+ 
++    /**
++     * Like a device, where {@link InputMethodManager#restartInput(View)} synchronously creates a
++     * new input connection, unless {@link #sRestartCreatesConnection} is cleared: then it does
++     * nothing, like the framework while the view is not the one the IME serves, e.g. without
++     * window focus, and the IME keeps using the current connection.
++     */
++    @Implements(InputMethodManager.class)
++    public static class ShadowRestartingInputMethodManager extends ShadowInputMethodManager {
++        static boolean sRestartCreatesConnection = true;
++
++        @Implementation
++        protected void restartInput(View view) {
++            if (sRestartCreatesConnection) view.onCreateInputConnection(new EditorInfo());
++        }
++    }
++
+     private TerminalView mView;
+     /** The queue of bytes to the process of the session, and its read(byte[], boolean). */
+     private Object mSent;
+@@ -39,6 +60,7 @@ public class TerminalInputConnectionTest {
+ 
+     @Before
+     public void setUp() throws Exception {
++        ShadowRestartingInputMethodManager.sRestartCreatesConnection = true;
+         mView = new TerminalView(RuntimeEnvironment.application, null);
+         mView.mClient = stub(TerminalViewClient.class);
+ 
+@@ -394,6 +416,74 @@ public class TerminalInputConnectionTest {
+         oldConnection.setComposingText("보류", 1);
+         Assert.assertEquals("기존", line());
+ 
++        switchSession();
++
++        InputConnection newConnection = connect();
++        newConnection.commitText("새", 1);
++        oldConnection.closeConnection();
++        oldConnection.commitText("보류", 1);
++        Assert.assertEquals("새", line());
++        Assert.assertEquals("", mView.mComposingText.toString());
++        // Nothing was sent to the old session either, not even by the new connection finishing the old composition.
++        Assert.assertEquals("기존", mPreviousLine);
++    }
++
++    @Test
++    @LooperMode(LooperMode.Mode.LEGACY)
++    public void testKeysWithoutANewConnectionKeepTheCurrentOneAcceptingInput() throws Exception {
++        // restartInput() does nothing while the view is not the one the IME serves, e.g. when a
++        // key is sent without window focus. The IME then keeps using the current connection.
++        ShadowRestartingInputMethodManager.sRestartCreatesConnection = false;
++        Robolectric.getForegroundThreadScheduler().pause();
++        try {
++            InputConnection connection = connect();
++            connection.commitText("안녕", 1);
++            connection.setComposingText("하", 1);
++            mView.onKeyDown(KeyEvent.KEYCODE_A, new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_A));
++            Assert.assertEquals("안녕하a", line());
++            Assert.assertEquals("", mView.mComposingText.toString());
++
++            connection.commitText("세요", 1);
++            Assert.assertEquals("안녕하a세요", line());
++            connection.setComposingText("ㄱ", 1);
++            Assert.assertEquals("ㄱ", mView.mComposingText.toString());
++            connection.commitText("ㄱ", 1);
++            connection.commitText("\n", 1);
++            Assert.assertEquals("안녕하a세요ㄱ\r", line());
++            Assert.assertEquals("", mView.mComposingText.toString());
++
++            // The delayed reset after the new line creates no new connection either.
++            Robolectric.getForegroundThreadScheduler().advanceToLastPostedRunnable();
++            connection.commitText("다음", 1);
++            Assert.assertEquals("안녕하a세요ㄱ\r다음", line());
++        } finally {
++            Robolectric.getForegroundThreadScheduler().unPause();
++        }
++    }
++
++    @Test
++    public void testSwitchingSessionsWithoutANewConnectionKeepsTheCurrentOneAcceptingInput() throws Exception {
++        // E.g. a session finishing while another app is in front: restartInput() does nothing.
++        ShadowRestartingInputMethodManager.sRestartCreatesConnection = false;
++        InputConnection connection = connect();
++        connection.commitText("기존", 1);
++        connection.setComposingText("보류", 1);
++        Assert.assertEquals("기존", line());
++
++        switchSession();
++        Assert.assertEquals("", mView.mComposingText.toString());
++        connection.commitText("새", 1);
++        connection.setComposingText("ㄱ", 1);
++        connection.commitText("글", 1);
++        Assert.assertEquals("새글", line());
++        Assert.assertEquals("기존", mPreviousLine);
++    }
++
++    /** What the previous session's line was when {@link #switchSession()} was called, with what was sent to it afterwards. */
++    private String mPreviousLine;
++
++    /** Attach a new session to the view, reading the line of the previous session once more afterwards into {@link #mPreviousLine}. */
++    private void switchSession() throws Exception {
+         TerminalSessionClient client = stub(TerminalSessionClient.class);
+         TerminalSession nextSession = new TerminalSession("/system/bin/sh", "/", new String[0], new String[0], 100, client);
+         TerminalEmulator nextEmulator = new TerminalEmulator(nextSession, 80, 24, 10, 20, 100, client);
+@@ -402,15 +492,9 @@ public class TerminalInputConnectionTest {
+         mView.attachSession(nextSession);
+         // This view has no layout; supply the emulator normally installed by updateSize().
+         mView.mEmulator = nextEmulator;
++        mPreviousLine = line();
+         mSent = getField(nextSession, "mTerminalToProcessIOQueue");
+         mLine.setLength(0);
+-
+-        InputConnection newConnection = connect();
+-        newConnection.commitText("새", 1);
+-        oldConnection.closeConnection();
+-        oldConnection.commitText("보류", 1);
+-        Assert.assertEquals("새", line());
+-        Assert.assertEquals("", mView.mComposingText.toString());
+     }
+ 
+ }
+diff --git a/terminal-view/src/main/java/com/termux/view/TerminalInputConnection.java b/terminal-view/src/main/java/com/termux/view/TerminalInputConnection.java
+index 196e2218..92d50e1b 100644
+--- a/terminal-view/src/main/java/com/termux/view/TerminalInputConnection.java
++++ b/terminal-view/src/main/java/com/termux/view/TerminalInputConnection.java
+@@ -40,14 +40,31 @@ final class TerminalInputConnection extends BaseInputConnection {
+         mGeneration = generation;
+     }
+ 
+-    /** Whether text the IME sends should be dropped, since input was started again after this connection was created. */
++    /** Whether text the IME sends should be dropped, since this connection was closed or replaced by a newer one. */
+     private boolean isDiscarded() {
+         if (!mClosed && mGeneration == mView.mInputConnectionGeneration) return false;
++        if (TerminalView.TERMINAL_VIEW_KEY_LOGGING_ENABLED) {
++            mView.mClient.logInfo(LOG_TAG, "IME: discarded (closed=" + mClosed + ", generation=" + mGeneration + "/" + mView.mInputConnectionGeneration + ")");
++        }
+         getEditable().clear();
+         mSent = "";
+         return true;
+     }
+ 
++    /**
++     * Forget the text the IME committed or is composing, without sending anything, while keeping
++     * on accepting input: the text before the cursor is no longer the IME's, e.g. after other keys
++     * were sent or the session was switched, but the IME keeps using this connection.
++     */
++    void forgetText() {
++        if (TerminalView.TERMINAL_VIEW_KEY_LOGGING_ENABLED) mView.mClient.logInfo(LOG_TAG, "IME: forgetText()");
++        Editable content = getEditable();
++        removeComposingSpans(content);
++        content.clear();
++        mSent = "";
++        mView.setComposingTextPreview("");
++    }
++
+     /** Whether the IME committed or is composing text since this connection was created, see {@link TerminalView#finishImeInput()}. */
+     boolean hasText() {
+         return !isDiscarded() && getEditable().length() > 0;
 diff --git a/terminal-view/src/main/java/com/termux/view/TerminalView.java b/terminal-view/src/main/java/com/termux/view/TerminalView.java
 index bccc0f98..47d8054a 100644
 --- a/terminal-view/src/main/java/com/termux/view/TerminalView.java

@@ -27,9 +27,460 @@ start input again with an empty text, since the text before the cursor
 then no longer is the IME's. So does a new line committed by the IME,
 and switching sessions after the IME committed text.
 ---
- .../java/com/termux/view/TerminalView.java    | 171 +++++-------------
- 1 file changed, 46 insertions(+), 125 deletions(-)
+ .../view/TerminalInputConnectionTest.java     | 175 ++++++++++++++
+ .../main/java/com/termux/view/ImeText.java    |  25 ++
+ .../termux/view/TerminalInputConnection.java  | 225 ++++++++++++++++++
+ .../java/com/termux/view/TerminalView.java    | 171 ++++---------
+ .../java/com/termux/view/ImeTextTest.java     |  31 +++
+ 5 files changed, 502 insertions(+), 125 deletions(-)
+ create mode 100644 app/src/test/java/com/termux/view/TerminalInputConnectionTest.java
+ create mode 100644 terminal-view/src/main/java/com/termux/view/ImeText.java
+ create mode 100644 terminal-view/src/main/java/com/termux/view/TerminalInputConnection.java
+ create mode 100644 terminal-view/src/test/java/com/termux/view/ImeTextTest.java
 
+diff --git a/app/src/test/java/com/termux/view/TerminalInputConnectionTest.java b/app/src/test/java/com/termux/view/TerminalInputConnectionTest.java
+new file mode 100644
+index 00000000..a8678ddc
+--- /dev/null
++++ b/app/src/test/java/com/termux/view/TerminalInputConnectionTest.java
+@@ -0,0 +1,175 @@
++package com.termux.view;
++
++import android.os.Build;
++import android.view.KeyEvent;
++import android.view.inputmethod.EditorInfo;
++import android.view.inputmethod.InputConnection;
++
++import com.termux.terminal.TerminalEmulator;
++import com.termux.terminal.TerminalSession;
++import com.termux.terminal.TerminalSessionClient;
++
++import org.junit.Assert;
++import org.junit.Before;
++import org.junit.Test;
++import org.junit.runner.RunWith;
++import org.robolectric.RobolectricTestRunner;
++import org.robolectric.RuntimeEnvironment;
++import org.robolectric.annotation.Config;
++
++import java.lang.reflect.Field;
++import java.lang.reflect.Method;
++import java.lang.reflect.Proxy;
++import java.nio.charset.StandardCharsets;
++
++/** What the input connection of {@link TerminalView} sends to the terminal for what an IME does. */
++@RunWith(RobolectricTestRunner.class)
++@Config(sdk = Build.VERSION_CODES.P)
++public class TerminalInputConnectionTest {
++
++    private TerminalView mView;
++    /** The queue of bytes to the process of the session, and its read(byte[], boolean). */
++    private Object mSent;
++    private Method mRead;
++    private final StringBuilder mLine = new StringBuilder();
++
++    @Before
++    public void setUp() throws Exception {
++        mView = new TerminalView(RuntimeEnvironment.application, null);
++        mView.mClient = stub(TerminalViewClient.class);
++
++        // A session without a process, whose writes are kept in its queue to the process.
++        TerminalSessionClient sessionClient = stub(TerminalSessionClient.class);
++        TerminalSession session = new TerminalSession("/system/bin/sh", "/", new String[0], new String[0], 100, sessionClient);
++        TerminalEmulator emulator = new TerminalEmulator(session, 80, 24, 10, 20, 100, sessionClient);
++        setField(session, "mEmulator", emulator);
++        setField(session, "mShellPid", 1);
++        mSent = getField(session, "mTerminalToProcessIOQueue");
++        mRead = mSent.getClass().getDeclaredMethod("read", byte[].class, boolean.class);
++        mRead.setAccessible(true);
++        mView.mTermSession = session;
++        mView.mEmulator = emulator;
++    }
++
++    /** An implementation of {@code type} doing nothing. */
++    @SuppressWarnings("unchecked")
++    private static <T> T stub(Class<T> type) {
++        return (T) Proxy.newProxyInstance(type.getClassLoader(), new Class<?>[]{type}, (proxy, method, args) -> {
++            Class<?> returnType = method.getReturnType();
++            if (returnType == boolean.class) return false;
++            if (returnType == float.class) return 1f;
++            if (returnType == int.class) return 0;
++            return null;
++        });
++    }
++
++    private static Field field(Object object, String name) throws Exception {
++        Field field = object.getClass().getDeclaredField(name);
++        field.setAccessible(true);
++        return field;
++    }
++
++    private static void setField(Object object, String name, Object value) throws Exception {
++        field(object, name).set(object, value);
++    }
++
++    private static Object getField(Object object, String name) throws Exception {
++        return field(object, name).get(object);
++    }
++
++    private InputConnection connect() {
++        return mView.onCreateInputConnection(new EditorInfo());
++    }
++
++    /** The line the terminal would show, with the backspaces sent applied to it. */
++    private String line() throws Exception {
++        byte[] buffer = new byte[4096];
++        int read = (int) mRead.invoke(mSent, buffer, false);
++        if (read > 0) {
++            String text = new String(buffer, 0, read, StandardCharsets.UTF_8);
++            text.codePoints().forEach(codePoint -> {
++                if (codePoint == 127) {
++                    if (mLine.length() > 0) mLine.setLength(mLine.offsetByCodePoints(mLine.length(), -1));
++                } else {
++                    mLine.appendCodePoint(codePoint);
++                }
++            });
++        }
++        return mLine.toString();
++    }
++
++    @Test
++    public void testComposingTextIsSentWhenCommitted() throws Exception {
++        InputConnection connection = connect();
++        connection.setComposingText("ㅇ", 1);
++        connection.setComposingText("아", 1);
++        connection.setComposingText("안", 1);
++        Assert.assertEquals("", line());
++        Assert.assertEquals("안", mView.mComposingText.toString());
++
++        connection.commitText("안", 1);
++        connection.setComposingText("ㄴ", 1);
++        connection.setComposingText("녀", 1);
++        Assert.assertEquals("안", line());
++        Assert.assertEquals("녀", mView.mComposingText.toString());
++
++        connection.finishComposingText();
++        Assert.assertEquals("안녀", line());
++        Assert.assertEquals("", mView.mComposingText.toString());
++    }
++
++    @Test
++    public void testComposingTheWordBeforeTheCursorAgainDoesNotSendItAgain() throws Exception {
++        InputConnection connection = connect();
++        connection.commitText("안녕", 1);
++        Assert.assertEquals("안녕", line());
++
++        // E.g. after switching from Korean to English and back, the IME composes the last word again.
++        connection.setComposingRegion(0, 2);
++        connection.setComposingText("안녕하", 1);
++        connection.commitText("안녕하", 1);
++        Assert.assertEquals("안녕하", line());
++    }
++
++    @Test
++    public void testKeysSentToTheTerminalStartInputAgain() throws Exception {
++        InputConnection connection = connect();
++        connection.commitText("안녕", 1);
++        connection.setComposingText("하", 1);
++
++        // A key typed in English: the composing text is sent first, and the old connection is not used anymore.
++        mView.onKeyDown(KeyEvent.KEYCODE_A, new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_A));
++        Assert.assertEquals("안녕하a", line());
++        connection.commitText("안녕하세요", 1);
++        Assert.assertEquals("안녕하a", line());
++
++        InputConnection newConnection = connect();
++        newConnection.setComposingRegion(0, 3);
++        newConnection.commitText("요", 1);
++        Assert.assertEquals("안녕하a요", line());
++    }
++
++    @Test
++    public void testKeysAfterOnlyKeysDoNotStartInputAgain() throws Exception {
++        InputConnection connection = connect();
++        mView.onKeyDown(KeyEvent.KEYCODE_A, new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_A));
++        connection.commitText("가", 1);
++        Assert.assertEquals("a가", line());
++    }
++
++    @Test
++    public void testDeletingTextBeforeTheCommittedTextSendsBackspaces() throws Exception {
++        InputConnection connection = connect();
++        mView.onKeyDown(KeyEvent.KEYCODE_X, new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_X));
++        mView.onKeyDown(KeyEvent.KEYCODE_Y, new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_Y));
++        connection.commitText("가나", 1);
++        Assert.assertEquals("xy가나", line());
++
++        // E.g. the stock Samsung keyboard with 'Auto check spelling' deletes more than it committed.
++        connection.deleteSurroundingText(3, 0);
++        Assert.assertEquals("x", line());
++        connection.commitText("다", 1);
++        Assert.assertEquals("x다", line());
++    }
++
++}
+diff --git a/terminal-view/src/main/java/com/termux/view/ImeText.java b/terminal-view/src/main/java/com/termux/view/ImeText.java
+new file mode 100644
+index 00000000..7e728cca
+--- /dev/null
++++ b/terminal-view/src/main/java/com/termux/view/ImeText.java
+@@ -0,0 +1,25 @@
++package com.termux.view;
++
++/** Comparing the text an IME has committed with the text already sent to the terminal. */
++final class ImeText {
++
++    private ImeText() {}
++
++    /**
++     * The length of the common start of {@code a} and {@code b}, not ending between the two chars
++     * of a surrogate pair.
++     */
++    static int commonPrefixLength(CharSequence a, CharSequence b) {
++        int max = Math.min(a.length(), b.length());
++        int length = 0;
++        while (length < max && a.charAt(length) == b.charAt(length)) length++;
++        if (length > 0 && length < max && Character.isHighSurrogate(a.charAt(length - 1))) length--;
++        return length;
++    }
++
++    /** The number of code points of {@code text} from {@code start}, which is the number of backspaces to delete them. */
++    static int codePointsFrom(CharSequence text, int start) {
++        return Character.codePointCount(text, start, text.length());
++    }
++
++}
+diff --git a/terminal-view/src/main/java/com/termux/view/TerminalInputConnection.java b/terminal-view/src/main/java/com/termux/view/TerminalInputConnection.java
+new file mode 100644
+index 00000000..1d8b0191
+--- /dev/null
++++ b/terminal-view/src/main/java/com/termux/view/TerminalInputConnection.java
+@@ -0,0 +1,225 @@
++package com.termux.view;
++
++import android.text.Editable;
++import android.text.Selection;
++import android.view.KeyEvent;
++import android.view.inputmethod.BaseInputConnection;
++
++import com.termux.terminal.TerminalEmulator;
++
++/**
++ * The input connection of a {@link TerminalView}, which sends the text an IME commits to the
++ * terminal.
++ * <p>
++ * The editable text keeps what the IME committed since input was last started, like the line an
++ * IME would edit in a text field, instead of being cleared once sent. IMEs keep their own idea of
++ * the text before the cursor, and may compose the word before it again, e.g. Korean IMEs after
++ * switching between Korean and English: with a cleared text the word could not be replaced, and
++ * all of it was sent again. Each change of the text is sent as the backspaces and code points that
++ * turn the text sent so far into it, and the composing text is drawn over the cursor until it is
++ * committed. {@link TerminalView#finishImeInput()} starts input again when anything else is sent to
++ * the terminal, since the text before the cursor then no longer is the IME's.
++ */
++final class TerminalInputConnection extends BaseInputConnection {
++
++    private static final String LOG_TAG = "TerminalView";
++
++    private final TerminalView mView;
++
++    /** The {@link TerminalView#mInputConnectionGeneration} this connection was created in. */
++    private final int mGeneration;
++
++    /** The committed text sent to the terminal, which is the editable text without the composing text. */
++    private String mSent = "";
++
++    TerminalInputConnection(TerminalView view, int generation) {
++        super(view, true);
++        mView = view;
++        mGeneration = generation;
++    }
++
++    /** Whether text the IME sends should be dropped, since input was started again after this connection was created. */
++    private boolean isDiscarded() {
++        if (mGeneration == mView.mInputConnectionGeneration) return false;
++        getEditable().clear();
++        mSent = "";
++        return true;
++    }
++
++    /** Whether the IME committed or is composing text since this connection was created, see {@link TerminalView#finishImeInput()}. */
++    boolean hasText() {
++        return !isDiscarded() && getEditable().length() > 0;
++    }
++
++    @Override
++    public boolean setComposingText(CharSequence text, int newCursorPosition) {
++        if (TerminalView.TERMINAL_VIEW_KEY_LOGGING_ENABLED) {
++            mView.mClient.logInfo(LOG_TAG, "IME: setComposingText(\"" + text + "\", " + newCursorPosition + ")");
++        }
++        if (isDiscarded()) return true;
++        super.setComposingText(text, newCursorPosition);
++        sendChanges();
++        return true;
++    }
++
++    @Override
++    public boolean setComposingRegion(int start, int end) {
++        if (TerminalView.TERMINAL_VIEW_KEY_LOGGING_ENABLED) mView.mClient.logInfo(LOG_TAG, "IME: setComposingRegion(" + start + ", " + end + ")");
++        if (isDiscarded()) return true;
++        super.setComposingRegion(start, end);
++        sendChanges();
++        return true;
++    }
++
++    @Override
++    public boolean finishComposingText() {
++        if (TerminalView.TERMINAL_VIEW_KEY_LOGGING_ENABLED) mView.mClient.logInfo(LOG_TAG, "IME: finishComposingText()");
++        if (isDiscarded()) return true;
++        super.finishComposingText();
++        sendChanges();
++        return true;
++    }
++
++    @Override
++    public boolean commitText(CharSequence text, int newCursorPosition) {
++        if (TerminalView.TERMINAL_VIEW_KEY_LOGGING_ENABLED) {
++            mView.mClient.logInfo(LOG_TAG, "IME: commitText(\"" + text + "\", " + newCursorPosition + ")");
++        }
++        if (isDiscarded()) return true;
++        super.commitText(text, newCursorPosition);
++        sendChanges();
++        return true;
++    }
++
++    @Override
++    public boolean deleteSurroundingText(int beforeLength, int afterLength) {
++        if (TerminalView.TERMINAL_VIEW_KEY_LOGGING_ENABLED) {
++            mView.mClient.logInfo(LOG_TAG, "IME: deleteSurroundingText(" + beforeLength + ", " + afterLength + ")");
++        }
++        if (isDiscarded()) return true;
++        // The text before the cursor that the IME committed is deleted from the editable text, and
++        // the rest, e.g. what the stock Samsung keyboard with 'Auto check spelling' deletes, with
++        // backspaces.
++        int beyond = Math.max(0, beforeLength - Math.max(0, Selection.getSelectionStart(getEditable())));
++        super.deleteSurroundingText(beforeLength, afterLength);
++        sendChanges();
++        sendBackspaces(beyond);
++        return true;
++    }
++
++    @Override
++    public boolean deleteSurroundingTextInCodePoints(int beforeLength, int afterLength) {
++        if (TerminalView.TERMINAL_VIEW_KEY_LOGGING_ENABLED) {
++            mView.mClient.logInfo(LOG_TAG, "IME: deleteSurroundingTextInCodePoints(" + beforeLength + ", " + afterLength + ")");
++        }
++        if (isDiscarded()) return true;
++        Editable content = getEditable();
++        int cursor = Math.max(0, Selection.getSelectionStart(content));
++        int beyond = Math.max(0, beforeLength - Character.codePointCount(content, 0, cursor));
++        super.deleteSurroundingTextInCodePoints(beforeLength, afterLength);
++        sendChanges();
++        sendBackspaces(beyond);
++        return true;
++    }
++
++    /**
++     * Send the committed text to the terminal, as the backspaces and code points that turn the text
++     * sent so far into it, and draw the composing text over the cursor.
++     */
++    private void sendChanges() {
++        Editable content = getEditable();
++        int composingStart = getComposingSpanStart(content);
++        int composingEnd = getComposingSpanEnd(content);
++        String committed;
++        CharSequence composing;
++        if (composingStart < 0 || composingEnd < 0) {
++            committed = content.toString();
++            composing = "";
++        } else {
++            int start = Math.min(composingStart, composingEnd);
++            int end = Math.max(composingStart, composingEnd);
++            committed = content.subSequence(0, start).toString() + content.subSequence(end, content.length());
++            composing = content.subSequence(start, end);
++        }
++
++        if (!committed.equals(mSent) && mView.mEmulator != null) {
++            int common = ImeText.commonPrefixLength(mSent, committed);
++            sendBackspaces(ImeText.codePointsFrom(mSent, common));
++            String added = committed.substring(common);
++            sendText(added);
++            mSent = committed;
++            // A new line ends what the IME can edit, so start input again with an empty text.
++            for (int i = 0; i < added.length(); i++) {
++                if (added.charAt(i) < ' ') {
++                    mView.post(mView::finishImeInput);
++                    break;
++                }
++            }
++        }
++        mView.setComposingTextPreview(composing);
++    }
++
++    private void sendBackspaces(int count) {
++        if (count <= 0 || mView.mTermSession == null) return;
++        mView.stopTextSelectionMode();
++        for (int i = 0; i < count; i++) mView.writeKeyCode(KeyEvent.KEYCODE_DEL);
++    }
++
++    private void sendText(CharSequence text) {
++        if (text.length() == 0) return;
++        mView.stopTextSelectionMode();
++        final int textLengthInChars = text.length();
++        for (int i = 0; i < textLengthInChars; i++) {
++            char firstChar = text.charAt(i);
++            int codePoint;
++            if (Character.isHighSurrogate(firstChar)) {
++                if (++i < textLengthInChars) {
++                    codePoint = Character.toCodePoint(firstChar, text.charAt(i));
++                } else {
++                    // At end of string, with no low surrogate following the high:
++                    codePoint = TerminalEmulator.UNICODE_REPLACEMENT_CHAR;
++                }
++            } else {
++                codePoint = firstChar;
++            }
++
++            // Check onKeyDown() for details.
++            if (mView.mClient.readShiftKey())
++                codePoint = Character.toUpperCase(codePoint);
++
++            boolean ctrlHeld = false;
++            if (codePoint <= 31 && codePoint != 27) {
++                if (codePoint == '\n') {
++                    // The AOSP keyboard and descendants seems to send \n as text when the enter key is pressed,
++                    // instead of a key event like most other keyboard apps. A terminal expects \r for the enter
++                    // key (although when icrnl is enabled this doesn't make a difference - run 'stty -icrnl' to
++                    // check the behaviour).
++                    codePoint = '\r';
++                }
++
++                // E.g. penti keyboard for ctrl input.
++                ctrlHeld = true;
++                switch (codePoint) {
++                    case 31:
++                        codePoint = '_';
++                        break;
++                    case 30:
++                        codePoint = '^';
++                        break;
++                    case 29:
++                        codePoint = ']';
++                        break;
++                    case 28:
++                        codePoint = '\\';
++                        break;
++                    default:
++                        codePoint += 96;
++                        break;
++                }
++            }
++
++            mView.inputCodePoint(codePoint, ctrlHeld, false, true);
++        }
++    }
++
++}
 diff --git a/terminal-view/src/main/java/com/termux/view/TerminalView.java b/terminal-view/src/main/java/com/termux/view/TerminalView.java
 index e34907e9..eadb0749 100644
 --- a/terminal-view/src/main/java/com/termux/view/TerminalView.java
@@ -279,6 +730,43 @@ index e34907e9..eadb0749 100644
      public boolean handleKeyCodeAction(int keyCode, int keyMod) {
          boolean shiftDown = (keyMod & KeyHandler.KEYMOD_SHIFT) != 0;
  
+diff --git a/terminal-view/src/test/java/com/termux/view/ImeTextTest.java b/terminal-view/src/test/java/com/termux/view/ImeTextTest.java
+new file mode 100644
+index 00000000..be348b0b
+--- /dev/null
++++ b/terminal-view/src/test/java/com/termux/view/ImeTextTest.java
+@@ -0,0 +1,31 @@
++package com.termux.view;
++
++import org.junit.Assert;
++import org.junit.Test;
++
++public class ImeTextTest {
++
++    @Test
++    public void testCommonPrefixLength() {
++        Assert.assertEquals(0, ImeText.commonPrefixLength("", "안녕"));
++        Assert.assertEquals(2, ImeText.commonPrefixLength("안녕", "안녕하"));
++        Assert.assertEquals(1, ImeText.commonPrefixLength("안녕", "안녀"));
++        Assert.assertEquals(3, ImeText.commonPrefixLength("abc", "abc"));
++        Assert.assertEquals(0, ImeText.commonPrefixLength("a", "b"));
++    }
++
++    @Test
++    public void testCommonPrefixLengthDoesNotSplitSurrogatePairs() {
++        // U+1F600 and U+1F601 share their high surrogate.
++        Assert.assertEquals(1, ImeText.commonPrefixLength("a😀", "a😁"));
++        Assert.assertEquals(3, ImeText.commonPrefixLength("a😀", "a😀b"));
++    }
++
++    @Test
++    public void testCodePointsFrom() {
++        Assert.assertEquals(2, ImeText.codePointsFrom("안녕", 0));
++        Assert.assertEquals(0, ImeText.codePointsFrom("안녕", 2));
++        Assert.assertEquals(1, ImeText.codePointsFrom("a😀", 1));
++    }
++
++}
 -- 
 2.43.0
 
