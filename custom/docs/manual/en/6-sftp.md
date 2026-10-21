@@ -4,6 +4,29 @@
 
 Open it by long pressing an SSH tab → **Browse files**, or from the host menu → **Browse files**.
 
+## Open the terminal's current directory
+
+For ordinary Linux SSH connections, **Browse files** queries that tab's login shell directory when opened, without per-server setup. It does not send commands to the terminal or edit server configuration. Reconnect tabs opened before this update once to enable automatic queries.
+
+Tabs connected to the same host are queried separately. The host menu uses the current tab when it is connected to that host.
+
+### Optional setup for other environments
+
+If `/proc` is unavailable or restricted by SFTP, or the connection uses Mosh, the browser can use a shell-reported directory instead. The Bash/Zsh setup below is optional for those environments. Unknown or inaccessible directories fall back to home.
+
+1. Download the [directory integration script](../../../shell-integration/devshell-cwd.sh), upload it to the remote home using **Upload**, and rename it to `.devshell-cwd.sh`.
+2. Run this in the remote terminal to activate it immediately:
+
+   ```sh
+   . "$HOME/.devshell-cwd.sh"
+   ```
+
+3. To keep it active after reconnecting, add that line at the end of `~/.bashrc` for Bash or `~/.zshrc` for Zsh, after any prompt theme setup.
+
+Then change directory with `cd` and open **Browse files** from the SSH tab. If the directory has not been reported, no longer exists, or cannot be accessed, the browser opens the remote home. Existing prompt hooks are preserved; the app does not edit server configuration automatically.
+
+Automatic queries refer to the SSH login shell. A tmux pane or a nested SSH session can have a different working directory. Browse another server from a tab connected directly to that server.
+
 ## Browsing and file actions
 
 <img src="../images/en/25_sftp_browser.png" width="270" alt="File list"> <img src="../images/en/26_sftp_menu.png" width="270" alt="File screen menu"> <img src="../images/en/27_sftp_file_menu.png" width="270" alt="File menu">

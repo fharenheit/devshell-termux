@@ -688,7 +688,7 @@ public class TerminalTabsController {
             }
             String hostName = SshConnector.getHostName(session);
             items.add(mActivity.getString(R.string.action_sftp_browse_files));
-            actions.add(() -> SftpBrowserActivity.start(mActivity, hostName, SshConnector.getControlPath(session)));
+            actions.add(() -> SftpBrowserActivity.startForSession(mActivity, hostName, session));
         }
         items.add(mActivity.getString(R.string.action_rename_terminal_tab));
         actions.add(() -> showRenameDialog(session));

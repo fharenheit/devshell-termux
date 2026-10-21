@@ -69,3 +69,4 @@ app/src/main/java/com/termux/app/terminal/db
 app/src/test/java/com/termux/app/terminal/db
 app/src/main/java/javax/security/sasl
 app/src/test/java/com/termux/view
+terminal-emulator/src/test/java/com/termux/terminal/CurrentWorkingDirectoryTest.java

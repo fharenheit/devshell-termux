@@ -55,6 +55,11 @@ public final class SshConnector {
     /** How long to wait for ssh to ask for the password before removing the pipe. */
     private static final long PASSWORD_PIPE_TIMEOUT_MS = 120_000;
 
+    // The helper reports its parent: the remote command shell, which then execs the login shell.
+    // Keep the existing RemoteCommand in its original shell, including its SSH percent tokens.
+    private static final String REMOTE_SHELL_PID_PREFIX =
+        "sh -c 'printf \"\\033]1337;DevShellShellPid=%%s\\007\" \"$PPID\"'; ";
+
     /**
      * Connect to `$1` with ssh, or with mosh if `$4` is `mosh`. ssh is the master of the connection
      * sharing socket `$6` if it is set, removing a socket left by a master that did not exit
@@ -67,15 +72,28 @@ public final class SshConnector {
     private static final String CONNECT_SCRIPT =
         "host=\"$1\"\n" +
         "control_path=\"$6\"\n" +
+        "session_prefix=\"$7\"\n" +
         "if [ -n \"$2\" ]; then\n" +
         "  export SSH_ASKPASS=\"$3\" SSH_ASKPASS_REQUIRE=force TERMUX_SSH_PASSWORD_PIPE=\"$2\"\n" +
         "fi\n" +
         "run_ssh() {\n" +
+        "  printf '\\033]1337;DevShellShellPid=0\\007'\n" +
+        "  remote_command=$(ssh -G \"$host\" 2>/dev/null | while IFS= read -r option; do\n" +
+        "    case \"$option\" in remotecommand\\ *) printf '%s' \"${option#remotecommand }\" ;; esac\n" +
+        "  done)\n" +
+        "  case \"$remote_command\" in ''|none) remote_command='exec \"$SHELL\" -l' ;; esac\n" +
+        // ssh -G has already expanded tokens. Re-escape literal percent signs before -o expands again.
+        "  escaped_command=\n" +
+        "  while [ \"$remote_command\" != \"${remote_command#*%}\" ]; do\n" +
+        "    escaped_command=\"$escaped_command${remote_command%%\\%*}%%\"\n" +
+        "    remote_command=${remote_command#*%}\n" +
+        "  done\n" +
+        "  remote_command=\"$session_prefix$escaped_command$remote_command\"\n" +
         "  if [ -n \"$control_path\" ]; then\n" +
         "    rm -f \"$control_path\"\n" +
-        "    ssh -o ControlMaster=yes -o ControlPath=\"$control_path\" \"$host\"\n" +
+        "    ssh -t -o \"RemoteCommand=$remote_command\" -o ControlMaster=yes -o ControlPath=\"$control_path\" \"$host\"\n" +
         "  else\n" +
-        "    ssh \"$host\"\n" +
+        "    ssh -t -o \"RemoteCommand=$remote_command\" \"$host\"\n" +
         "  fi\n" +
         "}\n" +
         "if [ \"$4\" = mosh ]; then\n" +
@@ -195,7 +213,7 @@ public final class SshConnector {
         // mosh does not keep an ssh connection to share.
         String controlPath = useMosh ? "" : newControlPath();
         TerminalSession session = startSshScript(activity, hostName, hostName, CONNECT_SCRIPT, autoReconnect,
-            useMosh ? "mosh" : "ssh", autoReconnect ? "1" : "", controlPath);
+            useMosh ? "mosh" : "ssh", autoReconnect ? "1" : "", controlPath, REMOTE_SHELL_PID_PREFIX);
         if (session != null) {
             synchronized (sSshSessions) {
                 sSshSessions.put(session, hostName);

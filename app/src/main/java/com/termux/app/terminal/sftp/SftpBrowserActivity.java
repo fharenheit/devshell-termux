@@ -47,8 +47,10 @@ import com.termux.R;
 import com.termux.app.terminal.backup.DownloadsDirectory;
 import com.termux.app.terminal.fonts.TerminalFonts;
 import com.termux.app.terminal.ssh.SshHostKeyDialog;
+import com.termux.app.terminal.ssh.SshConnector;
 import com.termux.shared.logger.Logger;
 import com.termux.shared.termux.TermuxConstants;
+import com.termux.terminal.TerminalSession;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -88,6 +90,8 @@ public class SftpBrowserActivity extends Activity {
 
     public static final String EXTRA_HOST = "com.termux.app.terminal.sftp.extra.HOST";
     public static final String EXTRA_CONTROL_PATH = "com.termux.app.terminal.sftp.extra.CONTROL_PATH";
+    public static final String EXTRA_INITIAL_DIRECTORY = "com.termux.app.terminal.sftp.extra.INITIAL_DIRECTORY";
+    public static final String EXTRA_REMOTE_SHELL_PID = "com.termux.app.terminal.sftp.extra.REMOTE_SHELL_PID";
     private static final String EXTRA_SHOW_TRANSFERS = "com.termux.app.terminal.sftp.extra.SHOW_TRANSFERS";
 
     private static final int MODE_BROWSER = 0;
@@ -106,6 +110,23 @@ public class SftpBrowserActivity extends Activity {
     /** Open the files of a host, over the connection of an ssh tab if its socket is given. */
     public static void start(@NonNull Context context, @NonNull String hostName, @Nullable String controlPath) {
         context.startActivity(newIntent(context, hostName, controlPath, false));
+    }
+
+    /** Open at the last directory reported by the selected SSH tab's shell. */
+    public static void startForSession(@NonNull Context context, @NonNull String hostName, @NonNull TerminalSession session) {
+        context.startActivity(newIntentForSession(context, hostName, session));
+    }
+
+    @NonNull
+    static Intent newIntentForSession(@NonNull Context context, @NonNull String hostName, @NonNull TerminalSession session) {
+        Intent intent = newIntent(context, hostName, SshConnector.getControlPath(session), false);
+        if (session.getEmulator() != null) {
+            String directory = session.getEmulator().getCurrentWorkingDirectory();
+            if (directory != null) intent.putExtra(EXTRA_INITIAL_DIRECTORY, directory);
+            int pid = session.getEmulator().getRemoteShellPid();
+            if (pid > 0) intent.putExtra(EXTRA_REMOTE_SHELL_PID, pid);
+        }
+        return intent;
     }
 
     /** An intent to open the files of a host, showing its transfers if {@code showTransfers}. */
@@ -197,8 +218,18 @@ public class SftpBrowserActivity extends Activity {
         setTitle(mHostName);
         buildViews();
         showMode(MODE_BROWSER);
-        loadDirectory(".");
+        String directory = savedInstanceState == null ? null : savedInstanceState.getString("directory");
+        boolean restoredDirectory = directory != null;
+        if (directory == null) directory = getIntent().getStringExtra(EXTRA_INITIAL_DIRECTORY);
+        int remoteShellPid = restoredDirectory ? 0 : getIntent().getIntExtra(EXTRA_REMOTE_SHELL_PID, 0);
+        loadDirectory(directory != null && directory.startsWith("/") ? directory : ".", true, remoteShellPid);
         if (savedInstanceState == null && getIntent().getBooleanExtra(EXTRA_SHOW_TRANSFERS, false)) showTransfers();
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (mPath != null) outState.putString("directory", mPath);
     }
 
     @Override
@@ -434,23 +465,16 @@ public class SftpBrowserActivity extends Activity {
     // Browser
 
     private void loadDirectory(@NonNull String path) {
-        runTask(client -> {
-            String realPath = client.realPath(path);
-            List<Item> items = new ArrayList<>();
-            for (SftpClient.Entry entry : client.list(realPath)) {
-                String itemPath = SftpPaths.join(realPath, entry.name);
-                boolean isDirectory = entry.attributes.isDirectory();
-                if (entry.attributes.isSymlink()) {
-                    try {
-                        isDirectory = client.stat(itemPath).isDirectory();
-                    } catch (IOException ignored) {
-                        // A broken symlink.
-                    }
-                }
-                items.add(new Item(entry, itemPath, isDirectory));
-            }
-            return new Object[]{realPath, items};
-        }, result -> {
+        loadDirectory(path, false);
+    }
+
+    private void loadDirectory(@NonNull String path, boolean fallbackToHome) {
+        loadDirectory(path, fallbackToHome, 0);
+    }
+
+    private void loadDirectory(@NonNull String path, boolean fallbackToHome, int remoteShellPid) {
+        runTask(client -> remoteShellPid > 0 ? readInitialDirectory(client, path, remoteShellPid)
+            : readDirectory(client, path, fallbackToHome), result -> {
             mPath = (String) result[0];
             mSelection.clear();
             invalidateOptionsMenu();
@@ -460,6 +484,49 @@ public class SftpBrowserActivity extends Activity {
             mListView.setSelection(0);
             updateTitle();
         });
+    }
+
+    static Object[] readInitialDirectory(SftpClient client, String fallbackDirectory, int remoteShellPid) throws IOException {
+        if (remoteShellPid > 0) {
+            try {
+                // Query the actual login shell through SFTP, without writing to its terminal.
+                String directory = client.realPath("/proc/" + remoteShellPid + "/cwd");
+                return readDirectory(client, directory, true);
+            } catch (SftpClient.SftpException e) {
+                if (e.status != SftpClient.SSH_FX_NO_SUCH_FILE && e.status != SftpClient.SSH_FX_PERMISSION_DENIED
+                    && e.status != SftpClient.SSH_FX_FAILURE) throw e;
+                // No procfs (or a restricted SFTP root): use an OSC 7 report if available.
+            }
+        }
+        return readDirectory(client, fallbackDirectory, true);
+    }
+
+    /** List a directory; only an initial shell-reported directory may fall back to home. */
+    static Object[] readDirectory(SftpClient client, String path, boolean fallbackToHome) throws IOException {
+        if (fallbackToHome && !path.equals(".")) {
+            try {
+                return readDirectory(client, path, false);
+            } catch (SftpClient.SftpException e) {
+                if (e.status != SftpClient.SSH_FX_NO_SUCH_FILE && e.status != SftpClient.SSH_FX_PERMISSION_DENIED
+                    && e.status != SftpClient.SSH_FX_FAILURE) throw e;
+                return readDirectory(client, ".", false);
+            }
+        }
+        String realPath = client.realPath(path);
+        List<Item> items = new ArrayList<>();
+        for (SftpClient.Entry entry : client.list(realPath)) {
+            String itemPath = SftpPaths.join(realPath, entry.name);
+            boolean isDirectory = entry.attributes.isDirectory();
+            if (entry.attributes.isSymlink()) {
+                try {
+                    isDirectory = client.stat(itemPath).isDirectory();
+                } catch (IOException ignored) {
+                    // A broken symlink.
+                }
+            }
+            items.add(new Item(entry, itemPath, isDirectory));
+        }
+        return new Object[]{realPath, items};
     }
 
     /** Show the items, sorted with directories first, with or without hidden files. */

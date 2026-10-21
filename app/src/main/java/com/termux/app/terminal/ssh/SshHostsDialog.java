@@ -26,6 +26,7 @@ import com.termux.app.TermuxActivity;
 import com.termux.app.terminal.sftp.SftpBrowserActivity;
 import com.termux.app.terminal.tabs.TerminalTabsController;
 import com.termux.shared.logger.Logger;
+import com.termux.terminal.TerminalSession;
 
 import java.io.File;
 import java.io.IOException;
@@ -123,7 +124,14 @@ public final class SshHostsDialog {
         labels.add(activity.getString(R.string.action_ssh_connect));
         actions.add(() -> SshConnector.connect(activity, item.name));
         labels.add(activity.getString(R.string.action_sftp_browse_files));
-        actions.add(() -> SftpBrowserActivity.start(activity, item.name, SshConnector.findControlPath(item.name)));
+        actions.add(() -> {
+            TerminalSession session = activity.getCurrentSession();
+            if (item.name.equals(SshConnector.getHostName(session))) {
+                SftpBrowserActivity.startForSession(activity, item.name, session);
+            } else {
+                SftpBrowserActivity.start(activity, item.name, SshConnector.findControlPath(item.name));
+            }
+        });
         if (item.host != null) {
             labels.add(activity.getString(R.string.action_ssh_edit_host));
             actions.add(() -> showHostDialog(activity, item.host));
