@@ -96,6 +96,14 @@ public final class TerminalView extends View {
     CharSequence mComposingText = "";
 
     /**
+     * The text the IME was composing that {@link #flushComposingText()} already sent to the
+     * terminal ahead of a key not going through the IME, and that the IME has not committed yet.
+     * What the IME then commits or composes is sent as the difference from it, so it is not sent
+     * twice.
+     */
+    private String mComposingTextSent = "";
+
+    /**
      * Incremented to make the input connections created before it was incremented ignore text the
      * IME still sends them, see {@link #discardComposingText()}.
      */
@@ -304,7 +312,7 @@ public final class TerminalView extends View {
         mTopRow = 0;
 
         // Text being composed for the previous session is discarded and not sent to the new one.
-        if (mComposingText.length() > 0) discardComposingText();
+        if (mComposingText.length() > 0 || mComposingTextSent.length() > 0) discardComposingText();
 
         mTermSession = session;
         mEmulator = null;
@@ -381,7 +389,7 @@ public final class TerminalView extends View {
                 super.finishComposingText();
                 setComposingTextPreview("");
 
-                sendTextToTerminal(getEditable());
+                sendCommittedText(getEditable());
                 getEditable().clear();
                 return true;
             }
@@ -398,7 +406,7 @@ public final class TerminalView extends View {
                 if (mEmulator == null) return true;
 
                 Editable content = getEditable();
-                sendTextToTerminal(content);
+                sendCommittedText(content);
                 content.clear();
                 return true;
             }
@@ -410,7 +418,13 @@ public final class TerminalView extends View {
                 }
                 if (isDiscarded()) return true;
                 super.setComposingText(text, newCursorPosition);
-                setComposingTextPreview(text);
+                if (mComposingTextSent.length() > 0) {
+                    // The composing text was already sent ahead of a key, so the terminal is kept
+                    // up to date with it instead of drawing it over the cursor.
+                    sendTextChange(text);
+                } else {
+                    setComposingTextPreview(text);
+                }
                 return true;
             }
 
@@ -425,63 +439,113 @@ public final class TerminalView extends View {
                 return super.deleteSurroundingText(leftLength, rightLength);
             }
 
-            void sendTextToTerminal(CharSequence text) {
-                stopTextSelectionMode();
-                final int textLengthInChars = text.length();
-                for (int i = 0; i < textLengthInChars; i++) {
-                    char firstChar = text.charAt(i);
-                    int codePoint;
-                    if (Character.isHighSurrogate(firstChar)) {
-                        if (++i < textLengthInChars) {
-                            codePoint = Character.toCodePoint(firstChar, text.charAt(i));
-                        } else {
-                            // At end of string, with no low surrogate following the high:
-                            codePoint = TerminalEmulator.UNICODE_REPLACEMENT_CHAR;
-                        }
-                    } else {
-                        codePoint = firstChar;
-                    }
+        };
+    }
 
-                    // Check onKeyDown() for details.
-                    if (mClient.readShiftKey())
-                        codePoint = Character.toUpperCase(codePoint);
+    /** Send text the IME committed, less the part of it {@link #flushComposingText()} already sent. */
+    void sendCommittedText(CharSequence text) {
+        if (mComposingTextSent.length() > 0) {
+            sendTextChange(text);
+            mComposingTextSent = "";
+        } else {
+            sendImeText(text);
+        }
+    }
 
-                    boolean ctrlHeld = false;
-                    if (codePoint <= 31 && codePoint != 27) {
-                        if (codePoint == '\n') {
-                            // The AOSP keyboard and descendants seems to send \n as text when the enter key is pressed,
-                            // instead of a key event like most other keyboard apps. A terminal expects \r for the enter
-                            // key (although when icrnl is enabled this doesn't make a difference - run 'stty -icrnl' to
-                            // check the behaviour).
-                            codePoint = '\r';
-                        }
+    /**
+     * Send the backspaces and text that turn {@link #mComposingTextSent} into {@code text}, which
+     * is the composing text now, and remember {@code text} as sent.
+     */
+    private void sendTextChange(CharSequence text) {
+        String newText = text.toString();
+        int common = commonPrefixLength(mComposingTextSent, newText);
+        int backspaces = Character.codePointCount(mComposingTextSent, common, mComposingTextSent.length());
+        if (backspaces > 0 && mTermSession != null) {
+            stopTextSelectionMode();
+            String backspace = KeyHandler.getCode(KeyEvent.KEYCODE_DEL, 0, false, false);
+            for (int i = 0; i < backspaces; i++) mTermSession.write(backspace);
+        }
+        sendImeText(newText.substring(common));
+        mComposingTextSent = newText;
+    }
 
-                        // E.g. penti keyboard for ctrl input.
-                        ctrlHeld = true;
-                        switch (codePoint) {
-                            case 31:
-                                codePoint = '_';
-                                break;
-                            case 30:
-                                codePoint = '^';
-                                break;
-                            case 29:
-                                codePoint = ']';
-                                break;
-                            case 28:
-                                codePoint = '\\';
-                                break;
-                            default:
-                                codePoint += 96;
-                                break;
-                        }
-                    }
+    /** The length of the common start of {@code a} and {@code b}, not ending between the two chars of a surrogate pair. */
+    private static int commonPrefixLength(String a, String b) {
+        int max = Math.min(a.length(), b.length());
+        int length = 0;
+        while (length < max && a.charAt(length) == b.charAt(length)) length++;
+        if (length > 0 && length < max && Character.isHighSurrogate(a.charAt(length - 1))) length--;
+        return length;
+    }
 
-                    inputCodePoint(codePoint, ctrlHeld, false);
+    /**
+     * Send the text the IME is composing to the terminal before a key that does not go through the
+     * IME, e.g. Enter on a hardware keyboard: IMEs commit the last syllable only after passing such
+     * a key on, which put it after the new line. The IME keeps composing it, so what it commits is
+     * sent as the difference from the text sent here, see {@link #mComposingTextSent}.
+     */
+    void flushComposingText() {
+        if (mComposingText.length() == 0) return;
+        String text = mComposingText.toString();
+        setComposingTextPreview("");
+        sendTextChange(text);
+    }
+
+    /** Send text from the IME to the terminal, code point by code point. */
+    private void sendImeText(CharSequence text) {
+        stopTextSelectionMode();
+        final int textLengthInChars = text.length();
+        for (int i = 0; i < textLengthInChars; i++) {
+            char firstChar = text.charAt(i);
+            int codePoint;
+            if (Character.isHighSurrogate(firstChar)) {
+                if (++i < textLengthInChars) {
+                    codePoint = Character.toCodePoint(firstChar, text.charAt(i));
+                } else {
+                    // At end of string, with no low surrogate following the high:
+                    codePoint = TerminalEmulator.UNICODE_REPLACEMENT_CHAR;
+                }
+            } else {
+                codePoint = firstChar;
+            }
+
+            // Check onKeyDown() for details.
+            if (mClient.readShiftKey())
+                codePoint = Character.toUpperCase(codePoint);
+
+            boolean ctrlHeld = false;
+            if (codePoint <= 31 && codePoint != 27) {
+                if (codePoint == '\n') {
+                    // The AOSP keyboard and descendants seems to send \n as text when the enter key is pressed,
+                    // instead of a key event like most other keyboard apps. A terminal expects \r for the enter
+                    // key (although when icrnl is enabled this doesn't make a difference - run 'stty -icrnl' to
+                    // check the behaviour).
+                    codePoint = '\r';
+                }
+
+                // E.g. penti keyboard for ctrl input.
+                ctrlHeld = true;
+                switch (codePoint) {
+                    case 31:
+                        codePoint = '_';
+                        break;
+                    case 30:
+                        codePoint = '^';
+                        break;
+                    case 29:
+                        codePoint = ']';
+                        break;
+                    case 28:
+                        codePoint = '\\';
+                        break;
+                    default:
+                        codePoint += 96;
+                        break;
                 }
             }
 
-        };
+            inputCodePoint(codePoint, ctrlHeld, false, true);
+        }
     }
 
     @Override
@@ -582,6 +646,7 @@ public final class TerminalView extends View {
      */
     void discardComposingText() {
         setComposingTextPreview("");
+        mComposingTextSent = "";
         mInputConnectionGeneration++;
         InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
         if (imm != null) imm.restartInput(this);
@@ -858,6 +923,7 @@ public final class TerminalView extends View {
         } else if (event.isSystem() && (!mClient.shouldBackButtonBeMappedToEscape() || keyCode != KeyEvent.KEYCODE_BACK)) {
             return super.onKeyDown(keyCode, event);
         } else if (event.getAction() == KeyEvent.ACTION_MULTIPLE && keyCode == KeyEvent.KEYCODE_UNKNOWN) {
+            flushComposingText();
             mTermSession.write(event.getCharacters());
             return true;
         }
@@ -920,6 +986,14 @@ public final class TerminalView extends View {
     }
 
     public void inputCodePoint(int codePoint, boolean controlDownFromEvent, boolean leftAltDownFromEvent) {
+        inputCodePoint(codePoint, controlDownFromEvent, leftAltDownFromEvent, false);
+    }
+
+    /**
+     * Input a code point, which is text the IME committed if {@code fromIme}. Anything else first
+     * sends the text the IME is composing, see {@link #flushComposingText()}.
+     */
+    void inputCodePoint(int codePoint, boolean controlDownFromEvent, boolean leftAltDownFromEvent, boolean fromIme) {
         if (TERMINAL_VIEW_KEY_LOGGING_ENABLED) {
             mClient.logInfo(LOG_TAG, "inputCodePoint(codePoint=" + codePoint + ", controlDownFromEvent=" + controlDownFromEvent + ", leftAltDownFromEvent="
                 + leftAltDownFromEvent + ")");
@@ -933,6 +1007,8 @@ public final class TerminalView extends View {
 
         final boolean controlDown = controlDownFromEvent || mClient.readControlKey();
         final boolean altDown = leftAltDownFromEvent || mClient.readAltKey();
+
+        if (!fromIme) flushComposingText();
 
         if (mClient.onCodePoint(codePoint, controlDown, mTermSession)) return;
 
@@ -993,6 +1069,7 @@ public final class TerminalView extends View {
         TerminalEmulator term = mTermSession.getEmulator();
         String code = KeyHandler.getCode(keyCode, keyMod, term.isCursorKeysApplicationMode(), term.isKeypadApplicationMode());
         if (code == null) return false;
+        flushComposingText();
         mTermSession.write(code);
         return true;
     }

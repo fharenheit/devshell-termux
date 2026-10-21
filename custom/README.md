@@ -12,6 +12,7 @@
 | 내용 | 위치 |
 |---|---|
 | 블루투스/하드웨어 키보드 한글(IME 조합) 입력, 조합 중인 글자 표시 | `custom/patches/0001-*.patch` (`TerminalView.java`, `TerminalRenderer.java`) |
+| 한글 조합 중 Enter 등 IME를 거치지 않는 키를 누르면 조합 중 글자를 먼저 보내고, 이후 IME가 커밋하는 글자는 보낸 것과의 차이만 전송(입력 재시작 없음) | `custom/patches/0043-*.patch` (`TerminalView.java`), 포크 전용 `app/src/test/java/com/termux/view/TerminalViewImeTest.java` |
 | D2Coding ligature 글꼴을 기본 터미널 글꼴로 사용 | `custom/patches/0002-*.patch` (`TermuxTerminalSessionClient.java`) + 글꼴 파일 |
 | 글꼴 목록(⚙ 메뉴 → Font, 설정 → Terminal View → Font): 터미널과 같은 방식으로 그리는 미리보기, 글꼴별 지원 문자 표시, 큰 글꼴은 처음 적용할 때 `custom/fonts/`에서 내려받기(SHA-256 확인). 고른 글꼴을 `~/.termux/font.ttf`로 복사. 자세한 내용은 `custom/docs/fonts-and-settings.md` | `custom/patches/0011-*.patch` + `app/.../terminal/fonts/`, `app/src/main/assets/fonts/`, `custom/fonts/` |
 | 터미널 글자 크기: 기본 extra keys에 A+(PGUP 오른쪽), A−(PGDN 오른쪽)를 추가하고, A+/A−, 두 손가락 확대/축소, Ctrl+Alt+/−는 현재 탭의 화면에만 적용(탭마다 따로, 저장하지 않음, 앱을 다시 열면 저장된 크기). 저장되는 크기는 Font 메뉴의 Size… 또는 설정 → Terminal View → Font size에서만 바꿈 | `custom/patches/0016-*.patch`, `0024-*.patch` (`TermuxPropertyConstants.java`, `ExtraKeysConstants.java`, `TermuxTerminalExtraKeys.java`, `TermuxTerminalViewClient.java`, `termux_terminal_view_preferences.xml`, `TerminalViewPreferencesFragment.java`) + `app/.../terminal/fonts/TerminalFontSizeDialog.java` |
