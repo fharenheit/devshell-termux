@@ -36,7 +36,7 @@ import java.util.List;
 
 /**
  * A panel of special keys in tabs above the extra keys, opened by the `SPECIAL_KEYS` extra key.
- * Tapping a key sends it to the terminal and closes the panel. A long press shows what the key
+ * Tapping a key sends it to the terminal and keeps the panel open. A long press shows what the key
  * sends, and adds it to or removes it from the favorites, the last tab.
  */
 public class SpecialKeysPanel {
@@ -259,10 +259,7 @@ public class SpecialKeysPanel {
         keycap.setCornerRadius(dp(8));
         keycap.setStroke(Math.max(1, dp(1)), KEY_BORDER_COLOR);
         button.setBackground(new InsetDrawable(keycap, 0));
-        button.setOnClickListener(v -> {
-            send(key);
-            hide();
-        });
+        button.setOnClickListener(v -> send(key));
         button.setOnLongClickListener(v -> {
             showKeyDialog(key);
             return true;
@@ -289,10 +286,7 @@ public class SpecialKeysPanel {
         new AlertDialog.Builder(mActivity)
             .setTitle(key.label)
             .setMessage(message)
-            .setPositiveButton(R.string.action_special_key_send, (d, which) -> {
-                send(key);
-                hide();
-            })
+            .setPositiveButton(R.string.action_special_key_send, (d, which) -> send(key))
             .setNeutralButton(favorite ? R.string.action_special_key_remove_favorite : R.string.action_special_key_add_favorite, (d, which) -> {
                 try {
                     SpecialKeyFavorites.toggle(key.macro);

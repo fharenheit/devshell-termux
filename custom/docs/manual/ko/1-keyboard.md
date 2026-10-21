@@ -28,7 +28,7 @@
 <img src="../images/ko/02_special_keys.png" width="270" alt="특수 키 패널"> <img src="../images/ko/04_special_keys_tmux.png" width="270" alt="tmux 탭"> <img src="../images/ko/03_special_key_info.png" width="270" alt="키 설명">
 
 1. 탭을 좌우로 밀어 원하는 묶음을 고릅니다(가운데: tmux 탭).
-2. 키를 누르면 보내고 패널이 닫힙니다. 하단 키에서 켜 둔 Ctrl/Alt가 함께 전송됩니다.
+2. 키를 누르면 보내고 패널을 유지해 연속으로 누를 수 있습니다. ✕ 또는 ⊞ 키를 다시 누르면 닫힙니다. 하단 키에서 켜 둔 Ctrl/Alt가 함께 전송됩니다.
 3. 키를 **길게 누르면** 보내는 키의 설명이 나옵니다(오른쪽). **★에 추가**를 누르면 ★ 탭에 모입니다.
 
 ## 하드웨어 키보드

@@ -28,7 +28,7 @@ Tap **⊞** at the right end of the extra keys. It has 10 tabs (Frequent, Ctrl, 
 <img src="../images/en/02_special_keys.png" width="270" alt="Special keys panel"> <img src="../images/en/04_special_keys_tmux.png" width="270" alt="tmux tab"> <img src="../images/en/03_special_key_info.png" width="270" alt="Key description">
 
 1. Swipe the tabs to pick a group (middle: the tmux tab).
-2. Tap a key to send it and close the panel. Ctrl/Alt turned on in the extra keys are sent with it.
+2. Tap a key to send it and keep the panel open for repeated presses. Tap ✕ or the ⊞ key again to close it. Ctrl/Alt turned on in the extra keys are sent with it.
 3. **Long press** a key to see what it sends (right). **Add to ★** collects it in the ★ tab.
 
 ## Hardware keyboard
