@@ -13,6 +13,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
+import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -29,6 +30,7 @@ import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityManager;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
+import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
@@ -46,7 +48,7 @@ import com.termux.view.textselection.TextSelectionCursorController;
 public final class TerminalView extends View {
 
     /** Log terminal view key and IME events. */
-    static boolean TERMINAL_VIEW_KEY_LOGGING_ENABLED = false;
+    private static boolean TERMINAL_VIEW_KEY_LOGGING_ENABLED = false;
 
     /** The currently displayed terminal session, whose emulator is {@link #mEmulator}. */
     public TerminalSession mTermSession;
@@ -94,13 +96,10 @@ public final class TerminalView extends View {
     CharSequence mComposingText = "";
 
     /**
-     * Incremented by {@link #onCreateInputConnection(EditorInfo)} to make the input connections
-     * created before ignore text the IME still sends them, see {@link #restartImeInput()}.
+     * Incremented to make the input connections created before it was incremented ignore text the
+     * IME still sends them, see {@link #discardComposingText()}.
      */
-    int mInputConnectionGeneration = 0;
-
-    /** The input connection last created by {@link #onCreateInputConnection(EditorInfo)}. */
-    private TerminalInputConnection mInputConnection;
+    private int mInputConnectionGeneration = 0;
 
     /** The {@link Configuration#hardKeyboardHidden} value the current input connection was created with. */
     private int mHardKeyboardHidden = Configuration.HARDKEYBOARDHIDDEN_UNDEFINED;
@@ -304,9 +303,8 @@ public final class TerminalView extends View {
         if (session == mTermSession) return false;
         mTopRow = 0;
 
-        // Text being composed for the previous session is discarded and not sent to the new one,
-        // and the IME does not take the text it committed to it to be before the cursor.
-        if (mComposingText.length() > 0 || (mInputConnection != null && mInputConnection.hasText())) discardComposingText();
+        // Text being composed for the previous session is discarded and not sent to the new one.
+        if (mComposingText.length() > 0) discardComposingText();
 
         mTermSession = session;
         mEmulator = null;
@@ -365,13 +363,125 @@ public final class TerminalView extends View {
         // keyboard on Android TV (see https://github.com/termux/termux-app/issues/221).
         outAttrs.imeOptions = EditorInfo.IME_FLAG_NO_FULLSCREEN;
 
-        // Android can replace a connection before its delayed close/commit arrives. Only the
-        // newest connection may send text or update the composing preview. Finish a still-current
-        // composition first so switching keyboards does not lose the pending syllable.
-        if (mInputConnection != null) mInputConnection.finishComposingText();
-        mInputConnection = new TerminalInputConnection(this, ++mInputConnectionGeneration);
-        setComposingTextPreview("");
-        return mInputConnection;
+        final int inputConnectionGeneration = mInputConnectionGeneration;
+
+        return new BaseInputConnection(this, true) {
+
+            /** Whether text the IME sends should be dropped, since it was discarded by {@link #discardComposingText()}. */
+            boolean isDiscarded() {
+                if (inputConnectionGeneration == mInputConnectionGeneration) return false;
+                getEditable().clear();
+                return true;
+            }
+
+            @Override
+            public boolean finishComposingText() {
+                if (TERMINAL_VIEW_KEY_LOGGING_ENABLED) mClient.logInfo(LOG_TAG, "IME: finishComposingText()");
+                if (isDiscarded()) return true;
+                super.finishComposingText();
+                setComposingTextPreview("");
+
+                sendTextToTerminal(getEditable());
+                getEditable().clear();
+                return true;
+            }
+
+            @Override
+            public boolean commitText(CharSequence text, int newCursorPosition) {
+                if (TERMINAL_VIEW_KEY_LOGGING_ENABLED) {
+                    mClient.logInfo(LOG_TAG, "IME: commitText(\"" + text + "\", " + newCursorPosition + ")");
+                }
+                if (isDiscarded()) return true;
+                super.commitText(text, newCursorPosition);
+                setComposingTextPreview("");
+
+                if (mEmulator == null) return true;
+
+                Editable content = getEditable();
+                sendTextToTerminal(content);
+                content.clear();
+                return true;
+            }
+
+            @Override
+            public boolean setComposingText(CharSequence text, int newCursorPosition) {
+                if (TERMINAL_VIEW_KEY_LOGGING_ENABLED) {
+                    mClient.logInfo(LOG_TAG, "IME: setComposingText(\"" + text + "\", " + newCursorPosition + ")");
+                }
+                if (isDiscarded()) return true;
+                super.setComposingText(text, newCursorPosition);
+                setComposingTextPreview(text);
+                return true;
+            }
+
+            @Override
+            public boolean deleteSurroundingText(int leftLength, int rightLength) {
+                if (TERMINAL_VIEW_KEY_LOGGING_ENABLED) {
+                    mClient.logInfo(LOG_TAG, "IME: deleteSurroundingText(" + leftLength + ", " + rightLength + ")");
+                }
+                // The stock Samsung keyboard with 'Auto check spelling' enabled sends leftLength > 1.
+                KeyEvent deleteKey = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DEL);
+                for (int i = 0; i < leftLength; i++) sendKeyEvent(deleteKey);
+                return super.deleteSurroundingText(leftLength, rightLength);
+            }
+
+            void sendTextToTerminal(CharSequence text) {
+                stopTextSelectionMode();
+                final int textLengthInChars = text.length();
+                for (int i = 0; i < textLengthInChars; i++) {
+                    char firstChar = text.charAt(i);
+                    int codePoint;
+                    if (Character.isHighSurrogate(firstChar)) {
+                        if (++i < textLengthInChars) {
+                            codePoint = Character.toCodePoint(firstChar, text.charAt(i));
+                        } else {
+                            // At end of string, with no low surrogate following the high:
+                            codePoint = TerminalEmulator.UNICODE_REPLACEMENT_CHAR;
+                        }
+                    } else {
+                        codePoint = firstChar;
+                    }
+
+                    // Check onKeyDown() for details.
+                    if (mClient.readShiftKey())
+                        codePoint = Character.toUpperCase(codePoint);
+
+                    boolean ctrlHeld = false;
+                    if (codePoint <= 31 && codePoint != 27) {
+                        if (codePoint == '\n') {
+                            // The AOSP keyboard and descendants seems to send \n as text when the enter key is pressed,
+                            // instead of a key event like most other keyboard apps. A terminal expects \r for the enter
+                            // key (although when icrnl is enabled this doesn't make a difference - run 'stty -icrnl' to
+                            // check the behaviour).
+                            codePoint = '\r';
+                        }
+
+                        // E.g. penti keyboard for ctrl input.
+                        ctrlHeld = true;
+                        switch (codePoint) {
+                            case 31:
+                                codePoint = '_';
+                                break;
+                            case 30:
+                                codePoint = '^';
+                                break;
+                            case 29:
+                                codePoint = ']';
+                                break;
+                            case 28:
+                                codePoint = '\\';
+                                break;
+                            default:
+                                codePoint += 96;
+                                break;
+                        }
+                    }
+
+                    inputCodePoint(codePoint, ctrlHeld, false);
+                }
+            }
+
+        };
     }
 
     @Override
@@ -471,43 +581,10 @@ public final class TerminalView extends View {
      * commit to it while finishing the old input.
      */
     void discardComposingText() {
-        if (mInputConnection != null) mInputConnection.forgetText();
         setComposingTextPreview("");
-        restartImeInput();
-    }
-
-    /**
-     * Send the text the IME is composing to the terminal and start input again with an empty text,
-     * if the IME committed or is composing text, before something else is sent to the terminal.
-     * Otherwise the IME could later replace text before the cursor that it takes to be its own,
-     * such as the last word typed in Korean when switching back from English, and send it again.
-     */
-    void finishImeInput() {
-        TerminalInputConnection connection = mInputConnection;
-        if (connection == null || !connection.hasText()) return;
-        connection.finishComposingText();
-        restartImeInput();
-    }
-
-    /**
-     * Start input again, so the IME forgets the text before the cursor. The new input connection
-     * {@link #onCreateInputConnection(EditorInfo)} then creates makes the current one ignore the
-     * text the IME may still send it.
-     * <p>
-     * {@link InputMethodManager#restartInput(View)} creates no new connection while this view is
-     * not the one the IME serves, e.g. while the window has no focus, and the IME then keeps using
-     * the current connection. It must not be discarded in that case, since all input the IME sends
-     * from then on would be dropped, which is not recovered from until a new connection is created.
-     * Its text is forgotten instead, which keeps input working.
-     */
-    private void restartImeInput() {
-        TerminalInputConnection connection = mInputConnection;
+        mInputConnectionGeneration++;
         InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
         if (imm != null) imm.restartInput(this);
-        if (connection != null && mInputConnection == connection) {
-            if (TERMINAL_VIEW_KEY_LOGGING_ENABLED) mClient.logInfo(LOG_TAG, "restartInput() created no new input connection, keeping the current one");
-            connection.forgetText();
-        }
     }
 
     @Override
@@ -517,8 +594,9 @@ public final class TerminalView extends View {
         // when it is connected or disconnected, since TermuxActivity handles keyboard config changes.
         if (newConfig.hardKeyboardHidden != mHardKeyboardHidden) {
             mHardKeyboardHidden = newConfig.hardKeyboardHidden;
-            if (mInputConnection != null) mInputConnection.finishComposingText();
-            discardComposingText();
+            setComposingTextPreview("");
+            InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (imm != null) imm.restartInput(this);
         }
     }
 
@@ -780,7 +858,6 @@ public final class TerminalView extends View {
         } else if (event.isSystem() && (!mClient.shouldBackButtonBeMappedToEscape() || keyCode != KeyEvent.KEYCODE_BACK)) {
             return super.onKeyDown(keyCode, event);
         } else if (event.getAction() == KeyEvent.ACTION_MULTIPLE && keyCode == KeyEvent.KEYCODE_UNKNOWN) {
-            finishImeInput();
             mTermSession.write(event.getCharacters());
             return true;
         }
@@ -843,14 +920,6 @@ public final class TerminalView extends View {
     }
 
     public void inputCodePoint(int codePoint, boolean controlDownFromEvent, boolean leftAltDownFromEvent) {
-        inputCodePoint(codePoint, controlDownFromEvent, leftAltDownFromEvent, false);
-    }
-
-    /**
-     * Input a code point, which is text the IME committed if {@code fromIme}. Anything else first
-     * sends the text the IME is composing, see {@link #finishImeInput()}.
-     */
-    void inputCodePoint(int codePoint, boolean controlDownFromEvent, boolean leftAltDownFromEvent, boolean fromIme) {
         if (TERMINAL_VIEW_KEY_LOGGING_ENABLED) {
             mClient.logInfo(LOG_TAG, "inputCodePoint(codePoint=" + codePoint + ", controlDownFromEvent=" + controlDownFromEvent + ", leftAltDownFromEvent="
                 + leftAltDownFromEvent + ")");
@@ -864,8 +933,6 @@ public final class TerminalView extends View {
 
         final boolean controlDown = controlDownFromEvent || mClient.readControlKey();
         final boolean altDown = leftAltDownFromEvent || mClient.readAltKey();
-
-        if (!fromIme) finishImeInput();
 
         if (mClient.onCodePoint(codePoint, controlDown, mTermSession)) return;
 
@@ -926,16 +993,8 @@ public final class TerminalView extends View {
         TerminalEmulator term = mTermSession.getEmulator();
         String code = KeyHandler.getCode(keyCode, keyMod, term.isCursorKeysApplicationMode(), term.isKeypadApplicationMode());
         if (code == null) return false;
-        finishImeInput();
         mTermSession.write(code);
         return true;
-    }
-
-    /** Write the code of a key without modifiers to the terminal, like backspace for text an IME deleted. */
-    void writeKeyCode(int keyCode) {
-        TerminalEmulator term = mTermSession.getEmulator();
-        String code = KeyHandler.getCode(keyCode, 0, term.isCursorKeysApplicationMode(), term.isKeypadApplicationMode());
-        if (code != null) mTermSession.write(code);
     }
 
     public boolean handleKeyCodeAction(int keyCode, int keyMod) {
