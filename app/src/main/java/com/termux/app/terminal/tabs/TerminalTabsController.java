@@ -736,16 +736,10 @@ public class TerminalTabsController {
             return;
         }
 
-        new AlertDialog.Builder(mActivity)
-            .setIcon(android.R.drawable.ic_dialog_alert)
-            .setMessage(R.string.title_confirm_kill_process)
-            .setPositiveButton(android.R.string.yes, (dialog, id) -> {
-                dialog.dismiss();
-                sSessionsToRemoveOnExit.add(session);
-                session.finishIfRunning();
-            })
-            .setNegativeButton(android.R.string.no, null)
-            .show();
+        SessionCloseDialog.show(mActivity, () -> {
+            sSessionsToRemoveOnExit.add(session);
+            session.finishIfRunning();
+        });
     }
 
     /**
