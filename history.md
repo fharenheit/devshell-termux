@@ -7,6 +7,17 @@
 - **Added**: 새 기능, **Changed**: 동작·문서·패치 변경, **Fixed**: 버그 수정
 - "패치 갱신" 커밋은 업스트림 파일을 고친 커밋 뒤에 `custom/update-patches.sh`로 `custom/patches/`를 다시 만든 것입니다.
 
+## v0.118.3-ko.39 (2026-10-24)
+
+| 커밋 | 내용 |
+|---|---|
+| [`3f529e0`](https://github.com/fharenheit/devshell-termux/commit/3f529e0) | Changed: 로컬 셸 첫 화면 제목에 릴리즈 버전(`.github/release-notes/`의 최신 태그)과 빌드 날짜 표시, "Termux 기반 터미널" 문구와 설명서 링크 제거. `app/build.gradle`의 `RELEASE_VERSION`, `BUILD_DATE` |
+| [`770e827`](https://github.com/fharenheit/devshell-termux/commit/770e827) | Changed: 위 변경에 맞춰 패치 갱신(`0048`) |
+| [`9724ecb`](https://github.com/fharenheit/devshell-termux/commit/9724ecb) | Fixed: README의 셸 첫 화면 패치 번호 |
+| [`e371502`](https://github.com/fharenheit/devshell-termux/commit/e371502) | Changed: 하단 Push 키를 `GIT_PUSH` 키(⇡ Push)로 바꾸고, 누르면 Main에 Push / 현재 브랜치에 Push / 새로운 브랜치에 Push 메뉴. 고른 문구를 입력하고 잠시 뒤 Enter. `PushMenu`, `fork_push.xml` |
+| [`3f2d134`](https://github.com/fharenheit/devshell-termux/commit/3f2d134) | Changed: 위 변경에 맞춰 패치 갱신(`0049`) |
+| [`142a312`](https://github.com/fharenheit/devshell-termux/commit/142a312) | Fixed: README의 Push 메뉴 패치 번호 |
+
 ## v0.118.3-ko.38 (2026-10-24)
 
 | 커밋 | 내용 |
