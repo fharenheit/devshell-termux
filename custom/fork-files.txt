@@ -57,6 +57,7 @@ app/src/main/res/values/fork_ssh_host_key.xml
 app/src/main/res/values/fork_sftp_transfers.xml
 FEATURES.md
 app/src/main/res/values/fork_snippet_defaults.xml
+app/src/main/res/values/fork_push.xml
 termux-shared/src/main/java/com/termux/shared/fork
 app/src/main/java/com/termux/app/terminal/welcome
 app/src/main/res/values/fork_shell_welcome.xml

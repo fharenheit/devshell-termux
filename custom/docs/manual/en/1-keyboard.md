@@ -16,7 +16,7 @@ The two rows of keys below the terminal. They are drawn as keycaps, with an icon
 | **⧉ Copy** | Copy the selection. **Swipe up** to copy the whole screen |
 | **⎘ Paste** | Paste. **Swipe up** to open the [clipboard history](4-snippets-clipboard.md#clipboard-history) |
 | **?** | Types `?` |
-| **Push** | Types `main push` (without Enter) |
+| **⇡ Push** | Opens a menu: Push to main, Push to the current branch, Push to a new branch. The chosen text is typed with Enter |
 | **⊞** | Opens the [special keys panel](#special-keys-panel) |
 
 - Ctrl and Alt are not in the default layout. Use the Ctrl and Alt tabs of the [special keys panel](#special-keys-panel), or add `CTRL` and `ALT` to `extra-keys`.

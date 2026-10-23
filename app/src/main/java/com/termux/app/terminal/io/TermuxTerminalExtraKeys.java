@@ -11,6 +11,7 @@ import com.termux.app.terminal.TermuxTerminalSessionClient;
 import com.termux.app.terminal.TermuxTerminalViewClient;
 import com.termux.app.terminal.clipboard.ClipboardHistory;
 import com.termux.app.terminal.clipboard.TerminalClipboard;
+import com.termux.app.terminal.snippets.PushMenu;
 import com.termux.app.terminal.snippets.SnippetsDialog;
 import com.termux.app.terminal.specialkeys.SpecialKeysPanel;
 import com.termux.shared.terminal.io.TerminalExtraKeys;
@@ -58,6 +59,9 @@ public class TermuxTerminalExtraKeys extends TerminalExtraKeys {
         } else if ("SNIPPETS".equals(key)) {
             if (mTermuxTerminalViewClient != null)
                 SnippetsDialog.show(mTermuxTerminalViewClient.getActivity());
+        } else if (PushMenu.EXTRA_KEY.equals(key)) {
+            if (mTermuxTerminalViewClient != null)
+                PushMenu.show(mTermuxTerminalViewClient.getActivity());
         } else if ("PASTE".equals(key)) {
             if(mTermuxTerminalSessionClient != null)
                 mTermuxTerminalSessionClient.onPasteTextFromClipboard(null);

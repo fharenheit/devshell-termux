@@ -127,6 +127,7 @@ public class ExtraKeysConstants {
             put("FONT_LARGER", "A+");
             put("FONT_SMALLER", "A−"); // U+2212 − MINUS SIGN
             put("SNIPPETS", "⚡"); // Saved commands
+            put("GIT_PUSH", "⇡"); // U+21E1 UPWARDS DASHED ARROW, the menu of push requests
             put("SPECIAL_KEYS", "⊞"); // U+229E SQUARED PLUS, the panel of special keys
             put("COPY", "⧉"); // U+29C9 TWO JOINED SQUARES, copy the selection
             put("COPY_SCREEN", "⧉ all"); // Copy the screen
@@ -194,6 +195,7 @@ public class ExtraKeysConstants {
             put("FONT_LARGER", "A+\nFont");
             put("FONT_SMALLER", "A−\nFont");
             put("SNIPPETS", "⚡\nSnip");
+            put("GIT_PUSH", "⇡\nPush");
         }};
 
         /**

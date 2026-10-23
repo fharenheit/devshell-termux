@@ -28,11 +28,11 @@ public class FontSizeExtraKeysTest {
         Assert.assertEquals("⧉", matrix[0][8].getDisplay());
         Assert.assertEquals("COPY_SCREEN", matrix[0][8].getPopup().getKey());
         Assert.assertEquals("ENTER", matrix[0][9].getKey());
-        // ? types a question mark, and Push types `main push`.
+        // ? types a question mark, and ⇡ opens the menu of push requests.
         Assert.assertEquals("?", matrix[1][1].getKey());
-        Assert.assertTrue(matrix[1][2].isMacro());
-        Assert.assertEquals("main SPACE push", matrix[1][2].getKey());
-        Assert.assertEquals("Push", matrix[1][2].getDisplay());
+        Assert.assertFalse(matrix[1][2].isMacro());
+        Assert.assertEquals("GIT_PUSH", matrix[1][2].getKey());
+        Assert.assertEquals("⇡", matrix[1][2].getDisplay());
         Assert.assertEquals("PGDN", matrix[1][6].getKey());
         Assert.assertEquals("FONT_SMALLER", matrix[1][7].getKey());
         Assert.assertEquals("A−", matrix[1][7].getDisplay());

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="title_push">Push</string>
+    <string name="push_request_main">Push to main</string>
+    <string name="push_request_current_branch">Push to the current branch</string>
+    <string name="push_request_new_branch">Push to a new branch</string>
+</resources>
