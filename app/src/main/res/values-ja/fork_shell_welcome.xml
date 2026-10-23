@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="shell_welcome_title">"DevShell · Termux ベースのターミナル · %1$s"</string>
-    <string name="shell_welcome">"\n マニュアル    %1$s\n リリース      %2$s\n 問題の報告    %3$s\n\n パッケージ    pkg search &lt;名前&gt; · pkg install &lt;名前&gt; · pkg upgrade\n ショートカット ⊞ 特殊キー · ⚙ → SSH · ⚙ → スニペット · Ctrl+Shift+F 検索\n\n パッケージは Termux のリポジトリから取得します。パッケージの問題は Termux に報告してください:\n %4$s"</string>
+    <string name="shell_welcome_title">"DevShell · %1$s · %2$s ビルド"</string>
+    <string name="shell_welcome">"\n リリース      %1$s\n 問題の報告    %2$s\n\n パッケージ    pkg search &lt;名前&gt; · pkg install &lt;名前&gt; · pkg upgrade\n ショートカット ⊞ 特殊キー · ⚙ → SSH · ⚙ → スニペット · Ctrl+Shift+F 検索\n\n パッケージは Termux のリポジトリから取得します。パッケージの問題は Termux に報告してください:\n %3$s"</string>
 </resources>

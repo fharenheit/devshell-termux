@@ -29,7 +29,7 @@
 The local shell of a new tab starts with the DevShell welcome: links to the manual, new versions and issues, how to use `pkg`, and shortcuts. It is in the language of the app.
 
 - The packages (bash, ssh, git and so on) come from the Termux repositories, so report package issues at the Termux link of the welcome. Report app issues at the issues of this repository.
-- The welcome is `~/.termux/motd.sh`, which the app writes again for its language and version.
+- The welcome is `~/.termux/motd.sh`, which the app writes again for its language, release and build date.
   - To change it yourself, delete its `# devshell-managed` line, and the app leaves it alone.
   - To hide it, run `touch ~/.hushlogin`.
 

@@ -23,7 +23,7 @@ import java.nio.charset.StandardCharsets;
  * The welcome message of the local shell, about this app instead of Termux. The login script of
  * Termux shows `~/.termux/motd.sh` if it exists instead of the `$PREFIX/etc/motd` of the
  * termux-tools package, so writing it there keeps it after package upgrades. It is written in the
- * language of the app, and again when that or the version changes. A file without the
+ * language of the app, and again when that, the release or the build date changes. A file without the
  * {@link #MARKER} line is the user's own and is never changed. `~/.hushlogin` still hides it.
  */
 public final class ShellWelcome {
@@ -38,9 +38,9 @@ public final class ShellWelcome {
 
     /** Write the welcome message in a background thread, unless the user has their own. */
     public static void install(@NonNull Context context) {
-        String script = build(context.getString(R.string.shell_welcome_title, BuildConfig.VERSION_NAME),
-            context.getString(R.string.shell_welcome, DevShellInfo.getManualUrl(context), DevShellInfo.RELEASES_URL,
-                DevShellInfo.ISSUES_URL, DevShellInfo.TERMUX_PACKAGES_ISSUES_URL));
+        String script = build(context.getString(R.string.shell_welcome_title, BuildConfig.RELEASE_VERSION, BuildConfig.BUILD_DATE),
+            context.getString(R.string.shell_welcome, DevShellInfo.RELEASES_URL, DevShellInfo.ISSUES_URL,
+                DevShellInfo.TERMUX_PACKAGES_ISSUES_URL));
         File file = new File(TermuxConstants.TERMUX_HOME_DIR_PATH, ".termux/motd.sh");
         new Thread(() -> {
             try {

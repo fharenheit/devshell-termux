@@ -36,6 +36,12 @@ android {
         if (appVersionName) versionName = appVersionName
         validateVersionName(versionName)
 
+        // The release this build belongs to and the day it was built, shown in the welcome message
+        // of the shell. The release is the newest `.github/release-notes/<tag>.md`, since a release
+        // is published from the build of the commit that adds its notes.
+        buildConfigField "String", "RELEASE_VERSION", "\"" + (latestReleaseTag() ?: "v" + versionName) + "\""
+        buildConfigField "String", "BUILD_DATE", "\"" + new Date().format("yyyy-MM-dd", TimeZone.getTimeZone("Asia/Seoul")) + "\""
+
         manifestPlaceholders.TERMUX_PACKAGE_NAME = "com.termux"
         manifestPlaceholders.TERMUX_APP_NAME = "Termux"
         manifestPlaceholders.TERMUX_API_APP_NAME = "Termux:API"
@@ -144,6 +150,18 @@ dependencies {
 
     testImplementation "junit:junit:4.13.2"
     testImplementation "org.robolectric:robolectric:4.4"
+}
+
+/** The newest tag of `.github/release-notes/v*.md`, comparing the numbers in it as numbers, or null. */
+def latestReleaseTag() {
+    def files = rootProject.file(".github/release-notes").listFiles()
+    def tags = (files ?: []).collect { it.name }.findAll { it ==~ /v.+\.md/ }.collect { it - ~/\.md$/ }
+    def key = { String tag -> tag.findAll(/\d+/).collect { it.toInteger() } }
+    return tags.max { a, b ->
+        def x = key(a), y = key(b)
+        for (int i = 0; i < Math.min(x.size(), y.size()); i++) if (x[i] != y[i]) return x[i] <=> y[i]
+        return x.size() <=> y.size()
+    }
 }
 
 task versionName {
