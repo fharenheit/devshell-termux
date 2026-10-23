@@ -1,0 +1,60 @@
+From b30e484344865d099e279f3f1707de920ff65e21 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?=EA=B9=80=EB=B3=91=EA=B3=A4?= <fharenheit@gmail.com>
+Date: Fri, 23 Oct 2026 23:56:18 +0900
+Subject: [PATCH] Added: Download files selected in SSH terminal output
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Long pressing a file name in an ssh tab, like in the output of ls or
+ls -l, and choosing More → Download (SFTP) queues its download. The
+name is resolved against the remote login shell's directory when the
+transfer runs.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ app/src/main/java/com/termux/app/TermuxActivity.java | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/app/src/main/java/com/termux/app/TermuxActivity.java b/app/src/main/java/com/termux/app/TermuxActivity.java
+index 32df2df9..af9080e1 100644
+--- a/app/src/main/java/com/termux/app/TermuxActivity.java
++++ b/app/src/main/java/com/termux/app/TermuxActivity.java
+@@ -44,6 +44,7 @@ import com.termux.shared.settings.preferences.TermuxAppSharedPreferences;
+ import com.termux.app.terminal.TermuxSessionsListViewController;
+ import com.termux.app.terminal.backup.SettingsBackup;
+ import com.termux.app.terminal.links.TerminalLinks;
++import com.termux.app.terminal.sftp.TerminalDownloads;
+ import com.termux.app.terminal.tabs.TerminalSessionNotifications;
+ import com.termux.app.terminal.tabs.TerminalTabsController;
+ import com.termux.app.terminal.io.TerminalToolbarViewPager;
+@@ -190,6 +191,7 @@ public final class TermuxActivity extends Activity implements ServiceConnection
+     private static final int CONTEXT_MENU_OPEN_URL_ID = 12;
+     private static final int CONTEXT_MENU_FIND_ID = 13;
+     private static final int CONTEXT_MENU_OPEN_URL_TAB_ID = 14;
++    private static final int CONTEXT_MENU_DOWNLOAD_ID = 15;
+ 
+     private static final String ARG_TERMINAL_TOOLBAR_TEXT_INPUT = "terminal_toolbar_text_input";
+ 
+@@ -641,6 +643,8 @@ public final class TermuxActivity extends Activity implements ServiceConnection
+             menu.add(Menu.NONE, CONTEXT_MENU_OPEN_URL_ID, Menu.NONE, R.string.action_open_url);
+             menu.add(Menu.NONE, CONTEXT_MENU_OPEN_URL_TAB_ID, Menu.NONE, R.string.action_open_url_tab);
+         }
++        if (TerminalDownloads.canDownload(currentSession, mTerminalView.getStoredSelectedText()))
++            menu.add(Menu.NONE, CONTEXT_MENU_DOWNLOAD_ID, Menu.NONE, R.string.action_terminal_download);
+         menu.add(Menu.NONE, CONTEXT_MENU_FIND_ID, Menu.NONE, R.string.action_terminal_search);
+         menu.add(Menu.NONE, CONTEXT_MENU_SELECT_URL_ID, Menu.NONE, R.string.action_select_url);
+         menu.add(Menu.NONE, CONTEXT_MENU_SHARE_TRANSCRIPT_ID, Menu.NONE, R.string.action_share_transcript);
+@@ -679,6 +683,9 @@ public final class TermuxActivity extends Activity implements ServiceConnection
+                     TerminalLinks.openInTab(this, TerminalLinks.findUrls(mTerminalView.getStoredSelectedText()),
+                         mTerminalTabsController::openWebTab);
+                 return true;
++            case CONTEXT_MENU_DOWNLOAD_ID:
++                if (session != null) TerminalDownloads.download(this, session, mTerminalView.getStoredSelectedText());
++                return true;
+             case CONTEXT_MENU_FIND_ID:
+                 if (mTerminalTabsController != null) mTerminalTabsController.getSearchBar().show();
+                 return true;
+-- 
+2.43.0
+
