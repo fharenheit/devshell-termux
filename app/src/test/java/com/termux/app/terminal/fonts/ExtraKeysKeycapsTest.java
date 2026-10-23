@@ -36,7 +36,8 @@ public class ExtraKeysKeycapsTest {
         Assert.assertEquals("⇤\nHome", matrix[0][3].getDisplay());
         Assert.assertEquals("⇞\nPgUp", matrix[0][6].getDisplay());
         Assert.assertEquals("⧉\nCopy", matrix[0][8].getDisplay());
-        Assert.assertEquals("Ctrl", matrix[1][1].getDisplay());
+        Assert.assertEquals("?", matrix[1][1].getDisplay());
+        Assert.assertEquals("Push", matrix[1][2].getDisplay());
         Assert.assertEquals("⎘\nPaste", matrix[1][8].getDisplay());
         // The other styles are unchanged.
         Assert.assertFalse(info(TermuxPropertyConstants.DEFAULT_IVALUE_EXTRA_KEYS, "default").isKeycaps());

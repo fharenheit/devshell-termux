@@ -35,7 +35,7 @@
 
 | 내용 | 위치 |
 |---|---|
-| 기본 extra keys에 ENTER(PGUP 오른쪽), KEYBOARD(PGDN 오른쪽, 키보드 표시/숨기기) 버튼 추가 | `custom/patches/0006-*.patch` (`TermuxPropertyConstants.java`) |
+| 기본 extra keys에 ENTER(PGUP 오른쪽), KEYBOARD(PGDN 오른쪽, 키보드 표시/숨기기) 버튼 추가. 둘째 줄의 CTRL, ALT 자리에 `?`와 Push(`main push` 입력, Enter 없음, `{macro: 'main SPACE push', display: 'Push'}`) | `custom/patches/0006-*.patch` (`TermuxPropertyConstants.java`) |
 | 기본 extra keys에 ⧉ COPY(A+ 오른쪽, 선택한 글자 복사, 위로 밀면 화면 전체 복사)와 ⎘ PASTE(A− 오른쪽) 추가, 두 줄 10칸. 선택 없이 ⧉를 누르면 선택 방법 안내 | `custom/patches/0021-*.patch` (`TermuxPropertyConstants.java`, `ExtraKeysConstants.java`, `TermuxTerminalExtraKeys.java`) + `app/.../terminal/clipboard/` |
 | extra keys를 키캡 모양으로 그리기(`extra-keys-style = keycaps`, 기본값): 둥근 키 안에 아이콘과 그 아래 작은 이름(⇤ Home, ⇞ PgUp, ⧉ Copy, ↲ Enter 등), Esc/Ctrl/Alt는 짧은 이름, 눌린 Ctrl/Alt는 파란색으로 채움. `extra-keys`에 직접 정한 display는 그대로. `extra-keys-style = default`로 예전 모양 | `custom/patches/0022-*.patch` (`ExtraKeysView.java`, `ExtraKeysConstants.java`, `ExtraKeysInfo.java`, `SpecialButtonState.java`, `TermuxPropertyConstants.java`) |
 | 특수 키 패널: Enter·Kbd 오른쪽의 좁고 두 줄 높이인 ⊞ 키로 열고, 10개 탭(자주: ^C ^V ^X ^Z ^D ^A ^E ^L·F1~F12·^R ^W ^U Del / Ctrl / Fn / 편집 / Alt / 기호 / tmux / vim / nano / ★). 누르면 하단 키처럼 전송(켜 둔 Ctrl/Alt 함께)하고 패널 유지, ✕ 또는 ⊞로 닫기. 길게 누르면 보내는 키 설명과 ★ 추가/삭제(`~/.termux/special_keys_favorites.json`, 설정 내보내기 포함). 하단 키에 `rows`, `width` 속성 추가(`{key: 'SPECIAL_KEYS', rows: 2, width: 0.5}`) | `custom/patches/0025-*.patch` (`ExtraKeyButton.java`, `ExtraKeysView.java`, `ExtraKeysConstants.java`, `TermuxPropertyConstants.java`, `TermuxTerminalExtraKeys.java`) + `app/.../terminal/specialkeys/`, `fork_special_keys.xml` |

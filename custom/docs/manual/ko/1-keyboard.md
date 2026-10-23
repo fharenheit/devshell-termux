@@ -15,9 +15,11 @@
 | **A+ / A−** | 지금 탭의 글자 크기만 키우기/줄이기(저장되지 않음) |
 | **⧉ Copy** | 선택한 글자 복사. **위로 밀면** 화면 전체 복사 |
 | **⎘ Paste** | 붙여넣기. **위로 밀면** [클립보드 기록](4-snippets-clipboard.md#클립보드-기록) |
-| **Ctrl / Alt** | 누르면 켜지고(파란색) 다음 키와 함께 전송 |
+| **?** | `?` 입력 |
+| **Push** | `main push` 입력(Enter는 보내지 않음) |
 | **⊞** | [특수 키 패널](#특수-키-패널) 열기 |
 
+- Ctrl/Alt 키는 기본 배치에 없습니다. [특수 키 패널](#특수-키-패널)의 Ctrl, Alt 탭을 쓰거나 `extra-keys`에 `CTRL`, `ALT`를 넣습니다.
 - 예전 모양으로 돌아가려면 `~/.termux/termux.properties`에 `extra-keys-style = default`를 넣습니다.
 - 배치를 직접 정할 때 `SNIPPETS`, `CLIPBOARD`, `COPY_SCREEN`, `SPECIAL_KEYS` 키를 쓸 수 있고, `{key: 'X', rows: 2, width: 0.5}`처럼 두 줄 높이나 좁은 키를 만들 수 있습니다.
 

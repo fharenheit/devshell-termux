@@ -282,7 +282,7 @@ public final class TermuxPropertyConstants {
     /** Defines the key for extra keys */
     public static final String KEY_EXTRA_KEYS =  "extra-keys"; // Default: "extra-keys"
     //public static final String DEFAULT_IVALUE_EXTRA_KEYS = "[[ESC, TAB, CTRL, ALT, {key: '-', popup: '|'}, DOWN, UP]]"; // Single row
-    public static final String DEFAULT_IVALUE_EXTRA_KEYS = "[['ESC','/',{key: '-', popup: '|'},'HOME','UP','END','PGUP','FONT_LARGER',{key: 'COPY', popup: 'COPY_SCREEN'},'ENTER',{key: 'SPECIAL_KEYS', rows: 2, width: 0.5}], ['TAB','CTRL','ALT','LEFT','DOWN','RIGHT','PGDN','FONT_SMALLER',{key: 'PASTE', popup: 'CLIPBOARD'},'KEYBOARD']]"; // Double row
+    public static final String DEFAULT_IVALUE_EXTRA_KEYS = "[['ESC','/',{key: '-', popup: '|'},'HOME','UP','END','PGUP','FONT_LARGER',{key: 'COPY', popup: 'COPY_SCREEN'},'ENTER',{key: 'SPECIAL_KEYS', rows: 2, width: 0.5}], ['TAB','?',{macro: 'main SPACE push', display: 'Push'},'LEFT','DOWN','RIGHT','PGDN','FONT_SMALLER',{key: 'PASTE', popup: 'CLIPBOARD'},'KEYBOARD']]"; // Double row
 
     /** Defines the key for extra keys style */
     public static final String KEY_EXTRA_KEYS_STYLE =  "extra-keys-style"; // Default: "extra-keys-style"

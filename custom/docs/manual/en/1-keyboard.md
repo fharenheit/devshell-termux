@@ -15,9 +15,11 @@ The two rows of keys below the terminal. They are drawn as keycaps, with an icon
 | **A+ / A−** | Make the text of the current tab larger or smaller (not saved) |
 | **⧉ Copy** | Copy the selection. **Swipe up** to copy the whole screen |
 | **⎘ Paste** | Paste. **Swipe up** to open the [clipboard history](4-snippets-clipboard.md#clipboard-history) |
-| **Ctrl / Alt** | Turns on (blue) and is sent with the next key |
+| **?** | Types `?` |
+| **Push** | Types `main push` (without Enter) |
 | **⊞** | Opens the [special keys panel](#special-keys-panel) |
 
+- Ctrl and Alt are not in the default layout. Use the Ctrl and Alt tabs of the [special keys panel](#special-keys-panel), or add `CTRL` and `ALT` to `extra-keys`.
 - To go back to the old look, put `extra-keys-style = default` in `~/.termux/termux.properties`.
 - In your own layout you can use the `SNIPPETS`, `CLIPBOARD`, `COPY_SCREEN` and `SPECIAL_KEYS` keys, and make tall or narrow keys like `{key: 'X', rows: 2, width: 0.5}`.
 
