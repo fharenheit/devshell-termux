@@ -129,4 +129,6 @@
     <string name="sftp_property_permissions">권한</string>
     <string name="sftp_property_owner">소유자 (uid:gid)</string>
     <string name="sftp_property_modified">수정 시간</string>
+    <string name="action_terminal_download">다운로드 (SFTP)</string>
+    <string name="terminal_download_not_found">%1$s에서 선택한 파일이나 폴더를 찾지 못했습니다</string>
 </resources>

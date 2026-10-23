@@ -130,4 +130,6 @@
     <string name="sftp_property_permissions">Permissions</string>
     <string name="sftp_property_owner">Owner (uid:gid)</string>
     <string name="sftp_property_modified">Modified</string>
+    <string name="action_terminal_download">Download (SFTP)</string>
+    <string name="terminal_download_not_found">No selected file or folder was found in %1$s</string>
 </resources>

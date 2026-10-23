@@ -129,4 +129,6 @@
     <string name="sftp_property_permissions">パーミッション</string>
     <string name="sftp_property_owner">所有者 (uid:gid)</string>
     <string name="sftp_property_modified">更新日時</string>
+    <string name="action_terminal_download">ダウンロード (SFTP)</string>
+    <string name="terminal_download_not_found">%1$s に選択したファイルやフォルダが見つかりません</string>
 </resources>

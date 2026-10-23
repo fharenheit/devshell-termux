@@ -45,6 +45,7 @@ Automatic queries refer to the SSH login shell. A tmux pane or a nested SSH sess
 <img src="../images/en/33_transfers.png" width="270" alt="Transfers">
 
 - **Download**: saves into the `Download/` folder. Folders keep their structure.
+- **Download from the terminal**: in an SSH tab, long press a file name in the output of `ls` or `ls -l` to select it, then tap **More → Download (SFTP)**. The name is looked up in the shell's current folder and queued. Each selected line is one file, and folders are downloaded whole. If you ran `cd` after `ls`, or you are inside tmux, the file may not be found; select an absolute path instead.
 - **Upload**: several files, or a whole folder. If a name already exists, you choose to replace or skip.
 - Transfers run one at a time in the background and continue after you leave the file screen. The notification shows the progress, how many are left, and **Cancel all**.
 - **⋮ → Transfers**: the transfers of all hosts. Stop one, see its error, or **Clear finished**.
