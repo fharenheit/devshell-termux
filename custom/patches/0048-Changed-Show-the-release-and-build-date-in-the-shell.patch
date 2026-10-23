@@ -1,0 +1,49 @@
+From 3f529e0ac8132eb8fbaf2003ba4a882230f07518 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?=EA=B9=80=EB=B3=91=EA=B3=A4?= <fharenheit@gmail.com>
+Date: Sat, 24 Oct 2026 00:46:09 +0900
+Subject: [PATCH] Changed: Show the release and build date in the shell welcome
+ without the manual link
+
+---
+ app/build.gradle | 18 ++++++++++++++++++
+ 1 file changed, 18 insertions(+)
+
+diff --git a/app/build.gradle b/app/build.gradle
+index 7e85235d..1f6a48ec 100644
+--- a/app/build.gradle
++++ b/app/build.gradle
+@@ -36,6 +36,12 @@ android {
+         if (appVersionName) versionName = appVersionName
+         validateVersionName(versionName)
+ 
++        // The release this build belongs to and the day it was built, shown in the welcome message
++        // of the shell. The release is the newest `.github/release-notes/<tag>.md`, since a release
++        // is published from the build of the commit that adds its notes.
++        buildConfigField "String", "RELEASE_VERSION", "\"" + (latestReleaseTag() ?: "v" + versionName) + "\""
++        buildConfigField "String", "BUILD_DATE", "\"" + new Date().format("yyyy-MM-dd", TimeZone.getTimeZone("Asia/Seoul")) + "\""
++
+         manifestPlaceholders.TERMUX_PACKAGE_NAME = "com.termux"
+         manifestPlaceholders.TERMUX_APP_NAME = "Termux"
+         manifestPlaceholders.TERMUX_API_APP_NAME = "Termux:API"
+@@ -146,6 +152,18 @@ dependencies {
+     testImplementation "org.robolectric:robolectric:4.4"
+ }
+ 
++/** The newest tag of `.github/release-notes/v*.md`, comparing the numbers in it as numbers, or null. */
++def latestReleaseTag() {
++    def files = rootProject.file(".github/release-notes").listFiles()
++    def tags = (files ?: []).collect { it.name }.findAll { it ==~ /v.+\.md/ }.collect { it - ~/\.md$/ }
++    def key = { String tag -> tag.findAll(/\d+/).collect { it.toInteger() } }
++    return tags.max { a, b ->
++        def x = key(a), y = key(b)
++        for (int i = 0; i < Math.min(x.size(), y.size()); i++) if (x[i] != y[i]) return x[i] <=> y[i]
++        return x.size() <=> y.size()
++    }
++}
++
+ task versionName {
+     doLast {
+         print android.defaultConfig.versionName
+-- 
+2.43.0
+
