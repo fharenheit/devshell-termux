@@ -7,6 +7,21 @@
 - **Added**: 새 기능, **Changed**: 동작·문서·패치 변경, **Fixed**: 버그 수정
 - "패치 갱신" 커밋은 업스트림 파일을 고친 커밋 뒤에 `custom/update-patches.sh`로 `custom/patches/`를 다시 만든 것입니다.
 
+## v0.118.3-ko.38 (2026-10-24)
+
+| 커밋 | 내용 |
+|---|---|
+| [`73df8bd`](https://github.com/fharenheit/devshell-termux/commit/73df8bd) | Fixed: 한/영 전환 뒤 이전 단어 재조합 시 중복 입력 방지. 보낸 입력 문맥을 유지하고 바뀐 부분만 전송, 명령 중간 Enter에서 뒤쪽 글자 유지. `TerminalViewImeTest` 보강 |
+| [`aeb99a5`](https://github.com/fharenheit/devshell-termux/commit/aeb99a5) | Added: SSH 로그인 셸 PID를 받아 SFTP로 `/proc/PID/cwd`를 조회해 파일 탐색을 현재 폴더에서 열기. OSC 7 대체 경로, `custom/shell-integration/` Bash/Zsh 설정 |
+| [`84c7ad7`](https://github.com/fharenheit/devshell-termux/commit/84c7ad7) | Changed: 특수 키 패널에서 키를 보내도 패널을 닫지 않음 |
+| [`cf4383c`](https://github.com/fharenheit/devshell-termux/commit/cf4383c) | Fixed: 좁은 화면에서 세션 닫기 확인 창이 화면 폭의 70%를 쓰고 버튼을 세로로 배치. `SessionCloseDialogTest` 추가 |
+| [`ca26e66`](https://github.com/fharenheit/devshell-termux/commit/ca26e66) | Changed: 위 변경 문서화와 패치 갱신(`0044`, `0045`) |
+| [`b30e484`](https://github.com/fharenheit/devshell-termux/commit/b30e484) | Added: SSH 탭에서 선택한 파일 이름을 More → Download (SFTP)로 받기. 셸의 현재 폴더 기준, `ls -l` 줄·따옴표·`ls -F` 표시 처리, 여러 줄과 폴더. `TerminalDownloads`, `TerminalDownloadsTest` |
+| [`82fbb2a`](https://github.com/fharenheit/devshell-termux/commit/82fbb2a) | Changed: 위 변경에 맞춰 패치 갱신(`0046`) |
+| [`6f638ab`](https://github.com/fharenheit/devshell-termux/commit/6f638ab) | Changed: 기본 extra keys 둘째 줄의 CTRL, ALT를 `?`와 Push(`main push` 입력)로 교체 |
+| [`e25122d`](https://github.com/fharenheit/devshell-termux/commit/e25122d) | Changed: 위 변경에 맞춰 패치 갱신(`0047`) |
+| (이 릴리즈 커밋) | Added: v0.118.3-ko.38 릴리즈 노트와 이력 |
+
 ## v0.118.3-ko.37 (2026-10-21)
 
 | 커밋 | 내용 |
