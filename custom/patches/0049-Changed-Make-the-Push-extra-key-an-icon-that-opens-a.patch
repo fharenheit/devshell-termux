@@ -1,0 +1,70 @@
+From e3715021e0cb3cb858b5a09ce46b35949dc0df9f Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?=EA=B9=80=EB=B3=91=EA=B3=A4?= <fharenheit@gmail.com>
+Date: Sat, 24 Oct 2026 00:50:25 +0900
+Subject: [PATCH] Changed: Make the Push extra key an icon that opens a menu of
+ push requests
+
+---
+ .../com/termux/app/terminal/io/TermuxTerminalExtraKeys.java   | 4 ++++
+ .../shared/settings/properties/TermuxPropertyConstants.java   | 2 +-
+ .../shared/terminal/io/extrakeys/ExtraKeysConstants.java      | 2 ++
+ 3 files changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/app/src/main/java/com/termux/app/terminal/io/TermuxTerminalExtraKeys.java b/app/src/main/java/com/termux/app/terminal/io/TermuxTerminalExtraKeys.java
+index 0b59dcf5..ad805969 100644
+--- a/app/src/main/java/com/termux/app/terminal/io/TermuxTerminalExtraKeys.java
++++ b/app/src/main/java/com/termux/app/terminal/io/TermuxTerminalExtraKeys.java
+@@ -11,6 +11,7 @@ import com.termux.app.terminal.TermuxTerminalSessionClient;
+ import com.termux.app.terminal.TermuxTerminalViewClient;
+ import com.termux.app.terminal.clipboard.ClipboardHistory;
+ import com.termux.app.terminal.clipboard.TerminalClipboard;
++import com.termux.app.terminal.snippets.PushMenu;
+ import com.termux.app.terminal.snippets.SnippetsDialog;
+ import com.termux.app.terminal.specialkeys.SpecialKeysPanel;
+ import com.termux.shared.terminal.io.TerminalExtraKeys;
+@@ -58,6 +59,9 @@ public class TermuxTerminalExtraKeys extends TerminalExtraKeys {
+         } else if ("SNIPPETS".equals(key)) {
+             if (mTermuxTerminalViewClient != null)
+                 SnippetsDialog.show(mTermuxTerminalViewClient.getActivity());
++        } else if (PushMenu.EXTRA_KEY.equals(key)) {
++            if (mTermuxTerminalViewClient != null)
++                PushMenu.show(mTermuxTerminalViewClient.getActivity());
+         } else if ("PASTE".equals(key)) {
+             if(mTermuxTerminalSessionClient != null)
+                 mTermuxTerminalSessionClient.onPasteTextFromClipboard(null);
+diff --git a/termux-shared/src/main/java/com/termux/shared/settings/properties/TermuxPropertyConstants.java b/termux-shared/src/main/java/com/termux/shared/settings/properties/TermuxPropertyConstants.java
+index dddc185d..ead5a8cb 100644
+--- a/termux-shared/src/main/java/com/termux/shared/settings/properties/TermuxPropertyConstants.java
++++ b/termux-shared/src/main/java/com/termux/shared/settings/properties/TermuxPropertyConstants.java
+@@ -282,7 +282,7 @@ public final class TermuxPropertyConstants {
+     /** Defines the key for extra keys */
+     public static final String KEY_EXTRA_KEYS =  "extra-keys"; // Default: "extra-keys"
+     //public static final String DEFAULT_IVALUE_EXTRA_KEYS = "[[ESC, TAB, CTRL, ALT, {key: '-', popup: '|'}, DOWN, UP]]"; // Single row
+-    public static final String DEFAULT_IVALUE_EXTRA_KEYS = "[['ESC','/',{key: '-', popup: '|'},'HOME','UP','END','PGUP','FONT_LARGER',{key: 'COPY', popup: 'COPY_SCREEN'},'ENTER',{key: 'SPECIAL_KEYS', rows: 2, width: 0.5}], ['TAB','?',{macro: 'main SPACE push', display: 'Push'},'LEFT','DOWN','RIGHT','PGDN','FONT_SMALLER',{key: 'PASTE', popup: 'CLIPBOARD'},'KEYBOARD']]"; // Double row
++    public static final String DEFAULT_IVALUE_EXTRA_KEYS = "[['ESC','/',{key: '-', popup: '|'},'HOME','UP','END','PGUP','FONT_LARGER',{key: 'COPY', popup: 'COPY_SCREEN'},'ENTER',{key: 'SPECIAL_KEYS', rows: 2, width: 0.5}], ['TAB','?','GIT_PUSH','LEFT','DOWN','RIGHT','PGDN','FONT_SMALLER',{key: 'PASTE', popup: 'CLIPBOARD'},'KEYBOARD']]"; // Double row
+ 
+     /** Defines the key for extra keys style */
+     public static final String KEY_EXTRA_KEYS_STYLE =  "extra-keys-style"; // Default: "extra-keys-style"
+diff --git a/termux-shared/src/main/java/com/termux/shared/terminal/io/extrakeys/ExtraKeysConstants.java b/termux-shared/src/main/java/com/termux/shared/terminal/io/extrakeys/ExtraKeysConstants.java
+index 226393b0..82a098b4 100644
+--- a/termux-shared/src/main/java/com/termux/shared/terminal/io/extrakeys/ExtraKeysConstants.java
++++ b/termux-shared/src/main/java/com/termux/shared/terminal/io/extrakeys/ExtraKeysConstants.java
+@@ -127,6 +127,7 @@ public class ExtraKeysConstants {
+             put("FONT_LARGER", "A+");
+             put("FONT_SMALLER", "A−"); // U+2212 − MINUS SIGN
+             put("SNIPPETS", "⚡"); // Saved commands
++            put("GIT_PUSH", "⇡"); // U+21E1 UPWARDS DASHED ARROW, the menu of push requests
+             put("SPECIAL_KEYS", "⊞"); // U+229E SQUARED PLUS, the panel of special keys
+             put("COPY", "⧉"); // U+29C9 TWO JOINED SQUARES, copy the selection
+             put("COPY_SCREEN", "⧉ all"); // Copy the screen
+@@ -194,6 +195,7 @@ public class ExtraKeysConstants {
+             put("FONT_LARGER", "A+\nFont");
+             put("FONT_SMALLER", "A−\nFont");
+             put("SNIPPETS", "⚡\nSnip");
++            put("GIT_PUSH", "⇡\nPush");
+         }};
+ 
+         /**
+-- 
+2.43.0
+
