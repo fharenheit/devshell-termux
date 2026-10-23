@@ -1,0 +1,30 @@
+From 6f638abb6f91db4b17b1b933d42b2486d400b7b8 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?=EA=B9=80=EB=B3=91=EA=B3=A4?= <fharenheit@gmail.com>
+Date: Sat, 24 Oct 2026 00:10:26 +0900
+Subject: [PATCH] Changed: Replace the Ctrl and Alt extra keys with ? and Push
+
+The second row of the default extra keys now has ?, which types a
+question mark, and Push, which types `main push`, where Ctrl and Alt
+were. Ctrl and Alt stay in the special keys panel.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ .../shared/settings/properties/TermuxPropertyConstants.java     | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/termux-shared/src/main/java/com/termux/shared/settings/properties/TermuxPropertyConstants.java b/termux-shared/src/main/java/com/termux/shared/settings/properties/TermuxPropertyConstants.java
+index 7c1cdbf8..dddc185d 100644
+--- a/termux-shared/src/main/java/com/termux/shared/settings/properties/TermuxPropertyConstants.java
++++ b/termux-shared/src/main/java/com/termux/shared/settings/properties/TermuxPropertyConstants.java
+@@ -282,7 +282,7 @@ public final class TermuxPropertyConstants {
+     /** Defines the key for extra keys */
+     public static final String KEY_EXTRA_KEYS =  "extra-keys"; // Default: "extra-keys"
+     //public static final String DEFAULT_IVALUE_EXTRA_KEYS = "[[ESC, TAB, CTRL, ALT, {key: '-', popup: '|'}, DOWN, UP]]"; // Single row
+-    public static final String DEFAULT_IVALUE_EXTRA_KEYS = "[['ESC','/',{key: '-', popup: '|'},'HOME','UP','END','PGUP','FONT_LARGER',{key: 'COPY', popup: 'COPY_SCREEN'},'ENTER',{key: 'SPECIAL_KEYS', rows: 2, width: 0.5}], ['TAB','CTRL','ALT','LEFT','DOWN','RIGHT','PGDN','FONT_SMALLER',{key: 'PASTE', popup: 'CLIPBOARD'},'KEYBOARD']]"; // Double row
++    public static final String DEFAULT_IVALUE_EXTRA_KEYS = "[['ESC','/',{key: '-', popup: '|'},'HOME','UP','END','PGUP','FONT_LARGER',{key: 'COPY', popup: 'COPY_SCREEN'},'ENTER',{key: 'SPECIAL_KEYS', rows: 2, width: 0.5}], ['TAB','?',{macro: 'main SPACE push', display: 'Push'},'LEFT','DOWN','RIGHT','PGDN','FONT_SMALLER',{key: 'PASTE', popup: 'CLIPBOARD'},'KEYBOARD']]"; // Double row
+ 
+     /** Defines the key for extra keys style */
+     public static final String KEY_EXTRA_KEYS_STYLE =  "extra-keys-style"; // Default: "extra-keys-style"
+-- 
+2.43.0
+
